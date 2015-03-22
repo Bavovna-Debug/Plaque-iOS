@@ -1,0 +1,34 @@
+"YOUR_PLAQUE_WAS_DESTROYED" = "Dein Plaque '%2$@' wurde aufgehoben durch %1$@!";
+
+"OK_BUTTON"                                 = "OK";
+
+"DO_YOU_WANT_TO_CREATE_PROFILE_TITLE"       = "Profile";
+"DO_YOU_WANT_TO_CREATE_PROFILE_MESSAGE"     = "You don't have profile...";
+"DO_YOU_WANT_TO_CREATE_PROFILE_NOT_YET"     = "Not yet";
+"DO_YOU_WANT_TO_CREATE_PROFILE_YES_BUTTON"  = "Yes";
+
+"PROFILE_FORM_CANCEL_BUTTON"                = "Cancel";
+"PROFILE_FORM_SUBMIT_BUTTON"                = "Submit";
+
+"PROFILE_FORM_PROFILE_NAME_LABEL"           = "Profile name:";
+"PROFILE_FORM_PROFILE_NAME_HELP"            = "Returns a connection options array. This can be used to determine all possible PQconnectdb options and their current default values.";
+"PROFILE_FORM_PROFILE_NAME_VALIDATING_MESSAGE"          = "Validating %@ on server...";
+"PROFILE_FORM_PROFILE_NAME_IS_AVAILABLE_MESSAGE"        = "Name %@ is free.";
+"PROFILE_FORM_PROFILE_NAME_ALREADY_IN_USE_MESSAGE"      = "Name %@ is already used...";
+"PROFILE_FORM_PROFILE_NAME_VALIDATION_ERROR_MESSAGE"    = "Cannot check...";
+
+"PROFILE_FORM_USER_NAME_LABEL"          = "User name:";
+"PROFILE_FORM_USER_NAME_HELP"           = "";
+
+"PROFILE_FORM_PASSWORD_LABEL"           = "Password:";
+"PROFILE_FORM_PASSWORD_HELP"            = "";
+
+"EDIT_MODE_COORDINATE_BUTTON"           = "Location";
+"EDIT_MODE_ALTITUDE_BUTTON"             = "Altitude";
+"EDIT_MODE_DIRECTION_BUTTON"            = "Direction";
+"EDIT_MODE_TILT_BUTTON"                 = "Tilt";
+"EDIT_MODE_SIZE_BUTTON"                 = "Size";
+"EDIT_MODE_BACKGROUND_BUTTON"           = "Background";
+"EDIT_MODE_FOREGROUND_BUTTON"           = "Text color";
+"EDIT_MODE_FONT_BUTTON"                 = "Font size";
+"EDIT_MODE_INSCRIPTION_BUTTON"          = "Inscription";
