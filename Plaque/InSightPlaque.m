@@ -8,6 +8,10 @@
 #import "InSightView.h"
 #import "Navigator.h"
 
+#ifdef DEBUG
+#undef REDRAW
+#endif
+
 @interface InSightPlaque ()
 
 @property (weak, nonatomic) InSightView *parentView;
@@ -46,7 +50,7 @@
     if (directionFromUser != _directionFromUser) {
         _directionFromUser = directionFromUser;
 
-        [self setInSight:(fabsf(directionFromUser) < 45.0f)];
+        [self setInSight:(fabs(directionFromUser) < 45.0f)];
 
         [self setNeedRedraw:YES];
     }
@@ -147,7 +151,7 @@
     if ((self.plaque.cloneChain != nil) && (self.plaque.rowId != 0)) {
         [plaqueLayer setOpacity:0.2f];
     } else {
-        [plaqueLayer setOpacity:1.0f];
+        [plaqueLayer setOpacity:0.8f];
     }
 
     CATransform3D transform = CATransform3DIdentity;
@@ -163,6 +167,12 @@
 
     [plaqueLayer setZPosition:roundf(self.parentView.rangeInSight - self.distanceToUser)];
     [plaqueLayer setTransform:transform];
+
+#ifdef REDRAW
+    NSLog(@"Redraw plaque in sight %@ (%@)",
+          [self.plaque.plaqueToken UUIDString],
+          self.plaque.inscription);
+#endif
 }
 
 #pragma mark -

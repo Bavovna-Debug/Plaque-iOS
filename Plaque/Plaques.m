@@ -5,20 +5,24 @@
 //
 
 #import "Authentificator.h"
+#import "Communicator.h"
 #import "Paquet.h"
 #import "Navigator.h"
 #import "Plaques.h"
 #import "Database.h"
 #import "Profiles.h"
 #import "Settings.h"
+#import "StatusBar.h"
+#import "XML.h"
 
 #include "API.h"
 
 #ifdef DEBUG
+#define VERBOSE_BROADCAST
 #define VERBOSE_LOCATION_MANAGER
 #define VERBOSE_RADAR
-#undef VERBOSE_RADAR_DETAILS
-#undef VERBOSE_PLAQUES
+#define VERBOSE_RADAR_DETAILS
+#define VERBOSE_PLAQUES
 #undef VERBOSE_ADD_PLAQUE
 #define VERBOSE_WORKDESK
 #undef VERBOSE_DATABASE
@@ -33,7 +37,12 @@
 
 #define MaxPlaquesPerDownloadRequest        100
 
-@interface Plaques () <CLLocationManagerDelegate, PaquetDelegate>
+#define PlaquesCacheKey                     @"PlaquesCache"
+#define PlaquesOnWorkdeskKey                @"PlaquesOnWorkdesk"
+#define PlaquesXMLTarget                    @"vp"
+#define PlaquesXMLVersion                   @"1.0"
+
+@interface Plaques () <CLLocationManagerDelegate, ConnectionDelegate, PaquetDelegate>
 
 @property (strong, nonatomic, readwrite) NSLock          *paquetHandlerLock;
 @property (strong, nonatomic, readwrite) NSMutableArray  *plaquesCache;
@@ -59,6 +68,7 @@
 @implementation Plaques
 {
     Settings *settings;
+    Communicator *communicator;
 
     BOOL inBackground;
 }
@@ -85,6 +95,7 @@
         return nil;
 
     settings = [Settings defaultSettings];
+    communicator = [Communicator sharedCommunicator];
 
     self.paquetHandlerLock              = [[NSLock alloc] init];
     self.plaquesCache                   = [NSMutableArray array];
@@ -100,7 +111,9 @@
     self.plaquesAwaitingDatabaseLock    = [[NSLock alloc] init];
 
     [self prepareLocationManager];
-    
+
+    [communicator setConnectionDelegate:self];
+
     return self;
 }
 
@@ -163,6 +176,147 @@
                                     repeats:YES];
 }
 
+#pragma mark - XML storage
+
+- (void)savePlaquesCache
+{
+    XMLDocument *document = [XMLDocument documentWithTarget:PlaquesXMLTarget
+                                                    version:PlaquesXMLVersion];
+
+    XMLElement *plaquesXML = [XMLElement elementWithName:@"plaques_cache"];
+
+    [document setForest:plaquesXML];
+
+    [self.plaquesCacheLock lock];
+    [self.plaquesInSightLock lock];
+    [self.plaquesOnMapLock lock];
+    for (Plaque *plaque in self.plaquesCache)
+    {
+        XMLElement *plaqueXML = [XMLElement elementWithName:@"plaque"];
+
+        NSUUID *plaqueToken = [plaque plaqueToken];
+        NSString *plaqueTokenString = [plaqueToken UUIDString];
+        [plaqueXML.attributes setObject:plaqueTokenString
+                                 forKey:@"plaque_token"];
+
+        NSString *isInSight = ([self.plaquesInSight containsObject:plaque] == YES) ? @"yes" : @"no";
+        [plaqueXML.attributes setObject:isInSight
+                                 forKey:@"in_sight"];
+
+        NSString *isOnMap = ([self.plaquesOnMap containsObject:plaque] == YES) ? @"yes" : @"no";
+        [plaqueXML.attributes setObject:isOnMap
+                                 forKey:@"on_map"];
+
+        [plaquesXML addElement:plaqueXML];
+    }
+    [self.plaquesOnMapLock unlock];
+    [self.plaquesInSightLock unlock];
+    [self.plaquesCacheLock unlock];
+
+    NSData *plaquesData = [document xmlData];
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setObject:plaquesData
+                 forKey:PlaquesCacheKey];
+    [defaults synchronize];
+}
+
+- (void)loadPlaquesCache
+{
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSData *plaquesData = [defaults objectForKey:PlaquesCacheKey];
+    XMLDocument *document = [XMLDocument documentFromData:plaquesData];
+
+    XMLElement *plaquesXML = [document forest];
+
+    [self.plaquesCacheLock lock];
+    [self.plaquesInSightLock lock];
+    [self.plaquesOnMapLock lock];
+    for (XMLElement *plaqueXML in [plaquesXML elements])
+    {
+        NSString *plaqueTokenString = [plaqueXML.attributes objectForKey:@"plaque_token"];
+        NSUUID *plaqueToken = [[NSUUID alloc] initWithUUIDString:plaqueTokenString];
+        Plaque *plaque = [[Plaque alloc] initWithToken:plaqueToken];
+        if (plaque == nil)
+            continue;
+
+        [self.plaquesCache addObject:plaque];
+
+        // Restore this plaque to "InSight" if it was there before.
+        //
+        NSString *isInSight = [plaqueXML.attributes objectForKey:@"in_sight"];
+        if ([isInSight isEqualToString:@"yes"] == YES)
+            [self.plaquesInSight addObject:plaque];
+
+        // Restore this plaque to "OnMap" if it was there before.
+        //
+        NSString *isOnMap = [plaqueXML.attributes objectForKey:@"on_map"];
+        if ([isOnMap isEqualToString:@"yes"] == YES)
+            [self.plaquesOnMap addObject:plaque];
+    }
+    [self.plaquesOnMapLock unlock];
+    [self.plaquesInSightLock unlock];
+    [self.plaquesCacheLock unlock];
+}
+
+- (void)saveWorkdesk
+{
+    XMLDocument *document = [XMLDocument documentWithTarget:PlaquesXMLTarget
+                                                    version:PlaquesXMLVersion];
+
+    XMLElement *plaquesXML = [XMLElement elementWithName:@"plaques_on_workdesk"];
+
+    [document setForest:plaquesXML];
+
+    [self.plaquesOnWorkdeskLock lock];
+    for (Plaque *plaque in self.plaquesOnWorkdesk)
+    {
+        XMLElement *plaqueXML = [plaque xml];
+
+        [plaquesXML addElement:plaqueXML];
+    }
+    [self.plaquesOnWorkdeskLock unlock];
+
+    NSData *plaquesData = [document xmlData];
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setObject:plaquesData
+                 forKey:PlaquesOnWorkdeskKey];
+    [defaults synchronize];
+}
+
+- (void)loadWorkdesk
+{
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSData *plaquesData = [defaults objectForKey:PlaquesOnWorkdeskKey];
+    XMLDocument *document = [XMLDocument documentFromData:plaquesData];
+
+    XMLElement *plaquesXML = [document forest];
+
+    [self.plaquesOnWorkdeskLock lock];
+    for (XMLElement *plaqueXML in [plaquesXML elements])
+    {
+        Plaque *plaque = [[Plaque alloc] initFromXML:plaqueXML];
+
+        if (plaque == nil)
+            continue;
+
+        [self.plaquesOnWorkdesk addObject:plaque];
+
+        // If the original plaque exist in cache ...
+        //
+        Plaque *plaqueInCache = [self plaqueInCacheByToken:[plaque plaqueToken]];
+        if (plaqueInCache != nil) {
+            //
+            // ... then chain it with the one on workdesk.
+            //
+            plaque.cloneChain = plaqueInCache;
+            plaqueInCache.cloneChain = plaque;
+        }
+    }
+    [self.plaquesOnWorkdeskLock unlock];
+}
+
+#pragma mark - API
+
 - (Plaque *)createNewPlaqueAtUserLocation
 {
     CLLocation *deviceLocation = [self.locationManager location];
@@ -210,7 +364,7 @@
 
             // Notify delegate a cloned plaque did appear on workdesk and must be shown.
             //
-            id<PlaquesDelegate> delegate = self.delegate;
+            id<PlaquesDelegate> delegate = self.plaquesDelegate;
             if ((delegate != nil) && [delegate respondsToSelector:@selector(plaqueDidAppearOnWorkdesk:)])
                 [delegate plaqueDidAppearOnWorkdesk:plaqueOnWorkdesk];
         } else {
@@ -223,36 +377,6 @@
         [self.plaquesOnWorkdeskLock unlock];
 
         _plaqueUnderEdit = plaqueOnWorkdesk;
-
-/*
-        Plaque *plaqueOnWorkdesk = nil;
-
-        [self.plaquesOnWorkdeskLock lock];
-
-        NSUUID *originalPlaqueToken = [plaqueUnderEdit plaqueToken];
-
-        // Check whether requested plaque is already on workdesk.
-        //
-        if (originalPlaqueToken != nil)
-        {
-            for (Plaque *plaque in self.plaquesOnWorkdesk)
-            {
-                if ([[plaque plaqueToken] isEqual:originalPlaqueToken] == YES) {
-                    plaqueOnWorkdesk = plaque;
-                    break;
-                }
-            }
-        }
-
-        // If not then create one and put it on workdesk.
-        //
-        if (plaqueOnWorkdesk == nil) {
-            plaqueOnWorkdesk = [plaqueUnderEdit clone];
-            [self.plaquesOnWorkdesk addObject:plaqueOnWorkdesk];
-        }
-        
-        [self.plaquesOnWorkdeskLock unlock];
-*/
 
         id<PlaqueEditDelegate> editDelegate = self.editDelegate;
         [editDelegate plaqueDidHaveTakenForEdit:plaqueOnWorkdesk];
@@ -269,7 +393,7 @@
     if (capturedPlaque != previousCapturedPlaque) {
         _capturedPlaque = capturedPlaque;
 
-        id<PlaquesDelegate> delegate = self.delegate;
+        id<PlaquesDelegate> delegate = self.plaquesDelegate;
 
         if (previousCapturedPlaque != nil) {
             [previousCapturedPlaque setCaptured:NO];
@@ -311,7 +435,7 @@
                 //
                 // Then execute store procedure ...
                 //
-                [plaque saveInDatabase];
+                [plaque saveToDatabase];
 
                 // ... and check afterwards whether it did store itself saccessfully.
                 //
@@ -378,7 +502,7 @@
 
         // Notify delegate that plaque from workdesk did disappear.
         //
-        id<PlaquesDelegate> delegate = self.delegate;
+        id<PlaquesDelegate> delegate = self.plaquesDelegate;
         if ((delegate != nil) && [delegate respondsToSelector:@selector(plaqueDidDisappearFromWorkdesk:)])
             [delegate plaqueDidDisappearFromWorkdesk:plaqueOnWorkdesk];
     }
@@ -508,7 +632,7 @@
 
         // Notify delegate we have some new plaque on workdesk.
         //
-        id<PlaquesDelegate> delegate = self.delegate;
+        id<PlaquesDelegate> delegate = self.plaquesDelegate;
         if ((delegate != nil) && [delegate respondsToSelector:@selector(plaqueDidAppearOnWorkdesk:)])
             [delegate plaqueDidAppearOnWorkdesk:plaque];
 
@@ -531,13 +655,14 @@
 - (void)addPlaqueToInSight:(Plaque *)plaque
 {
     @try {
+        NSLog(@"AAADDDDDD: %@ %@", (self.plaquesDelegate == nil) ? @"NIX" : @"GIBS", plaque.inscription);
         [self.plaquesInSightLock lock];
 
         [self.plaquesInSight addObject:plaque];
 
         // Notify delegate we have some new plaque in sight.
         //
-        id<PlaquesDelegate> delegate = self.delegate;
+        id<PlaquesDelegate> delegate = self.plaquesDelegate;
         if ((delegate != nil) && [delegate respondsToSelector:@selector(plaqueDidAppearInSight:)])
             [delegate plaqueDidAppearInSight:plaque];
 
@@ -562,7 +687,7 @@
 
         // Notify delegate we have some new plaque on map.
         //
-        id<PlaquesDelegate> delegate = self.delegate;
+        id<PlaquesDelegate> delegate = self.plaquesDelegate;
         if ((delegate != nil) && [delegate respondsToSelector:@selector(plaqueDidAppearOnMap:)])
             [delegate plaqueDidAppearOnMap:plaque];
 
@@ -590,6 +715,10 @@
 - (void)downloadPlaques:(NSMutableArray *)missingPlaques
             destination:(PlaqueDestination)destination
 {
+    NSString *message = [NSString stringWithFormat:NSLocalizedString(@"STATUS_BAR_DOWNLOAD_PLAQUES", nil),
+                         [missingPlaques count]];
+    [[StatusBar sharedStatusBar] postMessage:message];
+
     UInt32 paquetCommand;
 
     switch (destination)
@@ -635,16 +764,18 @@
         return;
 
     UInt32 paquetCommand;
-
+    NSUInteger radarRevision;
 
     switch (destination)
     {
         case InSight:
             paquetCommand = PaquetListOfPlaquesInSight;
+            radarRevision = [settings radarInSightRevision];
             break;
 
         case OnMap:
             paquetCommand = PaquetListOfPlaquesOnMap;
+            radarRevision = [settings radarOnMapRevision];
             break;
 
         default:
@@ -655,13 +786,12 @@
 
     [paquet setDelegate:self];
 
-    NSUInteger radarInSightRevision = [settings radarInSightRevision];
     CLLocationCoordinate2D coordinate = location.coordinate;
     CLLocationDistance altitude = location.altitude;
     CLLocationDirection course = location.course;
     NSInteger floorlevel = [location floorlevel];
 
-    [paquet putUInt32:(UInt32)radarInSightRevision];
+    [paquet putUInt32:(UInt32)radarRevision];
     [paquet putDouble:coordinate.latitude];
     [paquet putDouble:coordinate.longitude];
     [paquet putFloat:altitude];
@@ -673,7 +803,7 @@
     
     [paquet send];
 
-    NSLog(@"REVISION: %lu", (unsigned long)radarInSightRevision);
+    NSLog(@"REVISION: %lu", (unsigned long)radarRevision);
 }
 
 - (void)addPlaque:(Plaque *)plaque
@@ -687,44 +817,65 @@
 
 - (void)notifyPlaqueDidChangeLocation:(Plaque *)plaque
 {
-    id<PlaquesDelegate> delegate = self.delegate;
+    id<PlaquesDelegate> delegate = self.plaquesDelegate;
     if (delegate != nil)
         [delegate plaqueDidChangeLocation:plaque];
 }
 
 - (void)notifyPlaqueDidChangeOrientation:(Plaque *)plaque
 {
-    id<PlaquesDelegate> delegate = self.delegate;
+    id<PlaquesDelegate> delegate = self.plaquesDelegate;
     if (delegate != nil)
         [delegate plaqueDidChangeOrientation:plaque];
 }
 
 - (void)notifyPlaqueDidResize:(Plaque *)plaque
 {
-    id<PlaquesDelegate> delegate = self.delegate;
+    id<PlaquesDelegate> delegate = self.plaquesDelegate;
     if (delegate != nil)
         [delegate plaqueDidResize:plaque];
 }
 
 - (void)notifyPlaqueDidChangeColor:(Plaque *)plaque
 {
-    id<PlaquesDelegate> delegate = self.delegate;
+    id<PlaquesDelegate> delegate = self.plaquesDelegate;
     if (delegate != nil)
         [delegate plaqueDidChangeColor:plaque];
 }
 
 - (void)notifyPlaqueDidChangeFont:(Plaque *)plaque
 {
-    id<PlaquesDelegate> delegate = self.delegate;
+    id<PlaquesDelegate> delegate = self.plaquesDelegate;
     if (delegate != nil)
         [delegate plaqueDidChangeFont:plaque];
 }
 
 - (void)notifyPlaqueDidChangeInscription:(Plaque *)plaque
 {
-    id<PlaquesDelegate> delegate = self.delegate;
+    id<PlaquesDelegate> delegate = self.plaquesDelegate;
     if (delegate != nil)
         [delegate plaqueDidChangeInscription:plaque];
+}
+
+#pragma mark - Broadcast
+
+- (void)generateBroadcast:(UInt32)commandCode
+{
+    Paquet *paquet = [[Paquet alloc] initWithCommand:commandCode];
+    [paquet setDelegate:self];
+    [paquet send];
+
+#ifdef VERBOSE_BROADCAST
+    NSLog(@"Broadcast request sent");
+#endif
+}
+
+#pragma mark - Communicator delegate
+
+- (void)communicatorDidEstablishDialogue
+{
+    [self generateBroadcast:PaquetBroadcastForInSight];
+    [self generateBroadcast:PaquetBroadcastForOnRadar];
 }
 
 #pragma mark - Paquet delegate
@@ -733,6 +884,18 @@
 {
     switch (paquet.commandCode)
     {
+        case PaquetBroadcastForInSight:
+            [self processRadar:paquet
+                   destination:InSight];
+            [self generateBroadcast:PaquetBroadcastForInSight];
+            break;
+
+        case PaquetBroadcastForOnRadar:
+            [self processRadar:paquet
+                   destination:InSight];
+            [self generateBroadcast:PaquetBroadcastForOnRadar];
+            break;
+
         case PaquetListOfPlaquesInSight:
             [self processRadar:paquet
                    destination:InSight];
@@ -778,6 +941,14 @@
               (unsigned int)radarInSightRevision);
 #endif
 
+        if (numberOfPlaques > 0)
+        {
+            NSString *message = [NSString stringWithFormat:
+                                 NSLocalizedString(@"STATUS_BAR_PROCESS_RADAR", nil),
+                                 (unsigned int)numberOfPlaques];
+            [[StatusBar sharedStatusBar] postMessage:message];
+        }
+
         NSMutableArray *missingPlaques = [NSMutableArray array];
 
         for (int i = 0; i < numberOfPlaques; i++)
@@ -798,37 +969,39 @@
                 // ... then search for it in local database.
                 //
                 plaque = [[Plaque alloc] initWithToken:plaqueToken];
+            }
 
-                // If the plaque exists already in local database ...
+            // If the plaque exists already in local database ...
+            //
+            if (plaque != nil)
+            {
                 //
-                if (plaque != nil) {
-                    //
-                    // ... then add it to cache ...
-                    //
-                    [self addPlaqueToCache:plaque];
+                // ... then add it to cache ...
+                //
+                [self addPlaqueToCache:plaque];
 
-                    // ... and accordingly to "InSight" or "OnMap" or both.
-                    //
-                    switch (paquet.commandCode)
-                    {
-                        case PaquetListOfPlaquesInSight:
-                            if ([self plaqueInSightByToken:plaqueToken] == nil)
-                                [self addPlaqueToInSight:plaque];
-                            if ([self plaqueOnMapByToken:plaqueToken] == nil)
-                                [self addPlaqueToOnMap:plaque];
-                            break;
+                // ... and accordingly to "InSight" or "OnMap" or both.
+                //
+                switch (paquet.commandCode)
+                {
+                    case PaquetListOfPlaquesInSight:
+                        if ([self plaqueInSightByToken:plaqueToken] == nil)
+                            [self addPlaqueToInSight:plaque];
+                        if ([self plaqueOnMapByToken:plaqueToken] == nil)
+                            [self addPlaqueToOnMap:plaque];
+                        break;
 
-                        case PaquetListOfPlaquesOnMap:
-                            if ([self plaqueOnMapByToken:plaqueToken] == nil)
-                                [self addPlaqueToOnMap:plaque];
-                            break;
+                    case PaquetListOfPlaquesOnMap:
+                        if ([self plaqueOnMapByToken:plaqueToken] == nil)
+                            [self addPlaqueToOnMap:plaque];
+                        break;
 
-                        default:
-                            break;
-                    }
+                    default:
+                        break;
                 }
             }
 
+            // So, now, if the plaque exists
 #ifdef VERBOSE_RADAR_DETAILS
             NSLog(@"Token %@ revision %d <%@>",
                   [plaqueToken UUIDString],
@@ -930,6 +1103,9 @@
                   height,
                   inscription);
 #endif
+
+            //NSString *message = NSLocalizedString(@"STATUS_BAR_PROCESS_PLAQUES", nil);
+            //[[StatusBar sharedStatusBar] postMessage:message];
 
             Plaque *plaque = nil;
 

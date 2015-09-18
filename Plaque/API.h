@@ -30,10 +30,13 @@
 #define DialogueVerdictNewSession				0xBED10004
 
 #define CommandAnticipant                       0xABBA2015
-#define PaquetListOfPlaquesInSight              0x00010001
-#define PaquetListOfPlaquesOnMap                0x00010002
-#define PaquetDownloadPlaquesInSight            0x00010003
-#define PaquetDownloadPlaquesOnMap              0x00010004
+#define PaquetBroadcastForInCache               0x00010001
+#define PaquetBroadcastForInSight               0x00010002
+#define PaquetBroadcastForOnRadar               0x00010004
+#define PaquetListOfPlaquesInSight              0xF0010001
+#define PaquetListOfPlaquesOnMap                0xF0010002
+#define PaquetDownloadPlaquesInSight            0x00010012
+#define PaquetDownloadPlaquesOnMap              0x00010014
 #define PaquetPostNewPlaque                     0x00020001
 #define PaquetPlaqueModifiedLocation            0x00020002
 #define PaquetPlaqueModifiedOrientation         0x00020003

@@ -9,6 +9,7 @@
 #define TapMenuOnlyIconsKey         @"TapMenuOnlyIcons"
 #define LastOwnObjectIdKey          @"LastOwnObjectId"
 #define RadarInSightRevisionKey     @"RadarInSightRevision"
+#define RadarOnMapRevisionKey       @"RadarOnMapRevision"
 
 @implementation Settings
 {
@@ -72,6 +73,18 @@
 {
     [defaults setInteger:radarInSightRevision
                   forKey:RadarInSightRevisionKey];
+}
+
+- (NSUInteger)radarOnMapRevision
+{
+    NSUInteger radarOnMapRevision = [defaults integerForKey:RadarOnMapRevisionKey];
+    return radarOnMapRevision;
+}
+
+- (void)setRadarOnMapRevision:(NSUInteger)radarOnMapRevision
+{
+    [defaults setInteger:radarOnMapRevision
+                  forKey:RadarOnMapRevisionKey];
 }
 
 @end

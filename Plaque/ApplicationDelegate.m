@@ -17,6 +17,7 @@
 #import "Communicator.h"
 #import "Servers.h"
 #import "SQLite.h"
+#import "StatusBar.h"
 
 #ifdef DEBUG
 #define VERBOSE
@@ -81,9 +82,13 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 
     [Servers sharedServers];
     
-    [[Communicator sharedCommunicator] switchToForeground];
+    Communicator *communicator = [Communicator sharedCommunicator];
+    [communicator switchToForeground];
 
-    [[Plaques sharedPlaques] switchToForeground];
+    Plaques *plaques = [Plaques sharedPlaques];
+    [plaques switchToForeground];
+    [plaques loadPlaquesCache];
+    [plaques loadWorkdesk];
 
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
 
@@ -111,8 +116,14 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 #endif
     inBackground = TRUE;
     [self.controller switchToBackground];
-    [[Plaques sharedPlaques] switchToBackground];
-    [[Communicator sharedCommunicator] switchToBackground];
+
+    Plaques *plaques = [Plaques sharedPlaques];
+    [plaques switchToBackground];
+    [plaques savePlaquesCache];
+    [plaques saveWorkdesk];
+
+    Communicator *communicator = [Communicator sharedCommunicator];
+    [communicator switchToBackground];
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application
@@ -154,6 +165,9 @@ didReceiveRemoteNotification:(NSDictionary *)userInfo
         [notification setSoundName:UILocalNotificationDefaultSoundName];
         [notification setApplicationIconBadgeNumber:0];
         [[UIApplication sharedApplication] scheduleLocalNotification:notification];
+    } else {
+        UILocalNotification *notification = [[UILocalNotification alloc] init];
+        [[StatusBar sharedStatusBar] postMessage:[notification alertBody]];
     }
 }
 

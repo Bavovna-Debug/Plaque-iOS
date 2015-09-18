@@ -8,7 +8,11 @@
 
 #import "Paquet.h"
 
+@protocol ConnectionDelegate;
+
 @interface Communicator : NSObject
+
+@property (strong, nonatomic, readwrite) id<ConnectionDelegate> connectionDelegate;
 
 + (Communicator *)sharedCommunicator;
 
@@ -17,5 +21,13 @@
 - (void)switchToForeground;
 
 - (void)send:(Paquet *)paquet;
+
+@end
+
+@protocol ConnectionDelegate <NSObject>
+
+@required
+
+- (void)communicatorDidEstablishDialogue;
 
 @end

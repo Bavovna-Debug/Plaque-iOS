@@ -9,6 +9,7 @@
 #import "Authentificator.h"
 #import "Communicator.h"
 #import "Paquet.h"
+#import "Settings.h"
 
 #include "API.h"
 
@@ -139,6 +140,8 @@
 #ifdef VERBOSE
     NSLog(@"Set session token: %@", [sessionToken UUIDString]);
 #endif
+
+    [[Settings defaultSettings] setRadarInSightRevision:0];
 }
 
 - (void)setProfileToken:(NSUUID *)profileToken

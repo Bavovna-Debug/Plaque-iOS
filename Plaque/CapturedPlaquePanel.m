@@ -69,16 +69,18 @@
 
     [self translate:-1];
 
-    [self addCloseButton];
+    // FIXME: As long the close button has "layer problems".
+    //[self addCloseButton];
 }
 
 - (void)didClosePanel
 {
     [super didClosePanel];
 
-    Plaque *capturedPlaque = [[Plaques sharedPlaques] capturedPlaque];
+    Plaques *plaques = [Plaques sharedPlaques];
+    Plaque *capturedPlaque = [plaques capturedPlaque];
     if (capturedPlaque == self.plaque)
-        [[Plaques sharedPlaques] setCapturedPlaque:nil];
+        [plaques setCapturedPlaque:nil];
 }
 
 - (void)editButtonPressed:(id)sender

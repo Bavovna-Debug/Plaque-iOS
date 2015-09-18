@@ -173,7 +173,6 @@
     int executeQueryResults = sqlite3_step(statement);
 
     sqlite3_int64 rowId = sqlite3_last_insert_rowid(self.databaseHandler);
-
     [self.lock unlock];
 
     switch (executeQueryResults)

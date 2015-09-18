@@ -9,6 +9,7 @@
 #import "Authentificator.h"
 #import "Communicator.h"
 #import "Servers.h"
+#import "StatusBar.h"
 
 #include "API.h"
 
@@ -70,6 +71,7 @@
     Boolean         background;
     UInt32          lastPaquetId;
     NSMutableData   *pieceOnReceive;
+    StatusBar       *statusBar;
 }
 
 + (Communicator *)sharedCommunicator
@@ -101,6 +103,8 @@
 
     connected = NO;
     lastPaquetId = 0;
+
+    statusBar = [StatusBar sharedStatusBar];
 
     [self connect];
 
@@ -175,6 +179,10 @@
         [piece appendBytes:&commandCode
                     length:sizeof(commandCode)];
 
+        UInt32 commandSubcode = 0;
+        [piece appendBytes:&commandSubcode
+                    length:sizeof(commandSubcode)];
+
         UInt32 payloadSize = CFSwapInt32HostToBig((UInt32)[paquet.payload length]);
         [piece appendBytes:&payloadSize
                     length:sizeof(payloadSize)];
@@ -211,6 +219,8 @@
                   (unsigned long)[piece length]);
 #endif
 
+            // Reset piece for next loop.
+            //
             piece = [NSMutableData data];
 
             packedBytes += bytesToPack;
@@ -317,7 +327,10 @@
 
 #ifdef VERBOSE_SOCKET_CONNECTION
     NSLog(@"Establish connection");
+    [statusBar postMessage:@"DEBUG: Establish connection"];
 #endif
+
+    dialogueEstablished = NO;
 
     Authentificator *authentificator = [Authentificator sharedAuthentificator];
     if ([authentificator deviceRegistered] == NO) {
@@ -325,8 +338,6 @@
     } else {
         anticipantConnection = NO;
     }
-
-    dialogueEstablished = NO;
 
     Servers *servers = [Servers sharedServers];
 
@@ -349,6 +360,9 @@
     if (status == NO)
     {
         [self.connectionLock unlock];
+
+        [statusBar postMessage:NSLocalizedString(@"STATUS_BAR_VPCLOUD_CANNOT_CONNECT", nil)];
+
 #ifdef VERBOSE_SOCKET_CONNECTION
         NSLog(@"Cannot connect: %@", error);
 #endif
@@ -401,6 +415,9 @@
                                    selector:@selector(fireReconnect:)
                                    userInfo:nil
                                     repeats:NO];
+    [statusBar postMessage:[NSString stringWithFormat:
+                            NSLocalizedString(@"STATUS_BAR_VPCLOUD_SCHEDULE_RECONNECT", nil),
+                            reconnectInterval]];
 }
 
 - (void)fireReconnect:(NSTimer *)timer
@@ -421,6 +438,8 @@ didConnectToHost:(NSString *)host
     connected = YES;
 
     [self.connectionLock unlock];
+
+    [statusBar postMessage:NSLocalizedString(@"STATUS_BAR_VPCLOUD_CONNECTION_ESTABLISHED", nil)];
 
 #ifdef VERBOSE_SOCKET
     NSLog(@"Send dialogue demande");
@@ -455,6 +474,8 @@ didConnectToHost:(NSString *)host
 #ifdef VERBOSE_SOCKET_CONNECTION
         NSLog(@"Disconnect without I/O");
 #endif
+    } else {
+        [statusBar postMessage:NSLocalizedString(@"STATUS_BAR_VPCLOUD_LOST_CONNECTION", nil)];
     }
 
     [self processCards];
@@ -462,6 +483,7 @@ didConnectToHost:(NSString *)host
     [self clearAllQueues];
 
     [self.connectionLock unlock];
+
 }
 
 #ifdef VERBOSE_SOCKET
@@ -661,10 +683,17 @@ didWriteDataWithTag:(long)tag
     switch (verdictCode)
     {
         case DialogueVerdictWelcome:
+        {
 #ifdef VERBOSE_DIALOGUE
             NSLog(@"Dialogue established");
 #endif
+
+            id<ConnectionDelegate> delegate = self.connectionDelegate;
+            if (delegate != nil)
+                [delegate communicatorDidEstablishDialogue];
+
             break;
+        }
 
         case DialogueVerdictInvalidDevice:
 #ifdef VERBOSE_DIALOGUE

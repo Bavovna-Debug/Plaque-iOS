@@ -28,6 +28,7 @@ typedef enum {
 @property (strong, nonatomic) NSUUID                  *plaqueToken;
 @property (strong, nonatomic) NSUUID                  *profileToken;
 @property (assign, nonatomic) int                     plaqueRevision;
+@property (strong, nonatomic) NSDate                  *creationStamp;
 @property (strong, nonatomic) CLLocation              *location;
 @property (assign, nonatomic) CLLocationCoordinate2D  coordinate;
 @property (assign, nonatomic) CLLocationDistance      altitude;
@@ -50,18 +51,15 @@ typedef enum {
              direction:(CLLocationDirection)direction
            inscription:(NSString *)inscription;
 
-- (id)initWithCoordinate:(CLLocationCoordinate2D)coordinate
-               direction:(CLLocationDirection)direction
-                    text:(NSString *)text
-                   color:(UIColor *)color;
-
 - (id)initFromXML:(XMLElement *)plaqueXML;
+
+- (XMLElement *)xml;
 
 - (id)clone;
 
 - (id)copy;
 
-- (void)saveInDatabase;
+- (void)saveToDatabase;
 
 - (BOOL)uploadToCloudIfNecessary;
 
@@ -71,7 +69,5 @@ typedef enum {
 
 - (void)resizeInscriptionLayer:(CALayer *)inscriptionLayer
                       forLayer:(CALayer *)plaqueLayer;
-
-- (XMLElement *)xml;
 
 @end

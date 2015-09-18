@@ -96,7 +96,7 @@
 
     [self.mapView setDelegate:nil];
 
-    [[Plaques sharedPlaques] setDelegate:nil];
+    [[Plaques sharedPlaques] setPlaquesDelegate:nil];
 }
 
 - (void)resume
@@ -107,7 +107,7 @@
 
     [self.mapView setDelegate:self];
 
-    [[Plaques sharedPlaques] setDelegate:self];
+    [[Plaques sharedPlaques] setPlaquesDelegate:self];
 }
 
 - (void)refreshAllPlaques

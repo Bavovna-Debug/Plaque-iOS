@@ -24,7 +24,7 @@ typedef enum
 
 @interface Plaques : NSObject
 
-@property (weak,   nonatomic, readwrite) id<PlaquesDelegate> delegate;
+@property (weak,   nonatomic, readwrite) id<PlaquesDelegate> plaquesDelegate;
 @property (weak,   nonatomic, readwrite) id<PlaqueCaptureDelegate> captureDelegate;
 @property (weak,   nonatomic, readwrite) id<PlaqueEditDelegate> editDelegate;
 
@@ -40,6 +40,14 @@ typedef enum
 - (void)switchToBackground;
 
 - (void)switchToForeground;
+
+- (void)savePlaquesCache;
+
+- (void)loadPlaquesCache;
+
+- (void)saveWorkdesk;
+
+- (void)loadWorkdesk;
 
 - (Plaque *)createNewPlaqueAtUserLocation;
 

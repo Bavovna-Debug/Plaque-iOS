@@ -10,6 +10,7 @@
 
 @property (assign, nonatomic) Boolean tapMenuOnlyIcons;
 @property (assign, nonatomic) NSUInteger lastOwnObjectId;
+@property (assign, nonatomic) NSUInteger radarOnMapRevision;
 @property (assign, nonatomic) NSUInteger radarInSightRevision;
 
 + (Settings *)defaultSettings;

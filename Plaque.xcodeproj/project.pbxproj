@@ -444,9 +444,9 @@
 		94AD35741A580F2000879971 /* User Interface */ = {
 			isa = PBXGroup;
 			children = (
+				940C1F1B1A5809D1003E5181 /* Main.storyboard */,
 				945DC4BD1A78CD7E0015A519 /* TapMenu */,
 				943262F71A67E159004D9F57 /* Fly Menu */,
-				940C1F1B1A5809D1003E5181 /* Main.storyboard */,
 				94AD35781A5833A200879971 /* MainController.h */,
 				94AD35791A5833A200879971 /* MainController.m */,
 				94DBA14A1A9B9BC200190805 /* StatusBar.h */,
@@ -829,10 +829,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = Plaque/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 			};
 			name = Debug;
 		};
@@ -842,10 +844,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = Plaque/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 			};
 			name = Release;
 		};

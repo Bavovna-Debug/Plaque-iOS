@@ -19,6 +19,7 @@
 
 #ifdef DEBUG
 #undef VERBOSE_CAMERA
+#define PLAQUE_DID_APPEAR
 #endif
 
 #define TiltAccuracy 0.5f
@@ -133,7 +134,7 @@
 
     [self stopCapturer];
 
-    [[Plaques sharedPlaques] setDelegate:nil];
+    [[Plaques sharedPlaques] setPlaquesDelegate:nil];
 
     [self stopLocationManager];
     [self stopMotionManager];
@@ -155,7 +156,7 @@
     [self startLocationManager];
     [self startMotionManager];
 
-    [[Plaques sharedPlaques] setDelegate:self];
+    [[Plaques sharedPlaques] setPlaquesDelegate:self];
 
     [self startCapturerWithInterval:CaptureInterval];
 
@@ -528,6 +529,11 @@
     [self redrawPlaqueInSight:inSightPlaque];
 
     [self.inSightPlaques addObject:inSightPlaque];
+
+#ifdef PLAQUE_DID_APPEAR
+    NSLog(@"Plaque did appear in sight %@",
+          [inSightPlaque.plaque.plaqueToken UUIDString]);
+#endif
 }
 
 - (void)plaqueDidDisappearFromWorkdesk:(Plaque *)plaque

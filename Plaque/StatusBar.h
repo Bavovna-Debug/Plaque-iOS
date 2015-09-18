@@ -10,4 +10,6 @@
 
 + (StatusBar *)sharedStatusBar;
 
+- (void)postMessage:(NSString *)text;
+
 @end

@@ -10,7 +10,7 @@
 
 #import "Plaques.h"
 
-@interface InSightPlaque : NSObject <PlaquesDelegate>
+@interface InSightPlaque : NSObject
 
 @property (weak,   nonatomic) Plaque               *plaque;
 @property (weak,   nonatomic) CALayer              *plaqueLayer;

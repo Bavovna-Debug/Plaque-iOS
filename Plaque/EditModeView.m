@@ -81,7 +81,7 @@
 
 - (void)prepareSelectorPanel
 {
-    CGSize buttonSize = [EditModeSelectButton buttonSize];
+    //CGSize buttonSize = [EditModeSelectButton buttonSize];
     //CGRect buttonFrame = CGRectMake(0.0f, 0.0f, buttonSize.width, buttonSize.height);
 
     EditModeSelectButton *coordinateButton = [EditModeSelectButton button:EditModeCoordinate];

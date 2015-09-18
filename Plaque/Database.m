@@ -16,10 +16,10 @@
     dispatch_once(&onceToken, ^{
         database = [[SQLiteDatabase alloc] initWithDatabaseName:@"plaque"
                                       createDatabaseIfNotExists:YES];
-        [database executeSQL:@"ALTER TABLE plaques ADD COLUMN dimension INTEGER NOT NULL DEFAULT 2"
-           ignoreConstraints:YES];
-        [database executeSQL:@"ALTER TABLE plaques ADD COLUMN font_size REAL NOT NULL DEFAULT 0.25"
-           ignoreConstraints:YES];
+        
+        //[database executeSQL:@"DELETE FROM plaques" ignoreConstraints:YES];
+
+        //[database executeSQL:@"ALTER TABLE plaques ADD COLUMN dimension INTEGER NOT NULL DEFAULT 2" ignoreConstraints:YES];
     });
 
     return database;
