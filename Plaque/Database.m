@@ -6,6 +6,14 @@
 
 #import "Database.h"
 
+#ifdef DEBUG
+#define DATABASE_NAME   @"plaque2"
+#define TEMPLATE_NAME   @"plaque"
+#else
+#define DATABASE_NAME   @"plaque"
+#define TEMPLATE_NAME   @"plaque"
+#endif
+
 @implementation Database
 
 + (SQLiteDatabase *)mainDatabase
@@ -14,8 +22,8 @@
     static SQLiteDatabase *database;
 
     dispatch_once(&onceToken, ^{
-        database = [[SQLiteDatabase alloc] initWithDatabaseName:@"plaque"
-                                      createDatabaseIfNotExists:YES];
+        database = [[SQLiteDatabase alloc] initWithDatabaseName:DATABASE_NAME
+                                                   templateName:TEMPLATE_NAME];
         
         //[database executeSQL:@"DELETE FROM plaques" ignoreConstraints:YES];
 

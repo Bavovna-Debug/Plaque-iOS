@@ -6,10 +6,23 @@
 
 #import "Settings.h"
 
+#ifdef DEBUG
 #define TapMenuOnlyIconsKey         @"TapMenuOnlyIcons"
 #define LastOwnObjectIdKey          @"LastOwnObjectId"
-#define RadarInSightRevisionKey     @"RadarInSightRevision"
-#define RadarOnMapRevisionKey       @"RadarOnMapRevision"
+/*
+#define OnRadarRevisionKey          @"OnRadarRevision2"
+#define InSightRevisionKey          @"InSightRevision2"
+#define OnMapRevisionKey            @"OnMapRevision2"
+*/
+#else
+#define TapMenuOnlyIconsKey         @"TapMenuOnlyIcons"
+#define LastOwnObjectIdKey          @"LastOwnObjectId"
+/*
+#define OnRadarRevisionKey          @"OnRadarRevision"
+#define InSightRevisionKey          @"InSightRevision"
+#define OnMapRevisionKey            @"OnMapRevision"
+*/
+#endif
 
 @implementation Settings
 {
@@ -63,28 +76,42 @@
     return lastOwnObjectId;
 }
 
-- (NSUInteger)radarInSightRevision
+/*
+- (UInt32)radarOnRadarRevision
 {
-    NSUInteger radarInSightRevision = [defaults integerForKey:RadarInSightRevisionKey];
+    UInt32 radarOnRadarRevision = (UInt32)[defaults integerForKey:OnRadarRevisionKey];
+    return radarOnRadarRevision;
+}
+
+- (void)setRadarOnRadarRevision:(UInt32)radarOnRadarRevision
+{
+    [defaults setInteger:radarOnRadarRevision
+                  forKey:OnRadarRevisionKey];
+}
+
+- (UInt32)radarInSightRevision
+{
+    UInt32 radarInSightRevision = (UInt32)[defaults integerForKey:InSightRevisionKey];
     return radarInSightRevision;
 }
 
-- (void)setRadarInSightRevision:(NSUInteger)radarInSightRevision
+- (void)setRadarInSightRevision:(UInt32)radarInSightRevision
 {
     [defaults setInteger:radarInSightRevision
-                  forKey:RadarInSightRevisionKey];
+                  forKey:InSightRevisionKey];
 }
 
-- (NSUInteger)radarOnMapRevision
+- (UInt32)radarOnMapRevision
 {
-    NSUInteger radarOnMapRevision = [defaults integerForKey:RadarOnMapRevisionKey];
+    UInt32 radarOnMapRevision = (UInt32)[defaults integerForKey:OnMapRevisionKey];
     return radarOnMapRevision;
 }
 
-- (void)setRadarOnMapRevision:(NSUInteger)radarOnMapRevision
+- (void)setRadarOnMapRevision:(UInt32)radarOnMapRevision
 {
     [defaults setInteger:radarOnMapRevision
-                  forKey:RadarOnMapRevisionKey];
+                  forKey:OnMapRevisionKey];
 }
+*/
 
 @end

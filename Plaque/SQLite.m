@@ -30,7 +30,7 @@
 }
 
 - (id)initWithDatabaseName:(NSString *)databaseName
- createDatabaseIfNotExists:(Boolean)createDatabaseIfNotExists
+              templateName:(NSString *)templateName
 {
     self = [super init];
     if (self == nil)
@@ -39,9 +39,9 @@
     self.databaseName = databaseName;
     self.lock = [[NSLock alloc] init];
 
-    if (createDatabaseIfNotExists == YES)
+    if (templateName != nil)
         if ([self databaseExists] == NO)
-            if ([self createDatabase] == FALSE)
+            if ([self createDatabase:templateName] == FALSE)
                 return nil;
 
     if ([self openDatabase] == FALSE)
@@ -69,9 +69,9 @@
     return [[NSFileManager defaultManager] fileExistsAtPath:[self databaseFullPath]];
 }
 
-- (Boolean)createDatabase
+- (Boolean)createDatabase:(NSString *)templateName
 {
-    NSString *templateFileName = [NSString stringWithFormat:@"%@.db", [self databaseName]];
+    NSString *templateFileName = [NSString stringWithFormat:@"%@.db", templateName];
     NSString *templateFilePath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:templateFileName];
     NSError *error;
 

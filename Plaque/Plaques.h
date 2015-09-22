@@ -12,6 +12,7 @@
 typedef enum
 {
     Workdesk,
+    OnRadar,
     InSight,
     OnMap
 } PlaqueDestination;
@@ -28,6 +29,7 @@ typedef enum
 @property (weak,   nonatomic, readwrite) id<PlaqueCaptureDelegate> captureDelegate;
 @property (weak,   nonatomic, readwrite) id<PlaqueEditDelegate> editDelegate;
 
+@property (strong, nonatomic, readonly)  NSMutableArray  *plaquesOnRadar;
 @property (strong, nonatomic, readonly)  NSMutableArray  *plaquesInSight;
 @property (strong, nonatomic, readonly)  NSMutableArray  *plaquesOnMap;
 @property (strong, nonatomic, readonly)  NSMutableArray  *plaquesOnWorkdesk;
@@ -49,15 +51,15 @@ typedef enum
 
 - (void)loadWorkdesk;
 
+- (void)removeAllPlaques;
+
 - (Plaque *)createNewPlaqueAtUserLocation;
 
 - (Plaque *)plaqueByToken:(NSUUID *)plaqueToken;
 
-- (void)refreshPlaquesForLocation:(CLLocation *)location
-                            range:(CLLocationDistance)range
-                      destination:(PlaqueDestination)destination;
-
-- (void)addPlaque:(Plaque *)plaque;
+- (void)changeDisplacement:(CLLocation *)location
+                     range:(CLLocationDistance)range
+               destination:(PlaqueDestination)destination;
 
 // Plaque notifications.
 
@@ -81,13 +83,21 @@ typedef enum
 
 @optional
 
-- (void)plaqueDidAppearOnWorkdesk:(Plaque *)plaque;
+- (void)plaqueDidAppearOnRadar:(Plaque *)plaque;
 
-- (void)plaqueDidDisappearFromWorkdesk:(Plaque *)plaque;
+- (void)plaqueDidDisappearFromOnRadar:(Plaque *)plaque;
 
 - (void)plaqueDidAppearInSight:(Plaque *)plaque;
 
+- (void)plaqueDidDisappearFromInSight:(Plaque *)plaque;
+
 - (void)plaqueDidAppearOnMap:(Plaque *)plaque;
+
+- (void)plaqueDidDisappearFromOnMap:(Plaque *)plaque;
+
+- (void)plaqueDidAppearOnWorkdesk:(Plaque *)plaque;
+
+- (void)plaqueDidDisappearFromWorkdesk:(Plaque *)plaque;
 
 - (void)plaqueDidBecomeCaptured:(Plaque *)plaque;
 

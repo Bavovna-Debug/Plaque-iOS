@@ -8,10 +8,13 @@
 
 @interface Settings : NSObject
 
-@property (assign, nonatomic) Boolean tapMenuOnlyIcons;
-@property (assign, nonatomic) NSUInteger lastOwnObjectId;
-@property (assign, nonatomic) NSUInteger radarOnMapRevision;
-@property (assign, nonatomic) NSUInteger radarInSightRevision;
+@property (assign, nonatomic) Boolean       tapMenuOnlyIcons;
+@property (assign, nonatomic) NSUInteger    lastOwnObjectId;
+/*
+@property (assign, nonatomic) UInt32        radarOnRadarRevision;
+@property (assign, nonatomic) UInt32        radarInSightRevision;
+@property (assign, nonatomic) UInt32        radarOnMapRevision;
+*/
 
 + (Settings *)defaultSettings;
 

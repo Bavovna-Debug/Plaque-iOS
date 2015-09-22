@@ -9,7 +9,6 @@
 #import "Authentificator.h"
 #import "Communicator.h"
 #import "Paquet.h"
-#import "Settings.h"
 
 #include "API.h"
 
@@ -19,10 +18,17 @@
 
 #define DeviceRegistrationTryInterval   5.0f
 
+#ifdef DEBUG
+#define DeviceTokenKey                  @"DeviceToken2"
+#define SessionTokenKey                 @"SessionToken2"
+#define ProfileTokenKey                 @"ProfileToken2"
+#define NotificationsTokenKey           @"NotificationsToken2"
+#else
 #define DeviceTokenKey                  @"DeviceToken"
 #define SessionTokenKey                 @"SessionToken"
 #define ProfileTokenKey                 @"ProfileToken"
 #define NotificationsTokenKey           @"NotificationsToken"
+#endif
 
 @interface Authentificator () <PaquetDelegate>
 
@@ -140,8 +146,6 @@
 #ifdef VERBOSE
     NSLog(@"Set session token: %@", [sessionToken UUIDString]);
 #endif
-
-    [[Settings defaultSettings] setRadarInSightRevision:0];
 }
 
 - (void)setProfileToken:(NSUUID *)profileToken

@@ -8,6 +8,7 @@
 
 #import "Authentificator.h"
 #import "Communicator.h"
+#import "Plaques.h"
 #import "Servers.h"
 #import "StatusBar.h"
 
@@ -572,7 +573,7 @@ didWriteDataWithTag:(long)tag
     UInt16 applicationRelease;
     UInt16 deviceType;
 
-    NSString *version = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
+    //NSString *version = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
     NSString *build = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"];
 
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
@@ -715,6 +716,7 @@ didWriteDataWithTag:(long)tag
             NSLog(@"Dialogue verdict: open new session %@", [sessionToken UUIDString]);
 #endif
             [authentificator setSessionToken:sessionToken];
+            [[Plaques sharedPlaques] removeAllPlaques];
             break;
 
         default:

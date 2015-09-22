@@ -11,16 +11,17 @@
 "PROFILE_FORM_SUBMIT_BUTTON"                = "Submit";
 
 "PROFILE_FORM_PROFILE_NAME_LABEL"           = "Profile name:";
-"PROFILE_FORM_PROFILE_NAME_HELP"            = "Returns a connection options array. This can be used to determine all possible PQconnectdb options and their current default values.";
+"PROFILE_FORM_PROFILE_NAME_HELP"            = "Profile name must consist of at least 4 and not more than 20 characters and can contain letters, digits and some of special symbols.";
 "PROFILE_FORM_PROFILE_NAME_VALIDATING_MESSAGE"          = "Validating %@ on server...";
 "PROFILE_FORM_PROFILE_NAME_IS_AVAILABLE_MESSAGE"        = "Name %@ is free.";
 "PROFILE_FORM_PROFILE_NAME_ALREADY_IN_USE_MESSAGE"      = "Name %@ is already used...";
-"PROFILE_FORM_PROFILE_NAME_VALIDATION_ERROR_MESSAGE"    = "Cannot check...";
+"PROFILE_FORM_PROFILE_NAME_CONSTRAINT_MESSAGE"          = "Name %@ does not confirm to name rules...";
+"PROFILE_FORM_PROFILE_NAME_VALIDATION_ERROR_MESSAGE"    = "You are not connected to vpCloud...";
 
-"PROFILE_FORM_USER_NAME_LABEL"          = "User name:";
+"PROFILE_FORM_USER_NAME_LABEL"          = "Login name:";
 "PROFILE_FORM_USER_NAME_HELP"           = "";
 
-"PROFILE_FORM_PASSWORD_LABEL"           = "Password:";
+"PROFILE_FORM_PASSWORD_LABEL"           = "Login password:";
 "PROFILE_FORM_PASSWORD_HELP"            = "";
 
 "EDIT_MODE_COORDINATE_BUTTON"           = "Location";

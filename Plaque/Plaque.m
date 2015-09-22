@@ -786,8 +786,8 @@
         if (storedInDatabase == YES) {
             SQLiteDatabase *database = [Database mainDatabase];
 
-            NSString *query = [NSString stringWithFormat:@"UPDATE plaques SET background_color = %d WHERE rowid = %llu",
-                               newColor,
+            NSString *query = [NSString stringWithFormat:@"UPDATE plaques SET background_color = %u WHERE rowid = %llu",
+                               (unsigned int)newColor,
                                self.rowId];
 
             [database executeUPDATE:query ignoreConstraints:YES];
@@ -809,8 +809,8 @@
         if (storedInDatabase == YES) {
             SQLiteDatabase *database = [Database mainDatabase];
 
-            NSString *query = [NSString stringWithFormat:@"UPDATE plaques SET foreground_color = %d WHERE rowid = %llu",
-                               newColor,
+            NSString *query = [NSString stringWithFormat:@"UPDATE plaques SET foreground_color = %u WHERE rowid = %llu",
+                               (unsigned int)newColor,
                                self.rowId];
 
             [database executeUPDATE:query ignoreConstraints:YES];
@@ -997,11 +997,15 @@
                 [paquet putFloat:self.tilt];
 
 #ifdef VERBOSE_PLAQUE_CHANGE
-                NSLog(@"Plaque change orientation request: direction=%f->%f tilt=%f->%f",
-                      original.direction,
-                      self.direction,
-                      original.tilt,
-                      self.tilt);
+                NSLog(@"Plaque change orientation request: directed=%d->%d, direction=%f->%f tilted=%d->%d tilt=%f->%f",
+                    original.directed,
+                    self.directed,
+                    original.direction,
+                    self.direction,
+                    original.tilted,
+                    self.tilted,
+                    original.tilt,
+                    self.tilt);
 #endif
 
                 [paquet send];

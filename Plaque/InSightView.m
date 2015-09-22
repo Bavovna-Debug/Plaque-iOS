@@ -536,7 +536,7 @@
 #endif
 }
 
-- (void)plaqueDidDisappearFromWorkdesk:(Plaque *)plaque
+- (void)plaqueDidDisappearFromInSight:(Plaque *)plaque
 {
     InSightPlaque *inSightPlaque = [self inSightPlaqueByPlaque:plaque];
     if (inSightPlaque != nil) {
@@ -560,6 +560,17 @@
     [self redrawPlaqueInSight:inSightPlaque];
 
     [self.inSightPlaques addObject:inSightPlaque];
+}
+
+- (void)plaqueDidDisappearFromWorkdesk:(Plaque *)plaque
+{
+    InSightPlaque *inSightPlaque = [self inSightPlaqueByPlaque:plaque];
+    if (inSightPlaque != nil) {
+        [self.refreshLock lock];
+        [inSightPlaque didDisappear];
+        [self.inSightPlaques removeObject:inSightPlaque];
+        [self.refreshLock unlock];
+    }
 }
 
 - (void)plaqueDidChangeLocation:(Plaque *)plaque

@@ -11,7 +11,7 @@
 + (void)removeDatabase:(NSString *)databaseName;
 
 - (id)initWithDatabaseName:(NSString *)databaseName
- createDatabaseIfNotExists:(Boolean)createDatabaseIfNotExists;
+              templateName:(NSString *)templateName;
 
 - (Boolean)executeSQL:(NSString *)query
     ignoreConstraints:(Boolean)ignoreConstraints;

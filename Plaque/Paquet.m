@@ -60,13 +60,12 @@
 
 - (void)putBoolean:(Boolean)value
 {
-    char c = (value == TRUE) ? DeviceBooleanTrue : DeviceBooleanFalse;
-    [self.payload appendBytes:&c length:sizeof(c)];
+    [self.payload appendBytes:&value length:sizeof(value)];
 }
 
 - (Boolean)getBoolean
 {
-    char value;
+    UInt8 value;
     NSData *valueData = [NSData dataWithBytesNoCopy:(char *)[self.payload bytes] + payloadOffset
                                              length:sizeof(value)
                                        freeWhenDone:NO];
@@ -74,7 +73,7 @@
 
     payloadOffset += sizeof(value);
 
-    return (value == DeviceBooleanTrue) ? TRUE : FALSE;
+    return value;
 }
 
 - (void)putUInt16:(UInt16)value

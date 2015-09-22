@@ -224,9 +224,9 @@ regionWillChangeAnimated:(BOOL)animated
 
     CLLocationDistance rangeInMeters = [centerLocation distanceFromLocation:borderLocation];
 
-    [[Plaques sharedPlaques] refreshPlaquesForLocation:centerLocation
-                                                 range:rangeInMeters
-                                           destination:OnMap];
+    [[Plaques sharedPlaques] changeDisplacement:centerLocation
+                                          range:rangeInMeters
+                                    destination:OnMap];
 
 #ifdef VERBOSE
     NSLog(@"Switched to region: (%f x %f) with range %f",
