@@ -1178,7 +1178,7 @@
         case PaquetPlaqueModifiedColors:
         case PaquetPlaqueModifiedFont:
         case PaquetPlaqueModifiedInscription:
-            [[Plaques sharedPlaques] downloadPlaque:self.cloneChain.plaqueToken];
+            //[[Plaques sharedPlaques] downloadPlaque:self.cloneChain.plaqueToken];
 
             [[StatusBar sharedStatusBar] postMessage:NSLocalizedString(@"STATUS_BAR_PLAQUE_CHANGES_SYNCRONIZED", nil)];
             break;

@@ -38,8 +38,8 @@
 #define MaxPlaquesPerDownloadRequest        100
 
 #ifdef DEBUG
-#define PlaquesCacheKey                     @"PlaquesCache2"
-#define PlaquesOnWorkdeskKey                @"PlaquesOnWorkdesk4"
+#define PlaquesCacheKey                     @"PlaquesCache4"
+#define PlaquesOnWorkdeskKey                @"PlaquesOnWorkdesk6"
 #else
 #define PlaquesCacheKey                     @"PlaquesCache"
 #define PlaquesOnWorkdeskKey                @"PlaquesOnWorkdesk"
@@ -246,6 +246,12 @@
         [plaquesXML addElement:plaqueXML];
     }
 
+    NSLog(@"Saved plaques 'in cache':%lu, 'on radar':%lu, 'in sight':%lu, 'on map':%lu",
+          (unsigned long)[self.plaquesInCache count],
+          (unsigned long)[self.plaquesOnRadar count],
+          (unsigned long)[self.plaquesInSight count],
+          (unsigned long)[self.plaquesOnMap count]);
+
     [self.plaquesOnMapLock unlock];
     [self.plaquesInSightLock unlock];
     [self.plaquesOnRadarLock unlock];
@@ -314,6 +320,12 @@
             [self.plaquesOnMap addObject:plaque];
     }
 
+    NSLog(@"Loaded plaques 'in cache':%lu, 'on radar':%lu, 'in sight':%lu, 'on map':%lu",
+          (unsigned long)[self.plaquesInCache count],
+          (unsigned long)[self.plaquesOnRadar count],
+          (unsigned long)[self.plaquesInSight count],
+          (unsigned long)[self.plaquesOnMap count]);
+
     [self.plaquesOnMapLock unlock];
     [self.plaquesInSightLock unlock];
     [self.plaquesOnRadarLock unlock];
@@ -332,12 +344,17 @@
     [document setForest:plaquesXML];
 
     [self.plaquesOnWorkdeskLock lock];
+
     for (Plaque *plaque in self.plaquesOnWorkdesk)
     {
         XMLElement *plaqueXML = [plaque xml];
 
         [plaquesXML addElement:plaqueXML];
     }
+
+    NSLog(@"Loaded plaques 'on workdesk':%lu",
+          (unsigned long)[self.plaquesOnWorkdesk count]);
+
     [self.plaquesOnWorkdeskLock unlock];
 
     NSData *plaquesData = [document xmlData];
@@ -362,6 +379,7 @@
     XMLElement *plaquesXML = [document forest];
 
     [self.plaquesOnWorkdeskLock lock];
+
     for (XMLElement *plaqueXML in [plaquesXML elements])
     {
         Plaque *plaque = [[Plaque alloc] initFromXML:plaqueXML];
@@ -382,6 +400,10 @@
             plaqueInCache.cloneChain = plaque;
         }
     }
+
+    NSLog(@"Loaded plaques 'on workdesk':%lu",
+          (unsigned long)[self.plaquesOnWorkdesk count]);
+
     [self.plaquesOnWorkdeskLock unlock];
 }
 
@@ -1360,7 +1382,7 @@
                 //
                 // Plaque has appeared or changed
                 //
-                Plaque *plaque = nil;
+                Plaque *plaque;
 
                 // Look if the corresponding plaque is already in cache.
                 //
@@ -1373,26 +1395,34 @@
                     // ... then search for it in local database.
                     //
                     plaque = [[Plaque alloc] initWithToken:plaqueToken];
+
+                    // If the plaque exists already in local database ...
+                    //
+                    if (plaque != nil)
+                    {
+                        //
+                        // ... then add it to cache.
+                        //
+                        [self addPlaqueToCache:plaque];
+                    }
                 }
 
-                // If the plaque exists already in local database ...
+                // If the plaque exists in cache (or at least in a local database) ...
                 //
                 if (plaque != nil)
                 {
-                    //
-                    // ... then add it to cache ...
-                    //
-                    [self addPlaqueToCache:plaque];
-
-                    // ... and accordingly to "InSight" or "OnMap" or both.
+                    // ... then add it accordingly to a corresponding list.
                     //
                     switch (paquet.commandCode)
                     {
+                        case PaquetBroadcastForOnRadar:
+                            if ([self plaqueOnRadarByToken:plaqueToken] == nil)
+                                [self addPlaqueToOnRadar:plaque];
+                            break;
+
                         case PaquetBroadcastForInSight:
                             if ([self plaqueInSightByToken:plaqueToken] == nil)
                                 [self addPlaqueToInSight:plaque];
-                            if ([self plaqueOnMapByToken:plaqueToken] == nil)
-                                [self addPlaqueToOnMap:plaque];
                             break;
 
                         case PaquetBroadcastForOnMap:
@@ -1403,26 +1433,24 @@
                         default:
                             break;
                     }
-                }
 
-                // If it does not exist in local database then ...
-                //
-                if (plaque == nil)
-                {
-                    // ... request download ...
+                    // If plaque on server is newer than in local database then flag it for update.
+                    //
+                    if (plaque != nil) {
+                        if ([plaque plaqueRevision] < plaqueRevision)
+                            [missingPlaques addObject:plaqueToken];
+                    }
+                } else {
+                    //
+                    // Otherwise it does not exist in local database.
+                    //
+                    // Request download ...
                     //
                     [missingPlaques addObject:plaqueToken];
 
                     // ... and put it on a list of plaques awaiting download.
                     //
                     [self.plaquesAwaitingDownload addObject:plaqueToken];
-                }
-
-                // If plaque on server is newer than in local database then flag it for update.
-                //
-                if (plaque != nil) {
-                    if ([plaque plaqueRevision] < plaqueRevision)
-                        [missingPlaques addObject:plaqueToken];
                 }
 
                 // If there are already too much candidates for download in a queue ...
