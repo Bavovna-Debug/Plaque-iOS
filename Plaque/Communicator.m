@@ -319,7 +319,7 @@
     // Already connected or trying to establish connection right now?
     // If yes, then quit.
     //
-    if ([self.connectionLock tryLock] == FALSE) {
+    if ([self.connectionLock tryLock] == NO) {
 #ifdef VERBOSE_SOCKET_CONNECTION
         NSLog(@"Already connected or establishing a connection");
 #endif
@@ -721,7 +721,7 @@ didWriteDataWithTag:(long)tag
 
         default:
 #ifdef VERBOSE_DIALOGUE
-            NSLog(@"Unknown dialogue status 0x%08X", verdictCode);
+            NSLog(@"Unknown dialogue status 0x%08X", (unsigned int)verdictCode);
 #endif
             break;
     }

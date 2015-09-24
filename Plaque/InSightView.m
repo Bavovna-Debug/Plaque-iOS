@@ -30,32 +30,34 @@
 
 @interface InSightView () <CLLocationManagerDelegate, PlaquesDelegate>
 
-@property (weak,   nonatomic) MainController *controller;
-@property (strong, nonatomic) UIImagePickerController *cameraController;
-@property (assign, nonatomic) Boolean cameraAuthorized;
-@property (assign, nonatomic) CGFloat cameraScaleFactor;
+@property (weak,   nonatomic) MainController            *controller;
+@property (strong, nonatomic) UIImagePickerController   *cameraController;
+@property (strong, nonatomic) UIButton                  *createPlaqueButton;
+@property (assign, nonatomic) Boolean                   cameraAuthorized;
+@property (assign, nonatomic) CGFloat                   cameraScaleFactor;
 
-@property (strong, nonatomic) NSMutableArray *inSightPlaques;
-@property (strong, nonatomic) NSLock *recalculateLock;
-@property (strong, nonatomic) NSLock *refreshLock;
-@property (strong, nonatomic) NSLock *tiltLock;
-@property (strong, nonatomic) NSLock *turnLock;
+@property (strong, nonatomic) NSMutableArray            *inSightPlaques;
+@property (strong, nonatomic) NSLock                    *recalculateLock;
+@property (strong, nonatomic) NSLock                    *refreshLock;
+@property (strong, nonatomic) NSLock                    *tiltLock;
+@property (strong, nonatomic) NSLock                    *turnLock;
 
-@property (strong, nonatomic) CLLocationManager *locationManager;
-@property (strong, nonatomic) CLLocation *location;
-@property (strong, nonatomic) CLHeading *heading;
+@property (strong, nonatomic) CLLocationManager         *locationManager;
+@property (strong, nonatomic) CLLocation                *location;
+@property (strong, nonatomic) CLHeading                 *heading;
 
-@property (strong, nonatomic) CMMotionManager *motionManager;
-@property (assign, nonatomic) CGFloat tilt;
-@property (assign, nonatomic) CGFloat turn;
+@property (strong, nonatomic) CMMotionManager           *motionManager;
+@property (assign, nonatomic) CGFloat                   tilt;
+@property (assign, nonatomic) CGFloat                   turn;
 
-@property (strong, nonatomic) NSTimer *captureTimer;
+@property (strong, nonatomic) NSTimer                   *captureTimer;
 
 @end
 
 @implementation InSightView
 {
-    BOOL running;
+    Boolean initialized;
+    Boolean running;
     CGFloat tiltFactor;
     CGFloat tiltOffset;
 }
@@ -78,6 +80,17 @@
     [self setTranslatesAutoresizingMaskIntoConstraints:NO];
     [self setBackgroundColor:[UIColor colorWithWhite:0.2f alpha:1.0f]];
 
+    CGRect createPlaqueButtonRect = CGRectMake(0.0f, 0.0f, 48.0f, 48.0f);
+    UIButton *createPlaqueButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [createPlaqueButton setFrame:createPlaqueButtonRect];
+    [createPlaqueButton setTitle:@"(+)"
+                        forState:UIControlStateNormal];
+    [createPlaqueButton addTarget:controller
+                           action:@selector(createNewPlaquePressed)
+                 forControlEvents:UIControlEventTouchUpInside];
+    [self addSubview:createPlaqueButton];
+    self.createPlaqueButton = createPlaqueButton;
+
     [self checkCameraAuthorization];
 
     CLLocationManager *locationManager = [[CLLocationManager alloc] init];
@@ -97,11 +110,17 @@
 {
     [super didMoveToSuperview];
 
-    if (self.superview != nil) {
-        self.container = [CALayer layer];
-        [self.container setBackgroundColor:[[UIColor clearColor] CGColor]];
+    if (self.superview != nil)
+    {
+        if (initialized == NO)
+        {
+            self.container = [CALayer layer];
+            [self.container setBackgroundColor:[[UIColor clearColor] CGColor]];
 
-        [self.layer addSublayer:self.container];
+            [self.layer addSublayer:self.container];
+
+            initialized = YES;
+        }
 
         [self resume];
     }
@@ -655,10 +674,10 @@
                 self.cameraAuthorized = NO;
                 dispatch_async(dispatch_get_main_queue(), ^
                 {
-                    [[[UIAlertView alloc] initWithTitle:@"AVCam!"
-                                                message:@"AVCam doesn't have permission to use Camera, please change privacy settings"
+                    [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"AVERROR_TITLE", nil)
+                                                message:NSLocalizedString(@"AVERROR_MESSAGE", nil)
                                                delegate:self
-                                      cancelButtonTitle:@"OK"
+                                      cancelButtonTitle:NSLocalizedString(@"OK_BUTTON", nil)
                                       otherButtonTitles:nil] show];
                 });
             }

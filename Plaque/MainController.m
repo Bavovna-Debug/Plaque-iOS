@@ -197,6 +197,7 @@
     [self.lowLevelControlView createNewPlaqueMode];
 }
 
+
 - (void)createNewPlaqueCancelled
 {
 //    [self.informationalView setHidden:NO];

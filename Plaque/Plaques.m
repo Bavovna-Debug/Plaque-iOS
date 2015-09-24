@@ -35,11 +35,11 @@
 #define SaveToDatabaseInterval              3.0f
 #define WorkdeskUploadInterval              2.0f
 
-#define MaxPlaquesPerDownloadRequest        100
+#define MaxPlaquesPerDownloadRequest        20
 
 #ifdef DEBUG
-#define PlaquesCacheKey                     @"PlaquesCache4"
-#define PlaquesOnWorkdeskKey                @"PlaquesOnWorkdesk6"
+#define PlaquesCacheKey                     @"PlaquesCache6"
+#define PlaquesOnWorkdeskKey                @"PlaquesOnWorkdesk8"
 #else
 #define PlaquesCacheKey                     @"PlaquesCache"
 #define PlaquesOnWorkdeskKey                @"PlaquesOnWorkdesk"
@@ -80,9 +80,7 @@
 @implementation Plaques
 {
     Communicator *communicator;
-    Paquet *broadcastOnRadarPaquet;
-    Paquet *broadcastInSightPaquet;
-    Paquet *broadcastOnMapPaquet;
+    Paquet *broadcastPaquet;
 
     BOOL inBackground;
 }
@@ -140,12 +138,12 @@
     [self.locationManager setHeadingFilter:1.0f];
     [self.locationManager setDelegate:self];
 
-    if ([self.locationManager respondsToSelector:@selector(requestAlwaysAuthorization)]) {
-        [self.locationManager requestAlwaysAuthorization];
-    }
-
     if ([self.locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)]) {
         [self.locationManager requestWhenInUseAuthorization];
+    }
+
+    if ([self.locationManager respondsToSelector:@selector(requestAlwaysAuthorization)]) {
+        [self.locationManager requestAlwaysAuthorization];
     }
 }
 
@@ -415,14 +413,11 @@
     CLHeading *deviceHeading = [self.locationManager heading];
     CLLocation *plaqueLocation = [deviceLocation locationWithShiftFor:DistanceToNewPlaqueOnCreation
                                                             direction:[deviceHeading trueHeading]];
+    NSString *inscription = NSLocalizedString(@"DEFAULT_INSCRIPTION", nil);
 
     Plaque *newPlaque = [[Plaque alloc] initWithLocation:plaqueLocation
                                                direction:floorf(oppositeDirection([deviceHeading trueHeading]))
-                                             inscription:@"Hier könnte Ihre Werbung sein"];
-
-    [self addPlaqueToOnWorkdesk:newPlaque];
-
-    self.plaqueUnderEdit = newPlaque;
+                                             inscription:inscription];
 
     return newPlaque;
 }
@@ -448,10 +443,30 @@
 
         [self.plaquesOnWorkdeskLock lock];
 
-        // If this plaque is not on workdesk yet then clone it and put the clone on workdesk.
+        // Is this plaque already on workdesk?
         //
-        if ([self.plaquesOnWorkdesk containsObject:plaqueUnderEdit] == NO) {
-            plaqueOnWorkdesk = [plaqueUnderEdit clone];
+        if ([self.plaquesOnWorkdesk containsObject:plaqueUnderEdit] == YES) {
+            //
+            // If yes, then just take it.
+            //
+            plaqueOnWorkdesk = plaqueUnderEdit;
+        } else {
+            //
+            // This plaque is not on workdesk.
+
+            // Is this a new plaque?
+            //
+            if ([newPlaqueUnderEdit plaqueToken] == nil) {
+                //
+                // This plaque is new - just put it on workdesk.
+                //
+                plaqueOnWorkdesk = plaqueUnderEdit;
+            } else {
+                //
+                // This plaque is not new - clone it and put the clone on workdesk.
+                //
+                plaqueOnWorkdesk = [plaqueUnderEdit clone];
+            }
             [self.plaquesOnWorkdesk addObject:plaqueOnWorkdesk];
 
             // Notify delegate a cloned plaque did appear on workdesk and must be shown.
@@ -459,11 +474,6 @@
             id<PlaquesDelegate> delegate = self.plaquesDelegate;
             if ((delegate != nil) && [delegate respondsToSelector:@selector(plaqueDidAppearOnWorkdesk:)])
                 [delegate plaqueDidAppearOnWorkdesk:plaqueOnWorkdesk];
-        } else {
-            //
-            // If selected plaque is the one that is on workdesk then take it.
-            //
-            plaqueOnWorkdesk = plaqueUnderEdit;
         }
 
         [self.plaquesOnWorkdeskLock unlock];
@@ -1055,11 +1065,11 @@
 - (void)downloadPlaque:(NSUUID *)plaqueToken
 {
     [self downloadPlaques:[NSMutableArray arrayWithObject:plaqueToken]
-              destination:InSight];
+     broadcastDestination:BroadcastDestinationInSight];
 }
 
 - (void)downloadPlaques:(NSMutableArray *)missingPlaques
-            destination:(PlaqueDestination)destination
+   broadcastDestination:(UInt32)broadcastDestination
 {
     NSString *message = [NSString stringWithFormat:NSLocalizedString(@"STATUS_BAR_DOWNLOAD_PLAQUES", nil),
                          [missingPlaques count]];
@@ -1067,17 +1077,17 @@
 
     UInt32 paquetCommand;
 
-    switch (destination)
+    switch (broadcastDestination)
     {
-        case OnRadar:
+        case BroadcastDestinationOnRadar:
             paquetCommand = PaquetDownloadPlaquesOnRadar;
             break;
 
-        case InSight:
+        case BroadcastDestinationInSight:
             paquetCommand = PaquetDownloadPlaquesInSight;
             break;
 
-        case OnMap:
+        case BroadcastDestinationOnMap:
             paquetCommand = PaquetDownloadPlaquesOnMap;
             break;
 
@@ -1217,63 +1227,33 @@
 
 #pragma mark - Broadcast
 
-- (Paquet *)generateBroadcast:(UInt32)commandCode
+- (void)sendBroadcastRequest
 {
-    Paquet *paquet = [[Paquet alloc] initWithCommand:commandCode];
+    if (broadcastPaquet != nil)
+        [broadcastPaquet setCancelWhenPossible:YES];
 
-    UInt32 radarRevision;
+    broadcastPaquet = [[Paquet alloc] initWithCommand:PaquetBroadcast];
 
-    switch (commandCode)
-    {
-        case PaquetBroadcastForOnRadar:
-            radarRevision = self.onRadarRevision;
 #ifdef VERBOSE_BROADCAST
-            NSLog(@"Send broadcast request for 'on radar' with revision %u", radarRevision);
+    NSLog(@"Send broadcast request for with revision %u %u %u",
+          (unsigned int)self.onRadarRevision,
+          (unsigned int)self.inSightRevision,
+          (unsigned int)self.onMapRevision);
 #endif
-            break;
 
-        case PaquetBroadcastForInSight:
-            radarRevision = self.inSightRevision;
-#ifdef VERBOSE_BROADCAST
-            NSLog(@"Send broadcast request for 'in sight' with revision %u", radarRevision);
-#endif
-            break;
+    [broadcastPaquet putUInt32:self.onRadarRevision];
+    [broadcastPaquet putUInt32:self.inSightRevision];
+    [broadcastPaquet putUInt32:self.onMapRevision];
 
-        case PaquetBroadcastForOnMap:
-            radarRevision = self.onMapRevision;
-#ifdef VERBOSE_BROADCAST
-            NSLog(@"Send broadcast request for 'on map' with revision %u", radarRevision);
-#endif
-            break;
-
-        default:
-            return nil;
-    }
-
-    [paquet putUInt32:radarRevision];
-
-    [paquet setDelegate:self];
-    [paquet send];
-
-    return paquet;
+    [broadcastPaquet setDelegate:self];
+    [broadcastPaquet send];
 }
 
 #pragma mark - Communicator delegate
 
 - (void)communicatorDidEstablishDialogue
 {
-    if (broadcastOnRadarPaquet != nil)
-        [broadcastOnRadarPaquet setCancelWhenPossible:YES];
-
-    if (broadcastInSightPaquet != nil)
-        [broadcastInSightPaquet setCancelWhenPossible:YES];
-
-    if (broadcastOnMapPaquet != nil)
-        [broadcastOnMapPaquet setCancelWhenPossible:YES];
-
-    broadcastOnRadarPaquet = [self generateBroadcast:PaquetBroadcastForOnRadar];
-    broadcastInSightPaquet = [self generateBroadcast:PaquetBroadcastForInSight];
-    broadcastOnMapPaquet = [self generateBroadcast:PaquetBroadcastForOnMap];
+    [self sendBroadcastRequest];
 }
 
 #pragma mark - Paquet delegate
@@ -1282,37 +1262,24 @@
 {
     switch (paquet.commandCode)
     {
-        case PaquetBroadcastForOnRadar:
-            [self processRadar:paquet
-                   destination:OnRadar];
-            [self generateBroadcast:PaquetBroadcastForOnRadar];
-            break;
-
-        case PaquetBroadcastForInSight:
-            [self processRadar:paquet
-                   destination:InSight];
-            [self generateBroadcast:PaquetBroadcastForInSight];
-            break;
-
-        case PaquetBroadcastForOnMap:
-            [self processRadar:paquet
-                   destination:OnMap];
-            [self generateBroadcast:PaquetBroadcastForOnMap];
+        case PaquetBroadcast:
+            [self processBroadcast:paquet];
+            [self sendBroadcastRequest];
             break;
 
         case PaquetDownloadPlaquesOnRadar:
-            [self processPlaques:paquet
-                     destination:OnRadar];
+            [self processDownloadedPlaques:paquet
+                               destination:OnRadar];
             break;
 
         case PaquetDownloadPlaquesInSight:
-            [self processPlaques:paquet
-                     destination:InSight];
+            [self processDownloadedPlaques:paquet
+                               destination:InSight];
             break;
 
         case PaquetDownloadPlaquesOnMap:
-            [self processPlaques:paquet
-                     destination:OnMap];
+            [self processDownloadedPlaques:paquet
+                               destination:OnMap];
             break;
 
         default:
@@ -1322,27 +1289,27 @@
 
 #pragma mark - Process completed paquets
 
-- (void)processRadar:(Paquet *)paquet
-         destination:(PlaqueDestination)destination
+- (void)processBroadcast:(Paquet *)paquet
 {
     @try
     {
         [self.paquetHandlerLock lock];
 
+        UInt32 broadcastDestination = [paquet getUInt32];
         UInt32 radarRevision = [paquet getUInt32];
         UInt32 numberOfPlaques = [paquet getUInt32];
 
-        switch (paquet.commandCode)
+        switch (broadcastDestination)
         {
-            case PaquetBroadcastForOnRadar:
+            case BroadcastDestinationOnRadar:
                 self.onRadarRevision = radarRevision;
                 break;
 
-            case PaquetBroadcastForInSight:
+            case BroadcastDestinationInSight:
                 self.inSightRevision = radarRevision;
                 break;
 
-            case PaquetBroadcastForOnMap:
+            case BroadcastDestinationOnMap:
                 self.onMapRevision = radarRevision;
                 break;
 
@@ -1354,7 +1321,7 @@
         NSLog(@"Received %d plaques for revision %d (command=0x%08X)",
               (unsigned int)numberOfPlaques,
               (unsigned int)radarRevision,
-              paquet.commandCode);
+              (unsigned int)paquet.commandCode);
 #endif
 
         if (numberOfPlaques > 0)
@@ -1377,7 +1344,7 @@
 #ifdef VERBOSE_RADAR_DETAILS
                 NSLog(@"Plaque %@ revision %d did appear",
                       [plaqueToken UUIDString],
-                      plaqueRevision);
+                      (unsigned int)plaqueRevision);
 #endif
                 //
                 // Plaque has appeared or changed
@@ -1413,19 +1380,19 @@
                 {
                     // ... then add it accordingly to a corresponding list.
                     //
-                    switch (paquet.commandCode)
+                    switch (broadcastDestination)
                     {
-                        case PaquetBroadcastForOnRadar:
+                        case BroadcastDestinationOnRadar:
                             if ([self plaqueOnRadarByToken:plaqueToken] == nil)
                                 [self addPlaqueToOnRadar:plaque];
                             break;
 
-                        case PaquetBroadcastForInSight:
+                        case BroadcastDestinationInSight:
                             if ([self plaqueInSightByToken:plaqueToken] == nil)
                                 [self addPlaqueToInSight:plaque];
                             break;
 
-                        case PaquetBroadcastForOnMap:
+                        case BroadcastDestinationOnMap:
                             if ([self plaqueOnMapByToken:plaqueToken] == nil)
                                 [self addPlaqueToOnMap:plaque];
                             break;
@@ -1444,13 +1411,30 @@
                     //
                     // Otherwise it does not exist in local database.
                     //
-                    // Request download ...
+                    // Check whether this plaque is already on a list of plaques awaiting download.
                     //
-                    [missingPlaques addObject:plaqueToken];
+                    BOOL alreadyAwaitingDownload = NO;
+                    for (NSUUID *awaitingPlaqueToken in self.plaquesAwaitingDownload)
+                    {
+                        if ([awaitingPlaqueToken isEqual:plaqueToken] == YES)
+                        {
+                            alreadyAwaitingDownload = YES;
+                            break;
+                        }
+                    }
 
-                    // ... and put it on a list of plaques awaiting download.
+                    // If this plaque is not yet on a list of plaques awaiting download ...
                     //
-                    [self.plaquesAwaitingDownload addObject:plaqueToken];
+                    if (alreadyAwaitingDownload == NO)
+                    {
+                        // ... then request download ...
+                        //
+                        [missingPlaques addObject:plaqueToken];
+
+                        // ... and put it on a list of plaques awaiting download.
+                        //
+                        [self.plaquesAwaitingDownload addObject:plaqueToken];
+                    }
                 }
 
                 // If there are already too much candidates for download in a queue ...
@@ -1460,30 +1444,40 @@
                     // ... then send a download request.
                     //
                     [self downloadPlaques:missingPlaques
-                              destination:destination];
+                     broadcastDestination:broadcastDestination];
                     [missingPlaques removeAllObjects];
                 }
             } else {
-#ifdef VERBOSE_RADAR_DETAILS
-                NSLog(@"Plaque %@ revision %d did disappear",
-                      [plaqueToken UUIDString],
-                      plaqueRevision);
-#endif
                 //
                 // Plaque has disappeared.
                 //
-                switch (paquet.commandCode)
+                switch (broadcastDestination)
                 {
-                    case PaquetBroadcastForOnRadar:
+                    case BroadcastDestinationOnRadar:
                         [self removePlaqueFromOnRadar:plaqueToken];
+#ifdef VERBOSE_RADAR_DETAILS
+                        NSLog(@"Plaque %@ revision %u did disappear 'on radar'",
+                              [plaqueToken UUIDString],
+                              (unsigned int)plaqueRevision);
+#endif
                         break;
 
-                    case PaquetBroadcastForInSight:
+                    case BroadcastDestinationInSight:
                         [self removePlaqueFromInSight:plaqueToken];
+#ifdef VERBOSE_RADAR_DETAILS
+                        NSLog(@"Plaque %@ revision %u did disappear 'in sight'",
+                              [plaqueToken UUIDString],
+                              (unsigned int)plaqueRevision);
+#endif
                         break;
                         
-                    case PaquetBroadcastForOnMap:
+                    case BroadcastDestinationOnMap:
                         [self removePlaqueFromOnMap:plaqueToken];
+#ifdef VERBOSE_RADAR_DETAILS
+                        NSLog(@"Plaque %@ revision %u did disappear 'on map'",
+                              [plaqueToken UUIDString],
+                              (unsigned int)plaqueRevision);
+#endif
                         break;
 
                     default:
@@ -1499,7 +1493,7 @@
             // ... then send download request.
             //
             [self downloadPlaques:missingPlaques
-                      destination:destination];
+             broadcastDestination:broadcastDestination];
             [missingPlaques removeAllObjects];
         }
     }
@@ -1513,8 +1507,8 @@
     }
 }
 
-- (void)processPlaques:(Paquet *)paquet
-           destination:(PlaqueDestination)destination
+- (void)processDownloadedPlaques:(Paquet *)paquet
+                     destination:(PlaqueDestination)destination
 {
     @try
     {

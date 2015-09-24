@@ -267,10 +267,11 @@
                 NSLog(@"Notifications token accepted");
 #endif
                 NSData *notificationsToken = [paquet userInfo];
+
                 [self setNotificationsToken:notificationsToken];
             } else {
 #ifdef VERBOSE
-                NSLog(@"Notifications token declined: 0x%08X", status);
+                NSLog(@"Notifications token declined: 0x%08X", (unsigned int)status);
 #endif
             }
             break;

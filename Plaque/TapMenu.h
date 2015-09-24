@@ -38,9 +38,11 @@
 
 @required
 
+/*
 - (void)mainButtonPressed;
 
 - (void)exitButtonPressed;
+*/
 
 - (void)tapMenuItemPressed:(TapMenuCommand)command;
 

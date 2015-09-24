@@ -1,0 +1,55 @@
+"YOUR_PLAQUE_WAS_DESTROYED" = "Dein Plaque '%2$@' wurde aufgehoben durch %1$@!";
+
+"GPSERROR_TITLE"                             = "GPS";
+"GPSERROR_MESSAGE"                           = "Ohne Zugriff auf GPS kann diese App die Inhalte der vpCloud in 3D nicht repräsentieren. Sie können Zugriff auf GPS für diese App in den Systemeinstellungen Ihres Geräts aktivieren.";
+
+"AVERROR_TITLE"                             = "Kamera";
+"AVERROR_MESSAGE"                           = "Ohne Zugriff auf Kamera kann diese App die Inhalte der vpCloud in 3D nicht repräsentieren. Sie können Zugriff auf Kamera für diese App in den Systemeinstellungen Ihres Geräts aktivieren.";
+
+"OK_BUTTON"                                 = "OK";
+
+"DO_YOU_WANT_TO_CREATE_PROFILE_TITLE"       = "Profil";
+"DO_YOU_WANT_TO_CREATE_PROFILE_MESSAGE"     = "Sie haben noch keinen Profil in vpCloud angelegt. Möchten Sie sich jetzt in vpCloud registrieren?";
+"DO_YOU_WANT_TO_CREATE_PROFILE_NOT_YET"     = "Noch nicht";
+"DO_YOU_WANT_TO_CREATE_PROFILE_YES_BUTTON"  = "Registrieren";
+
+"PROFILE_FORM_CANCEL_BUTTON"                = "Abbrechen";
+"PROFILE_FORM_SUBMIT_BUTTON"                = "Übernehmen";
+
+"PROFILE_FORM_PROFILE_NAME_LABEL"           = "Profilname:";
+"PROFILE_FORM_PROFILE_NAME_HELP"            = "Profilname muss mindestens 4 und nicht mehr als 20 Zeichen lang sein und kann Buchstaben, Ziffern und einigen Sonderzeichen enthalten.";
+"PROFILE_FORM_PROFILE_NAME_VALIDATING_MESSAGE"          = "Prüfen %@' im vpCloud";
+"PROFILE_FORM_PROFILE_NAME_IS_AVAILABLE_MESSAGE"        = "Name '%@' ist frei";
+"PROFILE_FORM_PROFILE_NAME_ALREADY_IN_USE_MESSAGE"      = "Name '%@' ist schon vergeben";
+"PROFILE_FORM_PROFILE_NAME_CONSTRAINT_MESSAGE"          = "Name '%@' entspricht nicht den Regeln";
+"PROFILE_FORM_PROFILE_NAME_VALIDATION_ERROR_MESSAGE"    = "Sie sind nicht mit vpCloud verbunden";
+
+"PROFILE_FORM_USER_NAME_LABEL"              = "Loginname:";
+"PROFILE_FORM_USER_NAME_HELP"               = "";
+
+"PROFILE_FORM_PASSWORD_LABEL"               = "Passwort:";
+"PROFILE_FORM_PASSWORD_HELP"                = "";
+
+"DEFAULT_INSCRIPTION"                       = "Hier könnte Ihre Werbung sein";
+
+"EDIT_MODE_COORDINATE_BUTTON"               = "Ort";
+"EDIT_MODE_ALTITUDE_BUTTON"                 = "Höhe";
+"EDIT_MODE_DIRECTION_BUTTON"                = "Richtung";
+"EDIT_MODE_TILT_BUTTON"                     = "Neigung";
+"EDIT_MODE_SIZE_BUTTON"                     = "Größe";
+"EDIT_MODE_BACKGROUND_BUTTON"               = "Hintergrund";
+"EDIT_MODE_FOREGROUND_BUTTON"               = "Textfarbe";
+"EDIT_MODE_FONT_BUTTON"                     = "Schriftgröße";
+"EDIT_MODE_INSCRIPTION_BUTTON"              = "Aufschrift";
+
+"STATUS_BAR_VPCLOUD_CANNOT_CONNECT"         = "Kann nicht mit vpCloud verbinden";
+"STATUS_BAR_VPCLOUD_SCHEDULE_RECONNECT"     = "Versuche in %f Sekunden Verbindung mit vpCloud zu erstellen";
+"STATUS_BAR_VPCLOUD_CONNECTION_ESTABLISHED" = "Verbunden mit vpCloud";
+"STATUS_BAR_VPCLOUD_LOST_CONNECTION"        = "Verbindung mit vpCloud verloren";
+
+"STATUS_BAR_PROCESS_RADAR"                  = "Entdeckt %u Plaque(s) auf dem Radar";
+"STATUS_BAR_PROCESS_PLAQUES"                = "Synchronisieren mit vpCloud";
+"STATUS_BAR_DOWNLOAD_PLAQUES"               = "Synchronisiere %lu Plaque(s) mit vpCloud";
+
+"STATUS_BAR_NEW_PLAQUE_SYNCRONIZED"         = "Neuer Plaque wurde mit vpCloud synchronisiert";
+"STATUS_BAR_PLAQUE_CHANGES_SYNCRONIZED"     = "Plaque(s) wurden mit vpCloud synchronisiert";

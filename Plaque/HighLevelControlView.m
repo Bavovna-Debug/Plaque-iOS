@@ -118,15 +118,6 @@
 
 #pragma mark - TapMenu delegate
 
-- (void)mainButtonPressed
-{
-    //[self.controller createNewPlaquePressed];
-}
-
-- (void)exitButtonPressed
-{
-}
-
 - (void)tapMenuItemPressed:(TapMenuCommand)command
 {
     switch (command)

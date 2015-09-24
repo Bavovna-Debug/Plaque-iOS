@@ -24,7 +24,7 @@
     self = [super init];
     if (self == nil)
         return nil;
-
+    
     [[Plaques sharedPlaques] setCaptureDelegate:self];
     [[Plaques sharedPlaques] setEditDelegate:self];
 
