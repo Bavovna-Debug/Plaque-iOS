@@ -10,6 +10,7 @@
 @interface EditModeColorSubview ()
 
 @property (weak, nonatomic) Plaque *plaque;
+@property (weak, nonatomic) UIButton *transparentButton;
 
 @end
 
@@ -39,7 +40,7 @@
     for (NSUInteger i = 0; i < 20; i++)
     {
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-        [button setBackgroundColor:[UIColor redColor]];
+        [button setBackgroundColor:[UIColor blackColor]];
         [buttons addObject:button];
     }
 
@@ -59,11 +60,11 @@
                              [UIColor colorWithRed:0.502f green:0.000f blue:0.502f alpha:1.0f],
                              [UIColor colorWithRed:0.000f green:0.000f blue:1.000f alpha:1.0f],
                              [UIColor colorWithRed:1.000f green:0.435f blue:0.812f alpha:1.0f],
-                             [UIColor colorWithRed:0.000f green:0.000f blue:0.000f alpha:1.0f],
-                             [UIColor colorWithRed:0.298f green:0.298f blue:0.298f alpha:1.0f],
-                             [UIColor colorWithRed:0.502f green:0.502f blue:0.502f alpha:1.0f],
-                             [UIColor colorWithRed:0.800f green:0.800f blue:0.800f alpha:1.0f],
                              [UIColor colorWithRed:1.000f green:1.000f blue:1.000f alpha:1.0f],
+                             [UIColor colorWithRed:0.800f green:0.800f blue:0.800f alpha:1.0f],
+                             [UIColor colorWithRed:0.502f green:0.502f blue:0.502f alpha:1.0f],
+                             [UIColor colorWithRed:0.298f green:0.298f blue:0.298f alpha:1.0f],
+                             [UIColor colorWithRed:0.000f green:0.000f blue:0.000f alpha:1.0f],
                              nil];
 
     CGRect zeroButtonFrame = CGRectMake(0.0f, 0.0f, CGRectGetWidth(self.bounds) / 5, CGRectGetHeight(self.bounds) / 4);
@@ -103,6 +104,12 @@
 
         buttonColorIndex++;
     }
+
+    if (self.editModeColor == EditModeColorBackground)
+    {
+        self.transparentButton = (UIButton *)[buttons lastObject];
+        [self.transparentButton setTitle:@"∅" forState:UIControlStateNormal];
+    }
 }
 
 - (void)colorPressed:(id)sender
@@ -113,7 +120,11 @@
     switch (self.editModeColor)
     {
         case EditModeColorBackground:
-            [self.plaque setBackgroundColor:color];
+            if (button == self.transparentButton) {
+                [self.plaque setBackgroundColor:[UIColor clearColor]];
+            } else {
+                [self.plaque setBackgroundColor:color];
+            }
             break;
 
         case EditModeColorForeground:

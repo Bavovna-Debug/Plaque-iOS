@@ -30,7 +30,7 @@
 #define NotificationsTokenKey           @"NotificationsToken"
 #endif
 
-@interface Authentificator () <PaquetDelegate>
+@interface Authentificator () <PaquetSenderDelegate>
 
 @end
 
@@ -184,7 +184,7 @@
     {
         Paquet *paquet = [[Paquet alloc] initWithCommand:PaquetNotificationsToken];
 
-        [paquet setDelegate:self];
+        [paquet setSenderDelegate:self];
         [paquet setUserInfo:notificationsToken];
 
         [paquet putData:notificationsToken];

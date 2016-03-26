@@ -48,7 +48,7 @@
 #define PlaquesXMLTarget                    @"vp"
 #define PlaquesXMLVersion                   @"1.0"
 
-@interface Plaques () <CLLocationManagerDelegate, ConnectionDelegate, PaquetDelegate>
+@interface Plaques () <CLLocationManagerDelegate, ConnectionDelegate, PaquetSenderDelegate>
 
 @property (strong, nonatomic, readwrite) NSLock          *paquetHandlerLock;
 @property (strong, nonatomic, readwrite) NSMutableArray  *plaquesInCache;
@@ -1097,7 +1097,7 @@
 
     Paquet *paquet = [[Paquet alloc] initWithCommand:paquetCommand];
 
-    [paquet setDelegate:self];
+    [paquet setSenderDelegate:self];
 
     [paquet putUInt32:(int)[missingPlaques count]];
 
@@ -1152,7 +1152,7 @@
 
     Paquet *paquet = [[Paquet alloc] initWithCommand:paquetCommand];
 
-    [paquet setDelegate:self];
+    [paquet setSenderDelegate:self];
 
     CLLocationCoordinate2D coordinate = location.coordinate;
     CLLocationDistance altitude = location.altitude;
@@ -1245,7 +1245,7 @@
     [broadcastPaquet putUInt32:self.inSightRevision];
     [broadcastPaquet putUInt32:self.onMapRevision];
 
-    [broadcastPaquet setDelegate:self];
+    [broadcastPaquet setSenderDelegate:self];
     [broadcastPaquet send];
 }
 
@@ -1263,23 +1263,27 @@
     switch (paquet.commandCode)
     {
         case PaquetBroadcast:
-            [self processBroadcast:paquet];
+            if ([paquet rejectedByCloud] == NO)
+                [self processBroadcast:paquet];
             [self sendBroadcastRequest];
             break;
 
         case PaquetDownloadPlaquesOnRadar:
-            [self processDownloadedPlaques:paquet
-                               destination:OnRadar];
+            if ([paquet rejectedByCloud] == NO)
+                [self processDownloadedPlaques:paquet
+                                   destination:OnRadar];
             break;
 
         case PaquetDownloadPlaquesInSight:
-            [self processDownloadedPlaques:paquet
-                               destination:InSight];
+            if ([paquet rejectedByCloud] == NO)
+                [self processDownloadedPlaques:paquet
+                                   destination:InSight];
             break;
 
         case PaquetDownloadPlaquesOnMap:
-            [self processDownloadedPlaques:paquet
-                               destination:OnMap];
+            if ([paquet rejectedByCloud] == NO)
+                [self processDownloadedPlaques:paquet
+                                   destination:OnMap];
             break;
 
         default:
@@ -1520,6 +1524,13 @@
         {
             // Extract all plaque properties out of the paquet.
             //
+            UInt32 strobe = [paquet getUInt32];
+            if (strobe != PaquetPlaqueStrobe) {
+                @throw [NSException exceptionWithName:@"Plaque"
+                                               reason:@"No strobe"
+                                             userInfo:nil];
+            }
+
             NSUUID *plaqueToken = [paquet getToken];
             UInt32 revision = [paquet getUInt32];
             NSUUID *profileToken = [paquet getToken];

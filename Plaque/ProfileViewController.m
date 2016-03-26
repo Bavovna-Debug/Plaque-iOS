@@ -13,7 +13,7 @@
 
 #define ProfileNameValidateInterval 2.0f
 
-@interface ProfileViewController () <UITableViewDataSource, UITableViewDelegate, PaquetDelegate>
+@interface ProfileViewController () <UITableViewDataSource, UITableViewDelegate, PaquetSenderDelegate>
 
 @property (strong, nonatomic) UITableView               *tableView;
 @property (strong, nonatomic) NSMutableArray            *cells;
@@ -486,7 +486,7 @@
 
         Paquet *paquet = [[Paquet alloc] initWithCommand:PaquetValidateProfileName];
 
-        [paquet setDelegate:self];
+        [paquet setSenderDelegate:self];
 
         [paquet putFixedString:currentProfileName
                         length:BonjourProfileNameLength];
@@ -545,17 +545,24 @@
 
 - (void)createProfile
 {
-    NSString *profileName = [self.profileNameField text];
-    NSString *userFullName = [self.userFullNameField text];
-    NSString *passwordMD5 = [self.passwordField text];
-    if ([passwordMD5 length] != 0)
+    NSString *profileName;
+    NSString *userFullName;
+    NSString *passwordMD5;
+    NSString *emailAddress;
+
+    profileName = [self.profileNameField text];
+    userFullName = [self.userFullNameField text];
+    emailAddress = @"";//[self.passwordField text];
+
+    if ([[self.passwordField text] length] == 0)
+        passwordMD5 = @"";
+    else
         passwordMD5 = [passwordMD5 MD5];
-    NSString *emailAddress = @"";//[self.passwordField text];
 
     Paquet *paquet = [[Paquet alloc] initWithCommand:PaquetCreateProfile];
     self.paquet = paquet;
 
-    [paquet setDelegate:self];
+    [paquet setSenderDelegate:self];
 
     [paquet putFixedString:profileName
                     length:BonjourProfileNameLength];

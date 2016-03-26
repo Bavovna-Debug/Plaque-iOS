@@ -17,6 +17,9 @@ typedef enum {
     PlaqueDimension4D
 } PlaqueDimension;
 
+#define PLAQUE_BORDER_WIDTH     2.0f
+#define PLAQUE_CORNER_RADIUS    5.0f
+
 @interface Plaque : NSObject
 
 @property (assign, nonatomic) UInt64                  rowId;

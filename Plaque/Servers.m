@@ -27,7 +27,7 @@
 
 - (UInt32)serverPort
 {
-    return 12004;
+    return 12001;
 }
 
 - (void)nextServer

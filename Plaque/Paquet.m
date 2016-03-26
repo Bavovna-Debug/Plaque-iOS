@@ -20,19 +20,25 @@
     NSUInteger payloadOffset;
 }
 
-- (id)initWithCommand:(UInt32)commandCode;
+- (id)initWithCommand:(UInt32)commandCode
 {
     self = [super init];
     if (self == nil)
         return nil;
 
     self.commandCode = commandCode;
+    self.commandSubcode = 0;
     self.payload = [NSMutableData data];
     self.inTheAir = NO;
 
     payloadOffset = 0;
 
     return self;
+}
+
+- (Boolean)rejectedByCloud
+{
+    return (self.commandSubcode == PaquetRejectBusy) || (self.commandSubcode == PaquetRejectError);
 }
 
 - (void)send
@@ -45,10 +51,10 @@
     self.payload = payload;
     payloadOffset = 0;
 
-    id<PaquetDelegate> delegate = self.delegate;
-    if (delegate != nil) {
+    id<PaquetSenderDelegate> senderDelegate = self.senderDelegate;
+    if (senderDelegate != nil) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            [delegate paquetComplete:self];
+            [senderDelegate paquetComplete:self];
         });
     }
 }

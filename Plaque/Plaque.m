@@ -27,7 +27,7 @@
 
 #define ModificationsUploadInterval 3.0f
 
-@interface Plaque () <PaquetDelegate>
+@interface Plaque () <PaquetSenderDelegate>
 
 @property (weak, nonatomic) Paquet *uploadPaquet;
 @property (weak, nonatomic) Paquet *locationPaquet;
@@ -248,6 +248,7 @@
         self.directed = NO;
     } else {
         self.directed = YES;
+
         @try {
             double direction;
 
@@ -271,6 +272,7 @@
         self.tilted = NO;
     } else {
         self.tilted = YES;
+
         @try {
             double tilt;
 
@@ -499,20 +501,22 @@
 
     self.rowId = [database executeINSERT:query ignoreConstraints:YES];
 
-    if (self.directed == NO) {
+    if (self.directed == NO)
+    {
         query = [NSString stringWithFormat:@"UPDATE plaques SET direction = NULL WHERE rowid = %llu",
                  self.rowId];
         [database executeUPDATE:query ignoreConstraints:YES];
     }
 
-    if (self.tilted == NO) {
+    if (self.tilted == NO)
+    {
         query = [NSString stringWithFormat:@"UPDATE plaques SET tilt = NULL WHERE rowid = %llu",
                  self.rowId];
         [database executeUPDATE:query ignoreConstraints:YES];
     }
 
-    if (self.rowId != 0) {
-        //
+    if (self.rowId != 0)
+    {
         // Should be set to 'yes' only if record been successfully saved in local database.
         // Otherwise setter methods of properties would cause writing to database.
         //
@@ -533,7 +537,8 @@
     {
         _profileToken = profileToken;
 
-        if (storedInDatabase == YES) {
+        if (storedInDatabase == YES)
+        {
             SQLiteDatabase *database = [Database mainDatabase];
 
             NSString *query = [NSString stringWithFormat:@"UPDATE plaques SET profile_token = '%@' WHERE rowid = %llu",
@@ -551,7 +556,8 @@
     {
         _plaqueRevision = plaqueRevision;
 
-        if (storedInDatabase == YES) {
+        if (storedInDatabase == YES)
+        {
             SQLiteDatabase *database = [Database mainDatabase];
 
             NSString *query = [NSString stringWithFormat:@"UPDATE plaques SET revision = %d WHERE rowid = %llu",
@@ -581,7 +587,8 @@
                                                          speed:0.0f
                                                      timestamp:[NSDate date]];
 
-        if (storedInDatabase == YES) {
+        if (storedInDatabase == YES)
+        {
             SQLiteDatabase *database = [Database mainDatabase];
 
             NSString *query = [NSString stringWithFormat:@"UPDATE plaques SET latitude = %f, longitude = %f WHERE rowid = %llu",
@@ -613,7 +620,8 @@
                                                          speed:0.0f
                                                      timestamp:[NSDate date]];
 
-        if (storedInDatabase == YES) {
+        if (storedInDatabase == YES)
+        {
             SQLiteDatabase *database = [Database mainDatabase];
 
             NSString *query = [NSString stringWithFormat:@"UPDATE plaques SET altitude = %f WHERE rowid = %llu",
@@ -633,7 +641,8 @@
     {
         _directed = directed;
 
-        if (storedInDatabase == YES) {
+        if (storedInDatabase == YES)
+        {
             SQLiteDatabase *database = [Database mainDatabase];
 
             NSString *query;
@@ -661,7 +670,8 @@
 
         _directed = YES;
 
-        if (storedInDatabase == YES) {
+        if (storedInDatabase == YES)
+        {
             SQLiteDatabase *database = [Database mainDatabase];
 
             NSString *query = [NSString stringWithFormat:@"UPDATE plaques SET direction = %f WHERE rowid = %llu",
@@ -681,7 +691,8 @@
     {
         _tilted = tilted;
 
-        if (storedInDatabase == YES) {
+        if (storedInDatabase == YES)
+        {
             SQLiteDatabase *database = [Database mainDatabase];
 
             NSString *query;
@@ -709,7 +720,8 @@
 
         _tilted = YES;
 
-        if (storedInDatabase == YES) {
+        if (storedInDatabase == YES)
+        {
             SQLiteDatabase *database = [Database mainDatabase];
 
             NSString *query = [NSString stringWithFormat:@"UPDATE plaques SET tilt = %f WHERE rowid = %llu",
@@ -729,7 +741,8 @@
     {
         _width = width;
 
-        if (storedInDatabase == YES) {
+        if (storedInDatabase == YES)
+        {
             SQLiteDatabase *database = [Database mainDatabase];
 
             NSString *query = [NSString stringWithFormat:@"UPDATE plaques SET width = %f WHERE rowid = %llu",
@@ -749,7 +762,8 @@
     {
         _height = height;
 
-        if (storedInDatabase == YES) {
+        if (storedInDatabase == YES)
+        {
             SQLiteDatabase *database = [Database mainDatabase];
 
             NSString *query = [NSString stringWithFormat:@"UPDATE plaques SET height = %f WHERE rowid = %llu",
@@ -783,7 +797,8 @@
     {
         _backgroundColor = backgroundColor;
 
-        if (storedInDatabase == YES) {
+        if (storedInDatabase == YES)
+        {
             SQLiteDatabase *database = [Database mainDatabase];
 
             NSString *query = [NSString stringWithFormat:@"UPDATE plaques SET background_color = %u WHERE rowid = %llu",
@@ -806,7 +821,8 @@
     {
         _foregroundColor = foregroundColor;
 
-        if (storedInDatabase == YES) {
+        if (storedInDatabase == YES)
+        {
             SQLiteDatabase *database = [Database mainDatabase];
 
             NSString *query = [NSString stringWithFormat:@"UPDATE plaques SET foreground_color = %u WHERE rowid = %llu",
@@ -826,7 +842,8 @@
     {
         _fontSize = fontSize;
 
-        if (storedInDatabase == YES) {
+        if (storedInDatabase == YES)
+        {
             SQLiteDatabase *database = [Database mainDatabase];
 
             NSString *query = [NSString stringWithFormat:@"UPDATE plaques SET font_size = %f WHERE rowid = %llu",
@@ -846,7 +863,8 @@
     {
         _inscription = inscription;
 
-        if (storedInDatabase == YES) {
+        if (storedInDatabase == YES)
+        {
             SQLiteDatabase *database = [Database mainDatabase];
 
             NSString *query = [NSString stringWithFormat:@"UPDATE plaques SET inscription = '%@' WHERE rowid = %llu",
@@ -873,20 +891,23 @@
 {
     BOOL uploadNecessary = NO;
 
-    if (self.plaqueToken == nil) {
+    if (self.plaqueToken == nil)
+    {
         Paquet *uploadPaquet = self.uploadPaquet;
-        if (uploadPaquet != nil) {
-            [uploadPaquet setDelegate:nil];
+        if (uploadPaquet != nil)
+        {
+            [uploadPaquet setSenderDelegate:nil];
             [uploadPaquet setCancelWhenPossible:YES];
         }
 
         // New plaque.
         //
-        if ([self.inscription length] > 1) {
+        if ([self.inscription length] > 1)
+        {
             Paquet *paquet = [[Paquet alloc] initWithCommand:PaquetPostNewPlaque];
             self.uploadPaquet = paquet;
 
-            [paquet setDelegate:self];
+            [paquet setSenderDelegate:self];
 
             [paquet putDouble:self.coordinate.latitude];
             [paquet putDouble:self.coordinate.longitude];
@@ -910,19 +931,21 @@
         }
 
         uploadNecessary = YES;
-    } else {
-        //
+    }
+    else
+    {
         // Look if this plaque is already downloaded and its original exists already in plaque cache.
         //
-        if (self.cloneChain == nil) {
-            //
+        if (self.cloneChain == nil)
+        {
             // Search for original.
             //
             Plaque *cloneChain = [[Plaques sharedPlaques] plaqueByToken:self.plaqueToken];
 
             // If original was already downloaded then chain this plaque and original with each other.
             //
-            if (cloneChain != nil) {
+            if (cloneChain != nil)
+            {
                 self.cloneChain = cloneChain;
                 cloneChain.cloneChain = self;
             }
@@ -930,7 +953,8 @@
 
         // Modifications can be sent to cloud only if the original plaque already exists in plaque cache.
         //
-        if (self.cloneChain != nil) {
+        if (self.cloneChain != nil)
+        {
             Plaque *original = self.cloneChain;
 
             if ((self.coordinate.latitude != original.coordinate.latitude) ||
@@ -938,18 +962,19 @@
                 (nearbyintf(self.altitude * 100) != nearbyintf(original.altitude * 100)))
             {
                 Paquet *locationPaquet = self.locationPaquet;
-                if (locationPaquet != nil) {
+                if (locationPaquet != nil)
+                {
 #ifdef VERBOSE_PLAQUE_CHANGE
                     NSLog(@"Cancel previous plaque location change request");
 #endif
-                    [locationPaquet setDelegate:nil];
+                    [locationPaquet setSenderDelegate:nil];
                     [locationPaquet setCancelWhenPossible:YES];
                 }
 
                 Paquet *paquet = [[Paquet alloc] initWithCommand:PaquetPlaqueModifiedLocation];
                 self.locationPaquet = paquet;
 
-                [paquet setDelegate:self];
+                [paquet setSenderDelegate:self];
 
                 [paquet putToken:original.plaqueToken];
                 [paquet putDouble:self.coordinate.latitude];
@@ -977,18 +1002,19 @@
                 (nearbyintf(self.tilt) != nearbyintf(original.tilt)))
             {
                 Paquet *orientationPaquet = self.orientationPaquet;
-                if (orientationPaquet != nil) {
+                if (orientationPaquet != nil)
+                {
 #ifdef VERBOSE_PLAQUE_CHANGE
                     NSLog(@"Cancel previous plaque orientation change request");
 #endif
-                    [orientationPaquet setDelegate:nil];
+                    [orientationPaquet setSenderDelegate:nil];
                     [orientationPaquet setCancelWhenPossible:YES];
                 }
 
                 Paquet *paquet = [[Paquet alloc] initWithCommand:PaquetPlaqueModifiedOrientation];
                 self.orientationPaquet = paquet;
 
-                [paquet setDelegate:self];
+                [paquet setSenderDelegate:self];
 
                 [paquet putToken:original.plaqueToken];
                 [paquet putBoolean:self.directed];
@@ -1017,18 +1043,19 @@
                 (nearbyintf(self.height * 100.0f) != nearbyintf(original.height * 100.0f)))
             {
                 Paquet *sizePaquet = self.sizePaquet;
-                if (sizePaquet != nil) {
+                if (sizePaquet != nil)
+                {
 #ifdef VERBOSE_PLAQUE_CHANGE
                     NSLog(@"Cancel previous plaque size change request");
 #endif
-                    [sizePaquet setDelegate:nil];
+                    [sizePaquet setSenderDelegate:nil];
                     [sizePaquet setCancelWhenPossible:YES];
                 }
 
                 Paquet *paquet = [[Paquet alloc] initWithCommand:PaquetPlaqueModifiedSize];
                 self.sizePaquet = paquet;
 
-                [paquet setDelegate:self];
+                [paquet setSenderDelegate:self];
 
                 [paquet putToken:original.plaqueToken];
                 [paquet putFloat:self.size.width];
@@ -1051,18 +1078,19 @@
                 ([self.foregroundColor argb] != [original.foregroundColor argb]))
             {
                 Paquet *colorPaquet = self.colorPaquet;
-                if (colorPaquet != nil) {
+                if (colorPaquet != nil)
+                {
 #ifdef VERBOSE_PLAQUE_CHANGE
                     NSLog(@"Cancel previous plaque color change request");
 #endif
-                    [colorPaquet setDelegate:nil];
+                    [colorPaquet setSenderDelegate:nil];
                     [colorPaquet setCancelWhenPossible:YES];
                 }
 
                 Paquet *paquet = [[Paquet alloc] initWithCommand:PaquetPlaqueModifiedColors];
                 self.colorPaquet = paquet;
 
-                [paquet setDelegate:self];
+                [paquet setSenderDelegate:self];
 
                 [paquet putToken:original.plaqueToken];
                 [paquet putColor:[self.backgroundColor CGColor]];
@@ -1084,18 +1112,19 @@
             if (nearbyintf(self.fontSize * 100) != nearbyintf(original.fontSize * 100))
             {
                 Paquet *fontPaquet = self.fontPaquet;
-                if (fontPaquet != nil) {
+                if (fontPaquet != nil)
+                {
 #ifdef VERBOSE_PLAQUE_CHANGE
                     NSLog(@"Cancel previous plaque font change request");
 #endif
-                    [fontPaquet setDelegate:nil];
+                    [fontPaquet setSenderDelegate:nil];
                     [fontPaquet setCancelWhenPossible:YES];
                 }
 
                 Paquet *paquet = [[Paquet alloc] initWithCommand:PaquetPlaqueModifiedFont];
                 self.fontPaquet = paquet;
 
-                [paquet setDelegate:self];
+                [paquet setSenderDelegate:self];
 
                 [paquet putToken:original.plaqueToken];
                 [paquet putFloat:self.fontSize];
@@ -1112,18 +1141,19 @@
             if ([self.inscription isEqualToString:original.inscription] == NO)
             {
                 Paquet *inscriptionPaquet = self.inscriptionPaquet;
-                if (inscriptionPaquet != nil) {
+                if (inscriptionPaquet != nil)
+                {
 #ifdef VERBOSE_PLAQUE_CHANGE
                     NSLog(@"Cancel previous plaque inscription change request");
 #endif
-                    [inscriptionPaquet setDelegate:nil];
+                    [inscriptionPaquet setSenderDelegate:nil];
                     [inscriptionPaquet setCancelWhenPossible:YES];
                 }
 
                 Paquet *paquet = [[Paquet alloc] initWithCommand:PaquetPlaqueModifiedInscription];
                 self.inscriptionPaquet = paquet;
 
-                [paquet setDelegate:self];
+                [paquet setSenderDelegate:self];
 
                 [paquet putToken:original.plaqueToken];
                 [paquet putString:self.inscription];
@@ -1205,10 +1235,13 @@
 
     CALayer *plaqueLayer = [CALayer layer];
     [plaqueLayer setFrame:layerFrame];
-    [plaqueLayer setBackgroundColor:[self.backgroundColor CGColor]];
-    [plaqueLayer setBorderColor:[[UIColor colorWithWhite:1.0f alpha:0.5f] CGColor]];
-    [plaqueLayer setBorderWidth:2.0f];
-    [plaqueLayer setCornerRadius:5.0f];
+    if (CGColorEqualToColor([self.backgroundColor CGColor], [[UIColor clearColor] CGColor]) == NO)
+    {
+        [plaqueLayer setBackgroundColor:[self.backgroundColor CGColor]];
+        [plaqueLayer setBorderColor:[[UIColor colorWithWhite:1.0f alpha:0.5f] CGColor]];
+        [plaqueLayer setBorderWidth:PLAQUE_BORDER_WIDTH];
+        [plaqueLayer setCornerRadius:PLAQUE_CORNER_RADIUS];
+    }
 
     return plaqueLayer;
 }

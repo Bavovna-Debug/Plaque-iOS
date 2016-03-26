@@ -180,7 +180,7 @@
         [piece appendBytes:&commandCode
                     length:sizeof(commandCode)];
 
-        UInt32 commandSubcode = 0;
+        UInt32 commandSubcode = CFSwapInt32HostToBig([paquet commandSubcode]);
         [piece appendBytes:&commandSubcode
                     length:sizeof(commandSubcode)];
 
@@ -766,6 +766,8 @@ didWriteDataWithTag:(long)tag
 
         if (dialogueEstablished == NO) {
             paquetId = 0;
+            commandCode = 0;
+            commandSubcode = 0;
             payloadSize = sizeof(UInt64) + sizeof(UInt32) + TokenBinarySize;
             headerSize = 0;
 
@@ -997,8 +999,11 @@ didWriteDataWithTag:(long)tag
                 for (Paquet *paquet in self.paquets)
                 {
                     if (paquet.paquetId == paquetId) {
-                        [self dequeue:paquet payload:payload];
-                        break;
+                        if (paquet.commandCode == commandCode) {
+                            paquet.commandSubcode = commandSubcode;
+                            [self dequeue:paquet payload:payload];
+                            break;
+                        }
                     }
                 }
                 [self.paquetsLock unlock];

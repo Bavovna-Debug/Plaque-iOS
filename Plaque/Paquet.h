@@ -8,17 +8,19 @@
 
 #import <UIKit/UIKit.h>
 
-@protocol PaquetDelegate;
+@protocol PaquetSenderDelegate;
 
 @interface Paquet : NSObject
 
-@property (strong, nonatomic, readwrite) id<PaquetDelegate> delegate;
+@property (strong, nonatomic, readwrite) id<PaquetSenderDelegate> senderDelegate;
 
 @property (assign, nonatomic) UInt32            paquetId;
 @property (assign, nonatomic) UInt32            commandCode;
+@property (assign, nonatomic) UInt32            commandSubcode;
 @property (strong, nonatomic) NSMutableData     *payload;
 @property (assign, nonatomic) Boolean           inTheAir;
 @property (assign, nonatomic) Boolean           cancelWhenPossible;
+@property (assign, nonatomic) Boolean           rejectedByCloud;
 @property (strong, nonatomic) NSData            *userInfo;
 
 - (id)initWithCommand:(UInt32)commandCode;
@@ -64,7 +66,7 @@
 
 @end
 
-@protocol PaquetDelegate <NSObject>
+@protocol PaquetSenderDelegate <NSObject>
 
 @required
 

@@ -57,8 +57,8 @@
 
 @interface XMLElement ()
 
-@property (nonatomic, strong, readwrite) NSMutableArray *elements;
-@property (nonatomic, assign)            Boolean parsed;
+@property (nonatomic, strong, readwrite) NSMutableArray  *elements;
+@property (nonatomic, assign)            Boolean         parsed;
 
 - (NSData *)data;
 
@@ -77,7 +77,7 @@
                         version:(NSString *)documentVersion
 {
     XMLDocument *document = [[XMLDocument alloc] initWithTarget:target
-                                                    version:documentVersion];
+                                                        version:documentVersion];
     return document;
 }
 
@@ -117,17 +117,40 @@
 {
     NSMutableData *data = [NSMutableData data];
     NSData *forest = [self.forest data];
+    if (forest == nil)
+        return nil;
+
     NSString *root = [NSString stringWithFormat:@"<?%@ version=\"%@\"?>",
                       self.target,
                       self.documentVersion];
-    [data appendData:[root dataUsingEncoding:NSUTF8StringEncoding]];
-    [data appendData:forest];
+
+    @try
+    {
+        [data appendData:[root dataUsingEncoding:NSUTF8StringEncoding]];
+        [data appendData:forest];
+    }
+    @catch (NSException *exception)
+    {
+        NSLog(@"Error in xmlData");
+        @throw exception;
+    }
+
     return data;
 }
 
 - (NSString *)string
 {
-    NSData *data = [self xmlData];
+    NSData *data;
+
+    @try
+    {
+        data = [self xmlData];
+    }
+    @catch (NSException *exception)
+    {
+        return nil;
+    }
+
     return [NSString stringWithUTF8String:data.bytes];
 }
 
@@ -154,11 +177,16 @@ didStartElement:(NSString *)elementName
     XMLElement *element;
     if (self.forest == nil) {
         element = [XMLElement elementWithName:elementName];
-        [self setForest:element];
+        if (element != nil) {
+            [self setForest:element];
+        }
     } else {
         element = [XMLElement elementWithName:elementName];
-        XMLElement *parent = [self lastParsingElement];
-        [parent addElement:element];
+        if (element != nil) {
+            XMLElement *parent = [self lastParsingElement];
+            if (parent != nil)
+                [parent addElement:element];
+        }
     }
 
     [element setAttributes:(NSMutableDictionary *)attributes];
@@ -170,14 +198,16 @@ didStartElement:(NSString *)elementName
  qualifiedName:(NSString *)qualifiedName
 {
     XMLElement *lastElement = [self lastParsingElement];
-    [lastElement setParsed:YES];
+    if (lastElement != nil)
+        [lastElement setParsed:YES];
 }
 
 - (void)parser:(NSXMLParser *)parser
 foundCharacters:(NSString *)string
 {
     XMLElement *lastElement = [self lastParsingElement];
-    [lastElement setContent:string];
+    if (lastElement != nil)
+        [lastElement setContent:string];
 }
 
 - (XMLElement *)lastParsingElement
@@ -186,18 +216,25 @@ foundCharacters:(NSString *)string
 
     while (elementUnderCursor != nil)
     {
-        if (elementUnderCursor.parsed == YES)
+        @try
+        {
+            if (elementUnderCursor.parsed == YES)
+                return nil;
+
+            if ([elementUnderCursor.elements count] == 0)
+                return elementUnderCursor;
+
+            XMLElement *childElement = (XMLElement *)[elementUnderCursor.elements lastObject];
+
+            if (childElement.parsed == YES)
+                return elementUnderCursor;
+            
+            elementUnderCursor = childElement;
+        }
+        @catch (NSException *exception)
+        {
             return nil;
-
-        if ([elementUnderCursor.elements count] == 0)
-            return elementUnderCursor;
-
-        XMLElement *childElement = (XMLElement *)[elementUnderCursor.elements lastObject];
-
-        if (childElement.parsed == YES)
-            return elementUnderCursor;
-
-        elementUnderCursor = childElement;
+        }
     }
 
     return elementUnderCursor;
@@ -247,21 +284,31 @@ foundCharacters:(NSString *)string
                             [[self.attributes objectForKey:attribute] xml]];
     }
 
-    if (self.content != nil) {
+    if (self.content != nil)
+    {
         NSString *string = [NSString stringWithFormat:@"\n<%@%@>%@</%@>",
                             self.name,
                             attributesString,
                             [self.content xml],
                             self.name];
+
         NSData *data = [string dataUsingEncoding:NSUTF8StringEncoding];
+
         return data;
-    } else if ([self.elements count] == 0) {
-            NSString *string = [NSString stringWithFormat:@"\n<%@%@ />",
-                                self.name,
-                                attributesString];
-            NSData *data = [string dataUsingEncoding:NSUTF8StringEncoding];
-            return data;
-    } else {
+    }
+    else if ([self.elements count] == 0)
+    {
+        NSString *string = [NSString stringWithFormat:@"\n<%@%@ />",
+                            self.name,
+                            attributesString];
+
+
+        NSData *data = [string dataUsingEncoding:NSUTF8StringEncoding];
+
+        return data;
+    }
+    else
+    {
         NSMutableData *data = [NSMutableData data];
 
         NSString *prefix = [NSString stringWithFormat:@"\n<%@%@>",
@@ -272,9 +319,8 @@ foundCharacters:(NSString *)string
 
         [data appendData:[prefix dataUsingEncoding:NSUTF8StringEncoding]];
 
-        for (XMLElement *element in self.elements) {
+        for (XMLElement *element in self.elements)
             [data appendData:[element data]];
-        }
 
         [data appendData:[suffix dataUsingEncoding:NSUTF8StringEncoding]];
 
@@ -309,7 +355,8 @@ foundCharacters:(NSString *)string
     for (NSString *part in parts)
     {
         Boolean found = NO;
-        for (XMLElement *element in [elementUnderCursor elements])
+        NSMutableArray *elements = [elementUnderCursor elements];
+        for (XMLElement *element in elements)
         {
             if ([element.name isEqualToString:part] == YES) {
                 found = YES;

@@ -15,7 +15,7 @@
 #undef VERBOSE
 #endif
 
-@interface Profiles () <PaquetDelegate>
+@interface Profiles () <PaquetSenderDelegate>
 
 @property (strong, nonatomic) NSMutableArray  *profilesCache;
 
@@ -92,7 +92,7 @@
 {
     Paquet *paquet = [[Paquet alloc] initWithCommand:PaquetDownloadProfiles];
 
-    [paquet setDelegate:self];
+    [paquet setSenderDelegate:self];
 
     [paquet putUInt32:1];
     [paquet putToken:profileToken];

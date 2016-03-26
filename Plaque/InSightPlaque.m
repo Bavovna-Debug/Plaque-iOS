@@ -47,7 +47,8 @@
 
 - (void)setDirectionFromUser:(CLLocationDirection)directionFromUser
 {
-    if (directionFromUser != _directionFromUser) {
+    if (directionFromUser != _directionFromUser)
+    {
         _directionFromUser = directionFromUser;
 
         [self setInSight:(fabs(directionFromUser) < 45.0f)];
@@ -58,7 +59,8 @@
 
 - (void)setDistanceToUser:(CLLocationDistance)distanceToUser
 {
-    if (distanceToUser != _distanceToUser) {
+    if (distanceToUser != _distanceToUser)
+    {
         _distanceToUser = distanceToUser;
         [self setNeedRedraw:YES];
     }
@@ -66,7 +68,8 @@
 
 - (void)setAltitudeOverUser:(CLLocationDistance)altitudeOverUser
 {
-    if (altitudeOverUser != _altitudeOverUser) {
+    if (altitudeOverUser != _altitudeOverUser)
+    {
         _altitudeOverUser = altitudeOverUser;
         [self setNeedRedraw:YES];
     }
@@ -209,7 +212,14 @@
 
 - (void)didChangeColor
 {
-    [self.plaqueLayer setBackgroundColor:[self.plaque.backgroundColor CGColor]];
+    if (CGColorEqualToColor([self.plaque.backgroundColor CGColor], [[UIColor clearColor] CGColor]) == NO) {
+        [self.plaqueLayer setBackgroundColor:[self.plaque.backgroundColor CGColor]];
+        [self.plaqueLayer setBorderWidth:PLAQUE_BORDER_WIDTH];
+    } else {
+        [self.plaqueLayer setBackgroundColor:nil];
+        [self.plaqueLayer setBorderWidth:0.0f];
+    }
+
     if (self.plaque.image == nil) {
         CATextLayer *textLayer = (CATextLayer *)self.inscriptionLayer;
         [textLayer setForegroundColor:[self.plaque.foregroundColor CGColor]];
@@ -218,7 +228,8 @@
 
 - (void)didChangeFont
 {
-    if (self.plaque.image == nil) {
+    if (self.plaque.image == nil)
+    {
         CALayer *plaqueLayer = self.plaqueLayer;
         CATextLayer *textLayer = (CATextLayer *)self.inscriptionLayer;
 
@@ -232,7 +243,8 @@
 
 - (void)didChangeInscription
 {
-    if (self.plaque.image == nil) {
+    if (self.plaque.image == nil)
+    {
         CATextLayer *textLayer = (CATextLayer *)self.inscriptionLayer;
 
         if (textLayer != nil)
