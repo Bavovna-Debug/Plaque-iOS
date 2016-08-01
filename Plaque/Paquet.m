@@ -20,6 +20,13 @@
     NSUInteger payloadOffset;
 }
 
++ (void)report:(NSString *)message
+{
+    Paquet *paquet = [[Paquet alloc] initWithCommand:API_PaquetReportMessage];
+    [paquet putString:message];
+    [paquet send];
+}
+
 - (id)initWithCommand:(UInt32)commandCode
 {
     self = [super init];
@@ -38,7 +45,7 @@
 
 - (Boolean)rejectedByCloud
 {
-    return (self.commandSubcode == PaquetRejectBusy) || (self.commandSubcode == PaquetRejectError);
+    return (self.commandSubcode == API_PaquetRejectBusy) || (self.commandSubcode == API_PaquetRejectError);
 }
 
 - (void)send
@@ -52,8 +59,10 @@
     payloadOffset = 0;
 
     id<PaquetSenderDelegate> senderDelegate = self.senderDelegate;
-    if (senderDelegate != nil) {
-        dispatch_async(dispatch_get_main_queue(), ^{
+    if (senderDelegate != nil)
+    {
+        dispatch_async(dispatch_get_main_queue(), ^
+        {
             [senderDelegate paquetComplete:self];
         });
     }
@@ -66,16 +75,20 @@
 
 - (void)putBoolean:(Boolean)value
 {
-    [self.payload appendBytes:&value length:sizeof(value)];
+    [self.payload appendBytes:&value
+                       length:sizeof(value)];
 }
 
 - (Boolean)getBoolean
 {
     UInt8 value;
-    NSData *valueData = [NSData dataWithBytesNoCopy:(char *)[self.payload bytes] + payloadOffset
+
+    NSData *valueData = [NSData dataWithBytesNoCopy:(char *) [self.payload bytes] + payloadOffset
                                              length:sizeof(value)
                                        freeWhenDone:NO];
-    [valueData getBytes:&value length:sizeof(value)];
+
+    [valueData getBytes:&value
+                 length:sizeof(value)];
 
     payloadOffset += sizeof(value);
 
@@ -85,16 +98,21 @@
 - (void)putUInt16:(UInt16)value
 {
     value = CFSwapInt16HostToBig(value);
-    [self.payload appendBytes:&value length:sizeof(value)];
+
+    [self.payload appendBytes:&value
+                       length:sizeof(value)];
 }
 
 - (UInt16)getUInt16
 {
     UInt16 value;
-    NSData *valueData = [NSData dataWithBytesNoCopy:(char *)[self.payload bytes] + payloadOffset
+
+    NSData *valueData = [NSData dataWithBytesNoCopy:(char *) [self.payload bytes] + payloadOffset
                                              length:sizeof(value)
                                        freeWhenDone:NO];
-    [valueData getBytes:&value length:sizeof(value)];
+
+    [valueData getBytes:&value
+                 length:sizeof(value)];
 
     payloadOffset += sizeof(value);
 
@@ -104,16 +122,21 @@
 - (void)putUInt32:(UInt32)value
 {
     value = CFSwapInt32HostToBig(value);
-    [self.payload appendBytes:&value length:sizeof(value)];
+
+    [self.payload appendBytes:&value
+                       length:sizeof(value)];
 }
 
 - (UInt32)getUInt32
 {
     UInt32 value;
-    NSData *valueData = [NSData dataWithBytesNoCopy:(char *)[self.payload bytes] + payloadOffset
+
+    NSData *valueData = [NSData dataWithBytesNoCopy:(char *) [self.payload bytes] + payloadOffset
                                              length:sizeof(value)
                                        freeWhenDone:NO];
-    [valueData getBytes:&value length:sizeof(value)];
+
+    [valueData getBytes:&value
+                 length:sizeof(value)];
 
     payloadOffset += sizeof(value);
 
@@ -123,16 +146,21 @@
 - (void)putUInt64:(UInt64)value
 {
     value = CFSwapInt64HostToBig(value);
-    [self.payload appendBytes:&value length:sizeof(value)];
+
+    [self.payload appendBytes:&value
+                       length:sizeof(value)];
 }
 
 - (UInt64)getUInt64
 {
     UInt64 value;
+
     NSData *valueData = [NSData dataWithBytesNoCopy:(char *)[self.payload bytes] + payloadOffset
                                              length:sizeof(value)
                                        freeWhenDone:NO];
-    [valueData getBytes:&value length:sizeof(value)];
+
+    [valueData getBytes:&value
+                 length:sizeof(value)];
 
     payloadOffset += sizeof(value);
 
@@ -142,16 +170,21 @@
 - (void)putDouble:(double)value
 {
     CFSwappedFloat64 swapped = CFConvertDoubleHostToSwapped(value);
-    [self.payload appendBytes:&swapped length:sizeof(swapped)];
+
+    [self.payload appendBytes:&swapped
+                       length:sizeof(swapped)];
 }
 
 - (double)getDouble
 {
     CFSwappedFloat64 value;
+
     NSData *valueData = [NSData dataWithBytesNoCopy:(char *)[self.payload bytes] + payloadOffset
                                              length:sizeof(value)
                                        freeWhenDone:NO];
-    [valueData getBytes:&value length:sizeof(value)];
+
+    [valueData getBytes:&value
+                 length:sizeof(value)];
 
     payloadOffset += sizeof(value);
 
@@ -161,16 +194,21 @@
 - (void)putFloat:(float)value
 {
     CFSwappedFloat32 swapped = CFConvertFloatHostToSwapped(value);
-    [self.payload appendBytes:&swapped length:sizeof(swapped)];
+
+    [self.payload appendBytes:&swapped
+                       length:sizeof(swapped)];
 }
 
 - (float)getFloat
 {
     CFSwappedFloat32 value;
+
     NSData *valueData = [NSData dataWithBytesNoCopy:(char *)[self.payload bytes] + payloadOffset
                                              length:sizeof(value)
                                        freeWhenDone:NO];
-    [valueData getBytes:&value length:sizeof(value)];
+
+    [valueData getBytes:&value
+                 length:sizeof(value)];
 
     payloadOffset += sizeof(value);
 
@@ -180,11 +218,12 @@
 - (void)putString:(NSString *)string
 {
     NSData *stringData = [string dataUsingEncoding:NSUTF8StringEncoding];
-    UInt32 stringLength = (UInt32)[stringData length];
+    UInt32 stringLength = (UInt32) [stringData length];
 
     [self putUInt32:stringLength];
 
-    [self.payload appendBytes:[stringData bytes] length:stringLength];
+    [self.payload appendBytes:[stringData bytes]
+                       length:stringLength];
 }
 
 - (NSString *)getString
@@ -196,6 +235,7 @@
     NSData *stringData = [NSData dataWithBytesNoCopy:(char *)[self.payload bytes] + payloadOffset
                                               length:stringLength
                                         freeWhenDone:NO];
+
     NSString *string = [[NSString alloc] initWithData:stringData
                                              encoding:NSUTF8StringEncoding];
 
@@ -212,9 +252,11 @@
     NSString *paddedString = [string stringByPaddingToLength:length
                                                   withString:@"\0"
                                              startingAtIndex:0];
+
     NSData *paddedStringData = [paddedString dataUsingEncoding:NSUTF8StringEncoding];
 
-    [self.payload appendBytes:[paddedStringData bytes] length:length];
+    [self.payload appendBytes:[paddedStringData bytes]
+                       length:length];
 }
 
 - (NSString *)getFixedString:(NSUInteger)length
@@ -222,6 +264,7 @@
     NSData *stringData = [NSData dataWithBytesNoCopy:(char *)[self.payload bytes] + payloadOffset
                                               length:length
                                         freeWhenDone:NO];
+
     NSString *string = [[NSString alloc] initWithBytes:[stringData bytes]
                                                 length:length
                                               encoding:NSUTF8StringEncoding];
@@ -233,20 +276,24 @@
 - (void)putToken:(NSUUID *)token
 {
     uuid_t tokenBytes;
+
     [token getUUIDBytes:tokenBytes];
+
     NSData *tokenData = [NSData dataWithBytes:tokenBytes
-                                       length:TokenBinarySize];
+                                       length:API_TokenBinarySize];
+
     [self.payload appendData:tokenData];
 }
 
 - (NSUUID *)getToken
 {
     NSData *tokenData = [NSData dataWithBytesNoCopy:(char *)[self.payload bytes] + payloadOffset
-                                             length:TokenBinarySize
+                                             length:API_TokenBinarySize
                                        freeWhenDone:NO];
+
     NSUUID *token = [[NSUUID alloc] initWithUUIDBytes:[tokenData bytes]];
 
-    payloadOffset += TokenBinarySize;
+    payloadOffset += API_TokenBinarySize;
 
     return token;
 }
@@ -336,10 +383,10 @@
 {
     const CGFloat *components = CGColorGetComponents([self CGColor]);
 
-    uint red    = ((uint)floorf(components[0] * 255.0f)) & 0xFF;
-    uint green  = ((uint)floorf(components[1] * 255.0f)) & 0xFF;
-    uint blue   = ((uint)floorf(components[2] * 255.0f)) & 0xFF;
-    uint alpha  = ((uint)floorf(components[3] * 255.0f)) & 0xFF;
+    uint red    = ((uint) floorf(components[0] * 255.0f)) & 0xFF;
+    uint green  = ((uint) floorf(components[1] * 255.0f)) & 0xFF;
+    uint blue   = ((uint) floorf(components[2] * 255.0f)) & 0xFF;
+    uint alpha  = ((uint) floorf(components[3] * 255.0f)) & 0xFF;
 
     UInt32 argb = 0;
 

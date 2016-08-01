@@ -13,7 +13,8 @@
     static dispatch_once_t onceToken;
     static Servers *servers;
 
-    dispatch_once(&onceToken, ^{
+    dispatch_once(&onceToken, ^
+    {
         servers = [[Servers alloc] init];
     });
 
@@ -27,7 +28,7 @@
 
 - (UInt32)serverPort
 {
-    return 12001;
+    return 12000;
 }
 
 - (void)nextServer

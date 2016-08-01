@@ -93,7 +93,8 @@
     static dispatch_once_t onceToken;
     static Plaques *plaques;
 
-    dispatch_once(&onceToken, ^{
+    dispatch_once(&onceToken, ^
+    {
         plaques = [[Plaques alloc] init];
     });
 
@@ -138,18 +139,17 @@
     [self.locationManager setHeadingFilter:1.0f];
     [self.locationManager setDelegate:self];
 
-    if ([self.locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)]) {
+    if ([self.locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)])
         [self.locationManager requestWhenInUseAuthorization];
-    }
 
-    if ([self.locationManager respondsToSelector:@selector(requestAlwaysAuthorization)]) {
+    if ([self.locationManager respondsToSelector:@selector(requestAlwaysAuthorization)])
         [self.locationManager requestAlwaysAuthorization];
-    }
 }
 
 - (void)switchToBackground
 {
     inBackground = YES;
+
     [self.locationManager stopUpdatingHeading];
     [self.locationManager stopUpdatingLocation];
     [self.locationManager setDistanceFilter:50.0f];
@@ -167,7 +167,6 @@
 
 - (void)switchToForeground
 {
-    inBackground = NO;
     [self.locationManager stopUpdatingLocation];
     [self.locationManager setDistanceFilter:10.0f];
     [self.locationManager setDesiredAccuracy:kCLLocationAccuracyNearestTenMeters];
@@ -187,6 +186,8 @@
                                    selector:@selector(fireWorkdeskUpload:)
                                    userInfo:nil
                                     repeats:YES];
+
+    inBackground = NO;
 }
 
 #pragma mark - XML storage
@@ -207,17 +208,20 @@
     [self.plaquesInSightLock lock];
     [self.plaquesOnMapLock lock];
 
-    NSString *onRadarRevision = [NSString stringWithFormat:@"%u", (unsigned int)self.onRadarRevision];
-    NSString *inSightRevision = [NSString stringWithFormat:@"%u", (unsigned int)self.inSightRevision];
-    NSString *onMapRevision = [NSString stringWithFormat:@"%u", (unsigned int)self.onMapRevision];
+    NSString *onRadarRevisionString =
+        [NSString stringWithFormat:@"%u", (unsigned int) self.onRadarRevision];
+    NSString *inSightRevisionString =
+        [NSString stringWithFormat:@"%u", (unsigned int) self.inSightRevision];
+    NSString *onMapRevisionString =
+        [NSString stringWithFormat:@"%u", (unsigned int) self.onMapRevision];
 
-    [plaquesXML.attributes setObject:onRadarRevision
+    [plaquesXML.attributes setObject:onRadarRevisionString
                               forKey:@"on_radar_revision"];
 
-    [plaquesXML.attributes setObject:inSightRevision
+    [plaquesXML.attributes setObject:inSightRevisionString
                               forKey:@"in_sight_revision"];
 
-    [plaquesXML.attributes setObject:onMapRevision
+    [plaquesXML.attributes setObject:onMapRevisionString
                               forKey:@"on_map_revision"];
 
     for (Plaque *plaque in self.plaquesInCache)
@@ -244,11 +248,11 @@
         [plaquesXML addElement:plaqueXML];
     }
 
-    NSLog(@"Saved plaques 'in cache':%lu, 'on radar':%lu, 'in sight':%lu, 'on map':%lu",
-          (unsigned long)[self.plaquesInCache count],
-          (unsigned long)[self.plaquesOnRadar count],
-          (unsigned long)[self.plaquesInSight count],
-          (unsigned long)[self.plaquesOnMap count]);
+    NSLog(@"Saved plaques: 'in cache'=%lu, 'on radar'=%lu, 'in sight'=%lu, 'on map'=%lu",
+          (unsigned long) [self.plaquesInCache count],
+          (unsigned long) [self.plaquesOnRadar count],
+          (unsigned long) [self.plaquesInSight count],
+          (unsigned long) [self.plaquesOnMap count]);
 
     [self.plaquesOnMapLock unlock];
     [self.plaquesInSightLock unlock];
@@ -256,6 +260,7 @@
     [self.plaquesInCacheLock unlock];
 
     NSData *plaquesData = [document xmlData];
+
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     [defaults setObject:plaquesData
                  forKey:PlaquesCacheKey];
@@ -267,7 +272,8 @@
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSData *plaquesData = [defaults objectForKey:PlaquesCacheKey];
 
-    if (plaquesData == nil) {
+    if (plaquesData == nil)
+    {
         NSLog(@"There is no saved plaques cache");
         return;
     }
@@ -281,13 +287,16 @@
     [self.plaquesInSightLock lock];
     [self.plaquesOnMapLock lock];
 
-    NSString *onRadarRevision = [plaquesXML.attributes objectForKey:@"on_radar_revision"];
-    NSString *inSightRevision = [plaquesXML.attributes objectForKey:@"in_sight_revision"];
-    NSString *onMapRevision = [plaquesXML.attributes objectForKey:@"on_map_revision"];
+    NSString *onRadarRevisionString =
+        [plaquesXML.attributes objectForKey:@"on_radar_revision"];
+    NSString *inSightRevisionString =
+        [plaquesXML.attributes objectForKey:@"in_sight_revision"];
+    NSString *onMapRevisionString =
+        [plaquesXML.attributes objectForKey:@"on_map_revision"];
 
-    self.onRadarRevision = [onRadarRevision intValue];
-    self.inSightRevision = [inSightRevision intValue];
-    self.onMapRevision = [onMapRevision intValue];
+    self.onRadarRevision = [onRadarRevisionString intValue];
+    self.inSightRevision = [inSightRevisionString intValue];
+    self.onMapRevision = [onMapRevisionString intValue];
 
     for (XMLElement *plaqueXML in [plaquesXML elements])
     {
@@ -318,11 +327,11 @@
             [self.plaquesOnMap addObject:plaque];
     }
 
-    NSLog(@"Loaded plaques 'in cache':%lu, 'on radar':%lu, 'in sight':%lu, 'on map':%lu",
-          (unsigned long)[self.plaquesInCache count],
-          (unsigned long)[self.plaquesOnRadar count],
-          (unsigned long)[self.plaquesInSight count],
-          (unsigned long)[self.plaquesOnMap count]);
+    NSLog(@"Loaded plaques: 'in cache'=%lu, 'on radar'=%lu, 'in sight'=%lu, 'on map'=%lu",
+          (unsigned long) [self.plaquesInCache count],
+          (unsigned long) [self.plaquesOnRadar count],
+          (unsigned long) [self.plaquesInSight count],
+          (unsigned long) [self.plaquesOnMap count]);
 
     [self.plaquesOnMapLock unlock];
     [self.plaquesInSightLock unlock];
@@ -350,12 +359,13 @@
         [plaquesXML addElement:plaqueXML];
     }
 
-    NSLog(@"Loaded plaques 'on workdesk':%lu",
+    NSLog(@"Loaded plaques: 'on workdesk'=%lu",
           (unsigned long)[self.plaquesOnWorkdesk count]);
 
     [self.plaquesOnWorkdeskLock unlock];
 
     NSData *plaquesData = [document xmlData];
+
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     [defaults setObject:plaquesData
                  forKey:PlaquesOnWorkdeskKey];
@@ -367,7 +377,8 @@
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSData *plaquesData = [defaults objectForKey:PlaquesOnWorkdeskKey];
 
-    if (plaquesData == nil) {
+    if (plaquesData == nil)
+    {
         NSLog(@"There is no saved plaques workdesk");
         return;
     }
@@ -390,8 +401,8 @@
         // If the original plaque exist in cache ...
         //
         Plaque *plaqueInCache = [self plaqueInCacheByToken:[plaque plaqueToken]];
-        if (plaqueInCache != nil) {
-            //
+        if (plaqueInCache != nil)
+        {
             // ... then chain it with the one on workdesk.
             //
             plaque.cloneChain = plaqueInCache;
@@ -399,7 +410,7 @@
         }
     }
 
-    NSLog(@"Loaded plaques 'on workdesk':%lu",
+    NSLog(@"Loaded plaques: 'on workdesk'=%lu",
           (unsigned long)[self.plaquesOnWorkdesk count]);
 
     [self.plaquesOnWorkdeskLock unlock];
@@ -422,14 +433,14 @@
     return newPlaque;
 }
 
-- (void)setPlaqueUnderEdit:(Plaque *)plaqueUnderEdit
+- (void)setPlaqueUnderEdit:(Plaque *)thePlaqueUnderEdit
 {
     // If there is some plaque captured, then release it.
     //
     [self setCapturedPlaque:nil];
 
     Plaque *previousPlaqueUnderEdit = _plaqueUnderEdit;
-    Plaque *newPlaqueUnderEdit = plaqueUnderEdit;
+    Plaque *newPlaqueUnderEdit = thePlaqueUnderEdit;
 
     // First make sure no plaque is hanging: if there is any plaque already set as current plaque then release it.
     //
@@ -445,11 +456,11 @@
 
         // Is this plaque already on workdesk?
         //
-        if ([self.plaquesOnWorkdesk containsObject:plaqueUnderEdit] == YES) {
+        if ([self.plaquesOnWorkdesk containsObject:thePlaqueUnderEdit] == YES) {
             //
             // If yes, then just take it.
             //
-            plaqueOnWorkdesk = plaqueUnderEdit;
+            plaqueOnWorkdesk = thePlaqueUnderEdit;
         } else {
             //
             // This plaque is not on workdesk.
@@ -460,12 +471,12 @@
                 //
                 // This plaque is new - just put it on workdesk.
                 //
-                plaqueOnWorkdesk = plaqueUnderEdit;
+                plaqueOnWorkdesk = thePlaqueUnderEdit;
             } else {
                 //
                 // This plaque is not new - clone it and put the clone on workdesk.
                 //
-                plaqueOnWorkdesk = [plaqueUnderEdit clone];
+                plaqueOnWorkdesk = [thePlaqueUnderEdit clone];
             }
             [self.plaquesOnWorkdesk addObject:plaqueOnWorkdesk];
 
@@ -492,18 +503,21 @@
 
     Plaque *previousCapturedPlaque = _capturedPlaque;
 
-    if (capturedPlaque != previousCapturedPlaque) {
+    if (capturedPlaque != previousCapturedPlaque)
+    {
         _capturedPlaque = capturedPlaque;
 
         id<PlaquesDelegate> delegate = self.plaquesDelegate;
 
-        if (previousCapturedPlaque != nil) {
+        if (previousCapturedPlaque != nil)
+        {
             [previousCapturedPlaque setCaptured:NO];
             if (delegate != nil)
                 [delegate plaqueDidReleaseCaptured:previousCapturedPlaque];
         }
 
-        if (capturedPlaque != nil) {
+        if (capturedPlaque != nil)
+        {
             [capturedPlaque setCaptured:YES];
             if (delegate != nil)
                 [delegate plaqueDidBecomeCaptured:capturedPlaque];
@@ -521,10 +535,12 @@
     if ([self.plaquesAwaitingDatabaseLock tryLock] == NO)
         return;
 
+    /*
     // Execute main part dispatched because of SQLite latecy.
     //
     dispatch_async(dispatch_get_main_queue(), ^
     {
+     */
 #ifdef VERBOSE_DATABASE
         NSUInteger numberOfStoredPlaques = 0;
 #endif
@@ -536,16 +552,16 @@
         {
             // If this plaque has not being stored in local database yet ..
             //
-            if (plaque.rowId == 0) {
-                //
+            if (plaque.rowId == 0)
+            {
                 // Then execute store procedure ...
                 //
                 [plaque saveToDatabase];
 
                 // ... and check afterwards whether it did store itself saccessfully.
                 //
-                if (plaque.rowId != 0) {
-                    //
+                if (plaque.rowId != 0)
+                {
                     // If yes, then notice this plaque as processed.
                     //
                     [self.plaquesAwaitingDatabase removeObject:plaque];
@@ -567,22 +583,37 @@
         }
 #ifdef VERBOSE_DATABASE
         NSLog(@"Save to database proceeded: %lu awaiting %lu saved",
-              (unsigned long)[self.plaquesAwaitingDatabase count],
-              (unsigned long)numberOfStoredPlaques);
+              (unsigned long) [self.plaquesAwaitingDatabase count],
+              (unsigned long) numberOfStoredPlaques);
 #endif
-
-        [self.plaquesAwaitingDatabaseLock unlock];
+/*
     });
+*/
+    [self.plaquesAwaitingDatabaseLock unlock];
 }
 
 - (void)fireWorkdeskUpload:(NSTimer *)timer
 {
-    if ([self.plaquesOnWorkdesk count] == 0)
+    // Upload already running?
+    // If yes, then do nothing.
+    //
+    if ([self.plaquesOnWorkdeskLock tryLock] == NO)
+    {
+#ifdef VERBOSE_WORKDESK
+        NSLog(@"Workdesk upload already in process");
+#endif
         return;
-    
-    NSMutableArray *completedWorkdeskPlaques = [NSMutableArray array];
+    }
 
-    [self.plaquesOnWorkdeskLock lock];
+    // Nothing on workdesk for upload? Then quit.
+    //
+    if ([self.plaquesOnWorkdesk count] == 0)
+    {
+        [self.plaquesOnWorkdeskLock unlock];
+        return;
+    }
+
+    NSMutableArray *completedWorkdeskPlaques = [NSMutableArray array];
 
     for (Plaque *plaqueOnWorkdesk in self.plaquesOnWorkdesk)
     {
@@ -592,9 +623,9 @@
     }
 
 #ifdef VERBOSE_WORKDESK
-    NSLog(@"Plaques on workdesk: %lu total, %lu complete",
-          (unsigned long)[self.plaquesOnWorkdesk count],
-          (unsigned long)[completedWorkdeskPlaques count]);
+    NSLog(@"Plaques on workdesk: total=%lu, complete=%lu",
+          (unsigned long) [self.plaquesOnWorkdesk count],
+          (unsigned long) [completedWorkdeskPlaques count]);
 #endif
 
     for (Plaque *plaqueOnWorkdesk in completedWorkdeskPlaques)
@@ -643,7 +674,7 @@
        didFailWithError:(NSError *)error
 {
 #ifdef VERBOSE_LOCATION_MANAGER
-    NSLog(@"%@", error);
+    NSLog(@"Location manager failed: %@", error);
 #endif
 }
 
@@ -664,12 +695,14 @@
 
     // If it is not cache then search for it in local database.
     //
-    if (plaque == nil) {
+    if (plaque == nil)
+    {
         plaque = [[Plaque alloc] initWithToken:plaqueToken];
 
         // If plaque was found in local database then add it to cache.
         //
-        if (plaque != nil) {
+        if (plaque != nil)
+        {
             [self.plaquesInCacheLock lock];
             [self.plaquesInCache addObject:plaque];
             [self.plaquesInCacheLock unlock];
@@ -686,7 +719,8 @@
     [self.plaquesInCacheLock lock];
     for (Plaque *plaque in self.plaquesInCache)
     {
-        if ([plaque.plaqueToken isEqual:plaqueToken] == YES) {
+        if ([plaque.plaqueToken isEqual:plaqueToken] == YES)
+        {
             plaqueInCache = plaque;
             break;
         }
@@ -703,7 +737,8 @@
     [self.plaquesOnRadarLock lock];
     for (Plaque *plaque in self.plaquesOnRadar)
     {
-        if ([plaque.plaqueToken isEqual:plaqueToken] == YES) {
+        if ([plaque.plaqueToken isEqual:plaqueToken] == YES)
+        {
             plaqueOnRadar = plaque;
             break;
         }
@@ -720,7 +755,8 @@
     [self.plaquesInSightLock lock];
     for (Plaque *plaque in self.plaquesInSight)
     {
-        if ([plaque.plaqueToken isEqual:plaqueToken] == YES) {
+        if ([plaque.plaqueToken isEqual:plaqueToken] == YES)
+        {
             plaqueInSight = plaque;
             break;
         }
@@ -737,7 +773,8 @@
     [self.plaquesOnMapLock lock];
     for (Plaque *plaque in self.plaquesOnMap)
     {
-        if ([plaque.plaqueToken isEqual:plaqueToken] == YES) {
+        if ([plaque.plaqueToken isEqual:plaqueToken] == YES)
+        {
             plaqueOnMap = plaque;
             break;
         }
@@ -754,7 +791,8 @@
     [self.plaquesOnWorkdeskLock lock];
     for (Plaque *plaque in self.plaquesOnWorkdesk)
     {
-        if ([plaque.plaqueToken isEqual:plaqueToken] == YES) {
+        if ([plaque.plaqueToken isEqual:plaqueToken] == YES)
+        {
             plaqueOnWorkdesk = plaque;
             break;
         }
@@ -806,7 +844,6 @@
     }
     @finally {
         [self.plaquesOnRadarLock unlock];
-
     }
 }
 
@@ -890,7 +927,6 @@
     }
     @finally {
         [self.plaquesOnWorkdeskLock unlock];
-        
     }
 }
 
@@ -902,8 +938,8 @@
 
     for (Plaque *plaque in self.plaquesOnRadar)
     {
-        if ([plaque.plaqueToken isEqual:plaqueToken] == YES) {
-            //
+        if ([plaque.plaqueToken isEqual:plaqueToken] == YES)
+        {
             // Notice the plaque to be further processed after the spinlock is unlocked.
             //
             disappearedPlaque = plaque;
@@ -917,8 +953,8 @@
 
     [self.plaquesOnRadarLock unlock];
 
-    if (disappearedPlaque != nil) {
-        //
+    if (disappearedPlaque != nil)
+    {
         // The following graphics related procedure has to be done outside of spinlock.
         //
         id<PlaquesDelegate> delegate = self.plaquesDelegate;
@@ -935,8 +971,8 @@
 
     for (Plaque *plaque in self.plaquesInSight)
     {
-        if ([plaque.plaqueToken isEqual:plaqueToken] == YES) {
-            //
+        if ([plaque.plaqueToken isEqual:plaqueToken] == YES)
+        {
             // Notice the plaque to be further processed after the spinlock is unlocked.
             //
             disappearedPlaque = plaque;
@@ -950,8 +986,8 @@
 
     [self.plaquesInSightLock unlock];
 
-    if (disappearedPlaque != nil) {
-        //
+    if (disappearedPlaque != nil)
+    {
         // The following graphics related procedure has to be done outside of spinlock.
         //
         id<PlaquesDelegate> delegate = self.plaquesDelegate;
@@ -968,8 +1004,8 @@
 
     for (Plaque *plaque in self.plaquesOnMap)
     {
-        if ([plaque.plaqueToken isEqual:plaqueToken] == YES) {
-            //
+        if ([plaque.plaqueToken isEqual:plaqueToken] == YES)
+        {
             // Notice the plaque to be further processed after the spinlock is unlocked.
             //
             disappearedPlaque = plaque;
@@ -983,8 +1019,8 @@
 
     [self.plaquesOnMapLock unlock];
 
-    if (disappearedPlaque != nil) {
-        //
+    if (disappearedPlaque != nil)
+    {
         // The following graphics related procedure has to be done outside of spinlock.
         //
         id<PlaquesDelegate> delegate = self.plaquesDelegate;
@@ -1065,7 +1101,7 @@
 - (void)downloadPlaque:(NSUUID *)plaqueToken
 {
     [self downloadPlaques:[NSMutableArray arrayWithObject:plaqueToken]
-     broadcastDestination:BroadcastDestinationInSight];
+     broadcastDestination:API_BroadcastDestinationInSight];
 }
 
 - (void)downloadPlaques:(NSMutableArray *)missingPlaques
@@ -1079,16 +1115,16 @@
 
     switch (broadcastDestination)
     {
-        case BroadcastDestinationOnRadar:
-            paquetCommand = PaquetDownloadPlaquesOnRadar;
+        case API_BroadcastDestinationOnRadar:
+            paquetCommand = API_PaquetDownloadPlaquesOnRadar;
             break;
 
-        case BroadcastDestinationInSight:
-            paquetCommand = PaquetDownloadPlaquesInSight;
+        case API_BroadcastDestinationInSight:
+            paquetCommand = API_PaquetDownloadPlaquesInSight;
             break;
 
-        case BroadcastDestinationOnMap:
-            paquetCommand = PaquetDownloadPlaquesOnMap;
+        case API_BroadcastDestinationOnMap:
+            paquetCommand = API_PaquetDownloadPlaquesOnMap;
             break;
 
         default:
@@ -1129,21 +1165,24 @@
     switch (destination)
     {
         case OnRadar:
-            paquetCommand = PaquetDisplacementOnRadar;
+            paquetCommand = API_PaquetDisplacementOnRadar;
             radarRevision = self.onRadarRevision;
-            NSLog(@"Displacement for 'on radar' revision %lu", (unsigned long)radarRevision);
+            NSLog(@"Displacement for 'on radar' revision %lu",
+                  (unsigned long)radarRevision);
             break;
 
         case InSight:
-            paquetCommand = PaquetDisplacementInSight;
+            paquetCommand = API_PaquetDisplacementInSight;
             radarRevision = self.inSightRevision;
-            NSLog(@"Displacement for 'in sight' revision %lu", (unsigned long)radarRevision);
+            NSLog(@"Displacement for 'in sight' revision %lu",
+                  (unsigned long) radarRevision);
             break;
 
         case OnMap:
-            paquetCommand = PaquetDisplacementOnMap;
+            paquetCommand = API_PaquetDisplacementOnMap;
             radarRevision = self.onMapRevision;
-            NSLog(@"Displacement for 'on map' revision %lu", (unsigned long)radarRevision);
+            NSLog(@"Displacement for 'on map' revision %lu",
+                  (unsigned long) radarRevision);
             break;
 
         default:
@@ -1232,13 +1271,13 @@
     if (broadcastPaquet != nil)
         [broadcastPaquet setCancelWhenPossible:YES];
 
-    broadcastPaquet = [[Paquet alloc] initWithCommand:PaquetBroadcast];
+    broadcastPaquet = [[Paquet alloc] initWithCommand:API_PaquetBroadcast];
 
 #ifdef VERBOSE_BROADCAST
-    NSLog(@"Send broadcast request for with revision %u %u %u",
-          (unsigned int)self.onRadarRevision,
-          (unsigned int)self.inSightRevision,
-          (unsigned int)self.onMapRevision);
+    NSLog(@"Send broadcast request: revision=%u/%u/%u",
+          (unsigned int) self.onRadarRevision,
+          (unsigned int) self.inSightRevision,
+          (unsigned int) self.onMapRevision);
 #endif
 
     [broadcastPaquet putUInt32:self.onRadarRevision];
@@ -1262,25 +1301,25 @@
 {
     switch (paquet.commandCode)
     {
-        case PaquetBroadcast:
+        case API_PaquetBroadcast:
             if ([paquet rejectedByCloud] == NO)
                 [self processBroadcast:paquet];
             [self sendBroadcastRequest];
             break;
 
-        case PaquetDownloadPlaquesOnRadar:
+        case API_PaquetDownloadPlaquesOnRadar:
             if ([paquet rejectedByCloud] == NO)
                 [self processDownloadedPlaques:paquet
                                    destination:OnRadar];
             break;
 
-        case PaquetDownloadPlaquesInSight:
+        case API_PaquetDownloadPlaquesInSight:
             if ([paquet rejectedByCloud] == NO)
                 [self processDownloadedPlaques:paquet
                                    destination:InSight];
             break;
 
-        case PaquetDownloadPlaquesOnMap:
+        case API_PaquetDownloadPlaquesOnMap:
             if ([paquet rejectedByCloud] == NO)
                 [self processDownloadedPlaques:paquet
                                    destination:OnMap];
@@ -1305,15 +1344,15 @@
 
         switch (broadcastDestination)
         {
-            case BroadcastDestinationOnRadar:
+            case API_BroadcastDestinationOnRadar:
                 self.onRadarRevision = radarRevision;
                 break;
 
-            case BroadcastDestinationInSight:
+            case API_BroadcastDestinationInSight:
                 self.inSightRevision = radarRevision;
                 break;
 
-            case BroadcastDestinationOnMap:
+            case API_BroadcastDestinationOnMap:
                 self.onMapRevision = radarRevision;
                 break;
 
@@ -1323,9 +1362,9 @@
 
 #ifdef VERBOSE_RADAR
         NSLog(@"Received %d plaques for revision %d (command=0x%08X)",
-              (unsigned int)numberOfPlaques,
-              (unsigned int)radarRevision,
-              (unsigned int)paquet.commandCode);
+              (unsigned int) numberOfPlaques,
+              (unsigned int) radarRevision,
+              (unsigned int) paquet.commandCode);
 #endif
 
         if (numberOfPlaques > 0)
@@ -1344,13 +1383,14 @@
             UInt32 plaqueRevision = [paquet getUInt32];
             Boolean disappeared = [paquet getBoolean];
 
-            if (disappeared == NO) {
+            if (disappeared == NO)
+            {
 #ifdef VERBOSE_RADAR_DETAILS
                 NSLog(@"Plaque %@ revision %d did appear",
                       [plaqueToken UUIDString],
-                      (unsigned int)plaqueRevision);
+                      (unsigned int) plaqueRevision);
 #endif
-                //
+
                 // Plaque has appeared or changed
                 //
                 Plaque *plaque;
@@ -1386,17 +1426,17 @@
                     //
                     switch (broadcastDestination)
                     {
-                        case BroadcastDestinationOnRadar:
+                        case API_BroadcastDestinationOnRadar:
                             if ([self plaqueOnRadarByToken:plaqueToken] == nil)
                                 [self addPlaqueToOnRadar:plaque];
                             break;
 
-                        case BroadcastDestinationInSight:
+                        case API_BroadcastDestinationInSight:
                             if ([self plaqueInSightByToken:plaqueToken] == nil)
                                 [self addPlaqueToInSight:plaque];
                             break;
 
-                        case BroadcastDestinationOnMap:
+                        case API_BroadcastDestinationOnMap:
                             if ([self plaqueOnMapByToken:plaqueToken] == nil)
                                 [self addPlaqueToOnMap:plaque];
                             break;
@@ -1407,11 +1447,14 @@
 
                     // If plaque on server is newer than in local database then flag it for update.
                     //
-                    if (plaque != nil) {
+                    if (plaque != nil)
+                    {
                         if ([plaque plaqueRevision] < plaqueRevision)
                             [missingPlaques addObject:plaqueToken];
                     }
-                } else {
+                }
+                else
+                {
                     //
                     // Otherwise it does not exist in local database.
                     //
@@ -1451,36 +1494,38 @@
                      broadcastDestination:broadcastDestination];
                     [missingPlaques removeAllObjects];
                 }
-            } else {
+            }
+            else
+            {
                 //
                 // Plaque has disappeared.
                 //
                 switch (broadcastDestination)
                 {
-                    case BroadcastDestinationOnRadar:
+                    case API_BroadcastDestinationOnRadar:
                         [self removePlaqueFromOnRadar:plaqueToken];
 #ifdef VERBOSE_RADAR_DETAILS
                         NSLog(@"Plaque %@ revision %u did disappear 'on radar'",
                               [plaqueToken UUIDString],
-                              (unsigned int)plaqueRevision);
+                              (unsigned int) plaqueRevision);
 #endif
                         break;
 
-                    case BroadcastDestinationInSight:
+                    case API_BroadcastDestinationInSight:
                         [self removePlaqueFromInSight:plaqueToken];
 #ifdef VERBOSE_RADAR_DETAILS
                         NSLog(@"Plaque %@ revision %u did disappear 'in sight'",
                               [plaqueToken UUIDString],
-                              (unsigned int)plaqueRevision);
+                              (unsigned int) plaqueRevision);
 #endif
                         break;
                         
-                    case BroadcastDestinationOnMap:
+                    case API_BroadcastDestinationOnMap:
                         [self removePlaqueFromOnMap:plaqueToken];
 #ifdef VERBOSE_RADAR_DETAILS
                         NSLog(@"Plaque %@ revision %u did disappear 'on map'",
                               [plaqueToken UUIDString],
-                              (unsigned int)plaqueRevision);
+                              (unsigned int) plaqueRevision);
 #endif
                         break;
 
@@ -1492,8 +1537,8 @@
 
         // Are there still any candidates for download in a queue ...
         //
-        if ([missingPlaques count] > 0) {
-            //
+        if ([missingPlaques count] > 0)
+        {
             // ... then send download request.
             //
             [self downloadPlaques:missingPlaques
@@ -1525,11 +1570,11 @@
             // Extract all plaque properties out of the paquet.
             //
             UInt32 strobe = [paquet getUInt32];
-            if (strobe != PaquetPlaqueStrobe) {
+
+            if (strobe != API_PaquetPlaqueStrobe)
                 @throw [NSException exceptionWithName:@"Plaque"
                                                reason:@"No strobe"
                                              userInfo:nil];
-            }
 
             NSUUID *plaqueToken = [paquet getToken];
             UInt32 revision = [paquet getUInt32];
@@ -1604,7 +1649,7 @@
 
                     // Flag it as needs to be stored in local database ...
                     //
-                    //[plaque saveInDatabase];
+                    [plaque saveToDatabase];
 
                     // ... then add it to cache.
                     //
@@ -1613,8 +1658,8 @@
                     // If this plaque is still on workdesk ...
                     //
                     Plaque *plaqueOnWorkdesk = [self plaqueOnWorkdeskByToken:plaqueToken];
-                    if (plaqueOnWorkdesk != nil) {
-                        //
+                    if (plaqueOnWorkdesk != nil)
+                    {
                         // ... then chain it with its original.
                         //
                         plaque.cloneChain = plaqueOnWorkdesk;
@@ -1650,8 +1695,8 @@
             //
             for (NSUUID *awaitingPlaqueToken in self.plaquesAwaitingDownload)
             {
-                if ([awaitingPlaqueToken isEqual:plaqueToken] == YES) {
-                    //
+                if ([awaitingPlaqueToken isEqual:plaqueToken] == YES)
+                {
                     // Remove corresponding entry from awaiting download list.
                     //
                     [self.plaquesAwaitingDownload removeObject:awaitingPlaqueToken];
@@ -1664,17 +1709,17 @@
             //
             switch (paquet.commandCode)
             {
-                case PaquetDownloadPlaquesOnRadar:
+                case API_PaquetDownloadPlaquesOnRadar:
                     if ([self plaqueOnRadarByToken:plaqueToken] == nil)
                         [self addPlaqueToOnRadar:plaque];
                     break;
 
-                case PaquetDownloadPlaquesInSight:
+                case API_PaquetDownloadPlaquesInSight:
                     if ([self plaqueInSightByToken:plaqueToken] == nil)
                         [self addPlaqueToInSight:plaque];
                     break;
 
-                case PaquetDownloadPlaquesOnMap:
+                case API_PaquetDownloadPlaquesOnMap:
                     if ([self plaqueOnMapByToken:plaqueToken] == nil)
                         [self addPlaqueToOnMap:plaque];
                     break;

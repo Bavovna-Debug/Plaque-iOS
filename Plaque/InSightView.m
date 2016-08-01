@@ -130,7 +130,8 @@
 {
     [super layoutSubviews];
 
-    if (self.superview != nil) {
+    if (self.superview != nil)
+    {
         CGRect containterFrame = self.bounds;
         containterFrame.origin.y = -containterFrame.size.height;
         containterFrame.size.height *= 3.0f;
@@ -209,7 +210,7 @@
 
     [self.motionManager startAccelerometerUpdatesToQueue:[NSOperationQueue currentQueue]
                                              withHandler:^(CMAccelerometerData *accelerometerData, NSError *error)
-     {
+    {
          //CGFloat tilt = correctDegrees(radiandsToDegrees(-atan2f(accelerometerData.acceleration.y, accelerometerData.acceleration.z)) - 90.0f);
          CGFloat tilt = atan2f(accelerometerData.acceleration.y, accelerometerData.acceleration.z) + M_PI_2;
 
@@ -249,7 +250,8 @@
 - (void)stopCapturer
 {
     NSTimer *captureTimer = self.captureTimer;
-    if (captureTimer != nil) {
+    if (captureTimer != nil)
+    {
         self.captureTimer = nil;
         [captureTimer invalidate];
     }
@@ -266,7 +268,8 @@
 
         // If corresponding plaque is chained ...
         //
-        if (plaque.cloneChain != nil) {
+        if (plaque.cloneChain != nil)
+        {
             Plaques *plaques = [Plaques sharedPlaques];
 
             // ... then skip this plaque if it is not the one on workdesk.
@@ -274,8 +277,10 @@
             if ([plaques.plaquesOnWorkdesk containsObject:plaques] == NO)
                 continue;
         }
+
         CGFloat distanceToAim = [inSightPlaque distanceToAimWithTiltOffset:tiltOffset];
-        if (distanceToAim < closedDistanceToAim) {
+        if (distanceToAim < closedDistanceToAim)
+        {
             closedDistanceToAim = distanceToAim;
             capturedPlaque = inSightPlaque.plaque;
         }
@@ -296,7 +301,8 @@
     if ([self.tiltLock tryLock] == FALSE)
         return;
 
-    if ((self.tilt < -(M_PI_2 / 90.0f * 50.0f)) || (self.tilt > (M_PI_2 / 90.0f * 40.0f))) {
+    if ((self.tilt < -(M_PI_2 / 90.0f * 50.0f)) || (self.tilt > (M_PI_2 / 90.0f * 40.0f)))
+    {
         [self.tiltLock unlock];
         return;
     }
@@ -324,7 +330,8 @@
         InSightPlaque *existingInSightPlaque = nil;
         for (InSightPlaque *inSightPlaque in plaquesAlreadyInSight)
         {
-            if (inSightPlaque.plaque == plaque) {
+            if (inSightPlaque.plaque == plaque)
+            {
                 existingInSightPlaque = inSightPlaque;
                 break;
             }
@@ -344,7 +351,8 @@
         InSightPlaque *existingInSightPlaque = nil;
         for (InSightPlaque *inSightPlaque in plaquesAlreadyInSight)
         {
-            if (inSightPlaque.plaque == plaque) {
+            if (inSightPlaque.plaque == plaque)
+            {
                 existingInSightPlaque = inSightPlaque;
                 break;
             }
@@ -437,7 +445,8 @@
 
     [inSightPlaque setDirectionFromUser:directionFromUser];
 
-    if ([plaque directed] == YES) {
+    if ([plaque directed] == YES)
+    {
         CLLocationDirection rotationOnScreen;
 
         rotationOnScreen = correctDegrees(plaque.direction - oppositeDirection(self.heading.trueHeading));
@@ -477,11 +486,13 @@
 
     CALayer *layer = [(CALayer *)self.layer.presentationLayer hitTest:point];
     layer = layer.modelLayer;
-    if (layer != self.container) {
-        //
+
+    if (layer != self.container)
+    {
         // Get the high level layer.
         //
-        while (layer.delegate == nil) {
+        while (layer.delegate == nil)
+        {
             layer = layer.superlayer;
             if (layer == nil)
                 break;
@@ -490,7 +501,8 @@
         // If a layer under touch belongs to some InSightPlaque then capture it
         // and deactivate automatic capturer for a while.
         //
-        if ((layer != nil) && (layer.superlayer == self.container)) {
+        if ((layer != nil) && (layer.superlayer == self.container))
+        {
             [self stopCapturer];
             [self startCapturerWithInterval:CaptureOffAfterSelectionByUserInterval];
 
@@ -558,7 +570,8 @@
 - (void)plaqueDidDisappearFromInSight:(Plaque *)plaque
 {
     InSightPlaque *inSightPlaque = [self inSightPlaqueByPlaque:plaque];
-    if (inSightPlaque != nil) {
+    if (inSightPlaque != nil)
+    {
         [self.refreshLock lock];
         [inSightPlaque didDisappear];
         [self.inSightPlaques removeObject:inSightPlaque];
@@ -584,7 +597,8 @@
 - (void)plaqueDidDisappearFromWorkdesk:(Plaque *)plaque
 {
     InSightPlaque *inSightPlaque = [self inSightPlaqueByPlaque:plaque];
-    if (inSightPlaque != nil) {
+    if (inSightPlaque != nil)
+    {
         [self.refreshLock lock];
         [inSightPlaque didDisappear];
         [self.inSightPlaques removeObject:inSightPlaque];
@@ -595,7 +609,8 @@
 - (void)plaqueDidChangeLocation:(Plaque *)plaque
 {
     InSightPlaque *inSightPlaque = [self inSightPlaqueByPlaque:plaque];
-    if (inSightPlaque != nil) {
+    if (inSightPlaque != nil)
+    {
         [self recalculateInSightPlaque:inSightPlaque
                            forLocation:nil];
 
@@ -608,7 +623,8 @@
 - (void)plaqueDidChangeOrientation:(Plaque *)plaque
 {
     InSightPlaque *inSightPlaque = [self inSightPlaqueByPlaque:plaque];
-    if (inSightPlaque != nil) {
+    if (inSightPlaque != nil)
+    {
         [self recalculateInSightPlaque:inSightPlaque
                             forHeading:nil];
 
@@ -666,8 +682,10 @@
 {
     NSString *mediaType = AVMediaTypeVideo;
 
-    if ([AVCaptureDevice respondsToSelector:@selector(requestAccessForMediaType:completionHandler:)]) {
-        [AVCaptureDevice requestAccessForMediaType:mediaType completionHandler:^(BOOL granted) {
+    if ([AVCaptureDevice respondsToSelector:@selector(requestAccessForMediaType:completionHandler:)])
+    {
+        [AVCaptureDevice requestAccessForMediaType:mediaType completionHandler:^(BOOL granted)
+        {
             if (granted) {
                 self.cameraAuthorized = YES;
             } else {
@@ -698,7 +716,7 @@
         [self.cameraController setShowsCameraControls:NO];
         [self.cameraController setToolbarHidden:YES];
         [self.cameraController setNavigationBarHidden:YES];
-        [self.cameraController setWantsFullScreenLayout:YES];
+        [self.cameraController setEdgesForExtendedLayout:UIRectEdgeAll];
         [self.cameraController.view setAlpha:0.4f];
 
         CGRect screenBounds = [[UIScreen mainScreen] bounds];
@@ -709,7 +727,9 @@
 
         self.cameraScaleFactor = CGRectGetHeight(screenBounds) / cameraViewHeight;
 
-        CGAffineTransform transform = CGAffineTransformMakeTranslation(0, (CGRectGetHeight(screenBounds) - cameraViewHeight) / 2.0);
+        CGAffineTransform transform =
+        CGAffineTransformMakeTranslation(0, (CGRectGetHeight(screenBounds) - cameraViewHeight) / 2.0);
+
         transform = CGAffineTransformScale(transform, self.cameraScaleFactor, self.cameraScaleFactor);
         [self.cameraController setCameraViewTransform:transform];
 
@@ -740,7 +760,8 @@
 
 - (void)switchCameraOff
 {
-    if (self.cameraController != nil) {
+    if (self.cameraController != nil)
+    {
         [self.cameraController.view removeFromSuperview];
         self.cameraController = nil;
     }

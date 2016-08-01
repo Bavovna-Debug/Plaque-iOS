@@ -33,7 +33,8 @@
     static dispatch_once_t onceToken;
     static Navigator *navigator;
 
-    dispatch_once(&onceToken, ^{
+    dispatch_once(&onceToken, ^
+    {
         navigator = [[Navigator alloc] init];
     });
 
@@ -76,11 +77,11 @@
     if (inBackground != _inBackground) {
         _inBackground = inBackground;
         if (inBackground == YES) {
-            NSLog(@"BACKGROUND");
+            NSLog(@"Switch navigator to background");
             [self.locationManager setDistanceFilter:backgroundDistance];
             [self.locationManager setDesiredAccuracy:backgroundAccuracy];
         } else {
-            NSLog(@"FOREGROUND");
+            NSLog(@"Switch navigator to foreground");
             [self.locationManager setDistanceFilter:foregroundDistance];
             [self.locationManager setDesiredAccuracy:foregroundAccuracy];
         }

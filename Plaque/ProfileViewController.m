@@ -246,7 +246,10 @@
     UIFont *fieldFont = [UIFont systemFontOfSize:15.0f];
     UIFont *helpFont = [UIFont systemFontOfSize:13.0f];
 
-    CGSize labelTextSize = [profileNameLabelText sizeWithFont:labelFont];
+    CGSize labelTextSize = [profileNameLabelText sizeWithAttributes:
+                            @{NSFontAttributeName:labelFont}];
+    labelTextSize = CGSizeMake(ceilf(labelTextSize.width), ceilf(labelTextSize.height));
+
     labelTextSize.width += margin.width * 2;
     CGRect validatorRect = CGRectMake(0.0f, 00.0f, CGRectGetWidth(cellViewFrame), 40.0f);
     CGRect labelRect = CGRectMake(0.0f, 40.0f, labelTextSize.width, 32.0f);
@@ -340,8 +343,9 @@
     UIFont *labelFont = [UIFont systemFontOfSize:15.0f];
     UIFont *fieldFont = [UIFont systemFontOfSize:15.0f];
 
-    CGSize labelTextSize = [userFullNameLabelText sizeWithFont:labelFont];
-
+    CGSize labelTextSize = [userFullNameLabelText sizeWithAttributes:
+                            @{NSFontAttributeName:labelFont}];
+    labelTextSize = CGSizeMake(ceilf(labelTextSize.width), ceilf(labelTextSize.height));
     labelTextSize.width += 8.0f;
 
     CGRect labelRect = CGRectMake(8.0f, 8.0f, labelTextSize.width, 32.0f);
@@ -405,8 +409,11 @@
     UIFont *labelFont = [UIFont systemFontOfSize:15.0f];
     UIFont *fieldFont = [UIFont systemFontOfSize:15.0f];
 
-    CGSize labelTextSize = [profileNameLabelText sizeWithFont:labelFont];
+    CGSize labelTextSize = [profileNameLabelText sizeWithAttributes:
+                            @{NSFontAttributeName:labelFont}];
+    labelTextSize = CGSizeMake(ceilf(labelTextSize.width), ceilf(labelTextSize.height));
     labelTextSize.width += 8.0f;
+
     CGRect labelRect = CGRectMake(8.0f, 8.0f, labelTextSize.width, 32.0f);
     CGRect fieldRect = CGRectMake(labelTextSize.width,
                                   8.0f,
@@ -471,7 +478,7 @@
         return;
 
     NSString *currentProfileName = [self.profileNameField text];
-    if ([currentProfileName length] < MinimumProfileNameLength) {
+    if ([currentProfileName length] < API_MinimumProfileNameLength) {
         [self.profileNameValidationMessage setText:@""];
         [self.profileNameValdateLock unlock];
     } else if ([currentProfileName isEqualToString:self.previousProfileName] == YES) {
@@ -484,12 +491,12 @@
         [self.profileNameValidationMessage setTextColor:[UIColor yellowColor]];
         [self.profileNameValidationMessage setText:message];
 
-        Paquet *paquet = [[Paquet alloc] initWithCommand:PaquetValidateProfileName];
+        Paquet *paquet = [[Paquet alloc] initWithCommand:API_PaquetValidateProfileName];
 
         [paquet setSenderDelegate:self];
 
         [paquet putFixedString:currentProfileName
-                        length:BonjourProfileNameLength];
+                        length:API_BonjourProfileNameLength];
 
         [paquet send];
 
@@ -514,7 +521,7 @@
         UIColor *messageColor;
         switch (statusCode)
         {
-            case PaquetProfileNameAvailable:
+            case API_PaquetProfileNameAvailable:
                 message = NSLocalizedString(@"PROFILE_FORM_PROFILE_NAME_IS_AVAILABLE_MESSAGE", nil);
                 message = [NSString stringWithFormat:message, self.previousProfileName];
                 messageColor = [UIColor greenColor];
@@ -523,7 +530,7 @@
 
                 break;
 
-            case PaquetProfileNameAlreadyInUse:
+            case API_PaquetProfileNameAlreadyInUse:
                 message = NSLocalizedString(@"PROFILE_FORM_PROFILE_NAME_ALREADY_IN_USE_MESSAGE", nil);
                 message = [NSString stringWithFormat:message, self.previousProfileName];
                 messageColor = [UIColor redColor];
@@ -559,19 +566,19 @@
     else
         passwordMD5 = [passwordMD5 MD5];
 
-    Paquet *paquet = [[Paquet alloc] initWithCommand:PaquetCreateProfile];
+    Paquet *paquet = [[Paquet alloc] initWithCommand:API_PaquetCreateProfile];
     self.paquet = paquet;
 
     [paquet setSenderDelegate:self];
 
     [paquet putFixedString:profileName
-                    length:BonjourProfileNameLength];
+                    length:API_BonjourProfileNameLength];
     [paquet putFixedString:userFullName
-                    length:BonjourUserNameLength];
+                    length:API_BonjourUserNameLength];
     [paquet putFixedString:passwordMD5
-                    length:BonjourMD5Length];
+                    length:API_BonjourMD5Length];
     [paquet putFixedString:emailAddress
-                    length:BonjourEmailAddressLength];
+                    length:API_BonjourEmailAddressLength];
 
     [paquet send];
 }
@@ -582,7 +589,7 @@
 
     switch (paquetStatus)
     {
-        case BonjourCreateSucceeded:
+        case API_BonjourCreateSucceeded:
         {
             NSUUID *profileToken = [paquet getToken];
             [[Authentificator sharedAuthentificator] setProfileToken:profileToken];
@@ -591,7 +598,7 @@
             break;
         }
 
-        case BonjourCreateProfileNameAlreadyInUse:
+        case API_BonjourCreateProfileNameAlreadyInUse:
         {
             NSString *message;
             UIColor *messageColor;
@@ -604,7 +611,7 @@
             break;
         }
 
-        case BonjourCreateProfileNameConstraint:
+        case API_BonjourCreateProfileNameConstraint:
         {
             NSString *message;
             UIColor *messageColor;
@@ -617,11 +624,11 @@
             break;
         }
 
-        case BonjourCreateProfileEmailAlreadyInUse:
+        case API_BonjourCreateProfileEmailAlreadyInUse:
             NSLog(@"BonjourCreateProfileEmailAlreadyInUse");
             break;
 
-        case BonjourCreateProfileEmailConstraint:
+        case API_BonjourCreateProfileEmailConstraint:
             NSLog(@"BonjourCreateProfileEmailConstraint");
             break;
 
@@ -692,11 +699,11 @@ shouldHighlightRowAtIndexPath:(NSIndexPath *)indexPath
 
     switch (paquet.commandCode)
     {
-        case PaquetValidateProfileName:
+        case API_PaquetValidateProfileName:
             [self paquetProfileNameValidation:paquet];
             break;
 
-        case PaquetCreateProfile:
+        case API_PaquetCreateProfile:
             [self paquetCreateProfile:paquet];
             break;
 
@@ -714,11 +721,11 @@ shouldHighlightRowAtIndexPath:(NSIndexPath *)indexPath
 
     switch (paquet.commandCode)
     {
-        case PaquetValidateProfileName:
+        case API_PaquetValidateProfileName:
             [self paquetProfileNameValidation:nil];
             break;
 
-        case PaquetCreateProfile:
+        case API_PaquetCreateProfile:
             [self paquetCreateProfile:nil];
             break;
 

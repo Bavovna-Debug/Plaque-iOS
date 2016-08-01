@@ -904,7 +904,7 @@
         //
         if ([self.inscription length] > 1)
         {
-            Paquet *paquet = [[Paquet alloc] initWithCommand:PaquetPostNewPlaque];
+            Paquet *paquet = [[Paquet alloc] initWithCommand:API_PaquetPostNewPlaque];
             self.uploadPaquet = paquet;
 
             [paquet setSenderDelegate:self];
@@ -971,7 +971,7 @@
                     [locationPaquet setCancelWhenPossible:YES];
                 }
 
-                Paquet *paquet = [[Paquet alloc] initWithCommand:PaquetPlaqueModifiedLocation];
+                Paquet *paquet = [[Paquet alloc] initWithCommand:API_PaquetPlaqueModifiedLocation];
                 self.locationPaquet = paquet;
 
                 [paquet setSenderDelegate:self];
@@ -1011,7 +1011,7 @@
                     [orientationPaquet setCancelWhenPossible:YES];
                 }
 
-                Paquet *paquet = [[Paquet alloc] initWithCommand:PaquetPlaqueModifiedOrientation];
+                Paquet *paquet = [[Paquet alloc] initWithCommand:API_PaquetPlaqueModifiedOrientation];
                 self.orientationPaquet = paquet;
 
                 [paquet setSenderDelegate:self];
@@ -1052,7 +1052,7 @@
                     [sizePaquet setCancelWhenPossible:YES];
                 }
 
-                Paquet *paquet = [[Paquet alloc] initWithCommand:PaquetPlaqueModifiedSize];
+                Paquet *paquet = [[Paquet alloc] initWithCommand:API_PaquetPlaqueModifiedSize];
                 self.sizePaquet = paquet;
 
                 [paquet setSenderDelegate:self];
@@ -1087,7 +1087,7 @@
                     [colorPaquet setCancelWhenPossible:YES];
                 }
 
-                Paquet *paquet = [[Paquet alloc] initWithCommand:PaquetPlaqueModifiedColors];
+                Paquet *paquet = [[Paquet alloc] initWithCommand:API_PaquetPlaqueModifiedColors];
                 self.colorPaquet = paquet;
 
                 [paquet setSenderDelegate:self];
@@ -1121,7 +1121,7 @@
                     [fontPaquet setCancelWhenPossible:YES];
                 }
 
-                Paquet *paquet = [[Paquet alloc] initWithCommand:PaquetPlaqueModifiedFont];
+                Paquet *paquet = [[Paquet alloc] initWithCommand:API_PaquetPlaqueModifiedFont];
                 self.fontPaquet = paquet;
 
                 [paquet setSenderDelegate:self];
@@ -1130,7 +1130,9 @@
                 [paquet putFloat:self.fontSize];
 
 #ifdef VERBOSE_PLAQUE_CHANGE
-                NSLog(@"Plaque change font: %f->%f", original.fontSize, self.fontSize);
+                NSLog(@"Plaque change font: %f->%f",
+                      original.fontSize,
+                      self.fontSize);
 #endif
 
                 [paquet send];
@@ -1150,7 +1152,7 @@
                     [inscriptionPaquet setCancelWhenPossible:YES];
                 }
 
-                Paquet *paquet = [[Paquet alloc] initWithCommand:PaquetPlaqueModifiedInscription];
+                Paquet *paquet = [[Paquet alloc] initWithCommand:API_PaquetPlaqueModifiedInscription];
                 self.inscriptionPaquet = paquet;
 
                 [paquet setSenderDelegate:self];
@@ -1159,7 +1161,8 @@
                 [paquet putString:self.inscription];
 
 #ifdef VERBOSE_PLAQUE_CHANGE
-                NSLog(@"Plaque change inscription request: <%@>", self.inscription);
+                NSLog(@"Plaque change inscription request: <%@>",
+                      self.inscription);
 #endif
 
                 [paquet send];
@@ -1178,39 +1181,41 @@
 {
     switch (paquet.commandCode)
     {
-        case PaquetPostNewPlaque:
+        case API_PaquetPostNewPlaque:
         {
             UInt32 status = [paquet getUInt32];
             NSUUID *plaqueToken = [paquet getToken];
 
 #ifdef VERBOSE_PLAQUE_UPLOAD
-            if (status == PaquetCreatePlaqueSucceeded) {
-                NSLog(@"Plaque created with token %@", [plaqueToken UUIDString]);
+            if (status == API_PaquetCreatePlaqueSucceeded) {
+                NSLog(@"Plaque created with token %@",
+                      [plaqueToken UUIDString]);
             } else {
                 NSLog(@"Plaque creation failed");
             }
 #endif
 
-            if (status == PaquetCreatePlaqueSucceeded) {
+            if (status == API_PaquetCreatePlaqueSucceeded)
                 [self setPlaqueToken:plaqueToken];
-            }
 
             [[Plaques sharedPlaques] downloadPlaque:plaqueToken];
 
-            [[StatusBar sharedStatusBar] postMessage:NSLocalizedString(@"STATUS_BAR_NEW_PLAQUE_SYNCRONIZED", nil)];
+            [[StatusBar sharedStatusBar] postMessage:
+             NSLocalizedString(@"STATUS_BAR_NEW_PLAQUE_SYNCRONIZED", nil)];
 
             break;
         }
 
-        case PaquetPlaqueModifiedLocation:
-        case PaquetPlaqueModifiedOrientation:
-        case PaquetPlaqueModifiedSize:
-        case PaquetPlaqueModifiedColors:
-        case PaquetPlaqueModifiedFont:
-        case PaquetPlaqueModifiedInscription:
+        case API_PaquetPlaqueModifiedLocation:
+        case API_PaquetPlaqueModifiedOrientation:
+        case API_PaquetPlaqueModifiedSize:
+        case API_PaquetPlaqueModifiedColors:
+        case API_PaquetPlaqueModifiedFont:
+        case API_PaquetPlaqueModifiedInscription:
             //[[Plaques sharedPlaques] downloadPlaque:self.cloneChain.plaqueToken];
 
-            [[StatusBar sharedStatusBar] postMessage:NSLocalizedString(@"STATUS_BAR_PLAQUE_CHANGES_SYNCRONIZED", nil)];
+            [[StatusBar sharedStatusBar] postMessage:
+             NSLocalizedString(@"STATUS_BAR_PLAQUE_CHANGES_SYNCRONIZED", nil)];
             break;
 
         default:
@@ -1250,9 +1255,10 @@
 {
     CGRect plaqueFrame = plaqueLayer.bounds;
 
-    CALayer *inscriptionLayer = [CATextLayer layer];
+    CALayer *inscriptionLayer;
 
-    if (self.image == nil) {
+    if (self.image == nil)
+    {
         NSString *fontFamily = @"HelveticaNeue";
         CGFloat fontSize = [self fontSize];
         NSString *inscription = [self inscription];
@@ -1268,17 +1274,10 @@
 
 
         CGRect textFrame;
-        float systemVersion = [[[UIDevice currentDevice] systemVersion] floatValue];
-        if (systemVersion < 7.0f) {
-            CGSize textSize = [inscription sizeWithFont:[UIFont systemFontOfSize:fontSize]
-                                      constrainedToSize:maxTextSize];
-            textFrame = (CGRect){ CGPointZero, textSize };
-        } else {
-            textFrame = [inscription boundingRectWithSize:maxTextSize
-                                                  options:NSStringDrawingUsesLineFragmentOrigin
-                                               attributes:attributes
-                                                  context:nil];
-        }
+        textFrame = [inscription boundingRectWithSize:maxTextSize
+                                              options:NSStringDrawingUsesLineFragmentOrigin
+                                           attributes:attributes
+                                              context:nil];
 
         textFrame = CGRectOffset(textFrame,
                                  (CGRectGetWidth(plaqueFrame) - CGRectGetWidth(textFrame)) / 2,
@@ -1294,7 +1293,9 @@
         [textLayer setFontSize:fontSize];
 
         inscriptionLayer = textLayer;
-    } else {
+    }
+    else
+    {
         CGRect imageFrame = CGRectInset(plaqueFrame, 4.0f, 4.0f);
         CALayer *imageLayer = [CALayer layer];
         [imageLayer setContents:(id)[self.image CGImage]];
@@ -1316,7 +1317,8 @@
 {
     CGRect plaqueFrame = plaqueLayer.bounds;
 
-    if (self.image == nil) {
+    if (self.image == nil)
+    {
         NSString *fontFamily = @"HelveticaNeue";
         CGFloat fontSize = CGRectGetHeight(plaqueFrame) * [self fontSize];
         NSString *inscription = [self inscription];
@@ -1332,17 +1334,10 @@
 
 
         CGRect textFrame;
-        float systemVersion = [[[UIDevice currentDevice] systemVersion] floatValue];
-        if (systemVersion < 7.0f) {
-            CGSize textSize = [inscription sizeWithFont:[UIFont systemFontOfSize:fontSize]
-                                      constrainedToSize:maxTextSize];
-            textFrame = (CGRect){ CGPointZero, textSize };
-        } else {
-            textFrame = [inscription boundingRectWithSize:maxTextSize
-                                                  options:NSStringDrawingUsesLineFragmentOrigin
-                                               attributes:attributes
-                                                  context:nil];
-        }
+        textFrame = [inscription boundingRectWithSize:maxTextSize
+                                              options:NSStringDrawingUsesLineFragmentOrigin
+                                           attributes:attributes
+                                              context:nil];
 
         textFrame = CGRectOffset(textFrame,
                                  (CGRectGetWidth(plaqueFrame) - CGRectGetWidth(textFrame)) / 2,
@@ -1352,7 +1347,9 @@
         [textLayer setFrame:textFrame];
         [textLayer setFont:(CFTypeRef)fontFamily];
         [textLayer setFontSize:fontSize];
-    } else {
+    }
+    else
+    {
         CGRect imageFrame = CGRectInset(plaqueFrame, 4.0f, 4.0f);
         CALayer *imageLayer = (CALayer *)inscriptionLayer;
         [imageLayer setFrame:imageFrame];

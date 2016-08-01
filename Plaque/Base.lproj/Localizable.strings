@@ -42,6 +42,7 @@
 "EDIT_MODE_FONT_BUTTON"                     = "Font size";
 "EDIT_MODE_INSCRIPTION_BUTTON"              = "Inscription";
 
+"STATUS_BAR_VPCLOUD_ESTABLISH_CONNECTION"   = "Connecting to vpCloud";
 "STATUS_BAR_VPCLOUD_CANNOT_CONNECT"         = "Cannot connect to vpCloud";
 "STATUS_BAR_VPCLOUD_SCHEDULE_RECONNECT"     = "Will retry to connect to vpCloud in %f seconds";
 "STATUS_BAR_VPCLOUD_CONNECTION_ESTABLISHED" = "Connection with vpCloud established";

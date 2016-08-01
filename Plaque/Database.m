@@ -7,7 +7,7 @@
 #import "Database.h"
 
 #ifdef DEBUG
-#define DATABASE_NAME   @"plaque2"
+#define DATABASE_NAME   @"plaque3"
 #define TEMPLATE_NAME   @"plaque"
 #else
 #define DATABASE_NAME   @"plaque"
@@ -21,7 +21,8 @@
     static dispatch_once_t onceToken;
     static SQLiteDatabase *database;
 
-    dispatch_once(&onceToken, ^{
+    dispatch_once(&onceToken, ^
+    {
         database = [[SQLiteDatabase alloc] initWithDatabaseName:DATABASE_NAME
                                                    templateName:TEMPLATE_NAME];
         

@@ -202,9 +202,11 @@
 - (void)touchesEnded:(NSSet *)touches
            withEvent:(UIEvent *)event
 {
+    /*
     UITouch *touch = [touches anyObject];
     CGPoint point = [touch locationInView:[touch view]];
     point = [[touch view] convertPoint:point toView:self];
+    */
 
     self.resizing = NO;
 }

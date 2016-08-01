@@ -28,7 +28,8 @@
     static dispatch_once_t onceToken;
     static Profiles *profiles;
 
-    dispatch_once(&onceToken, ^{
+    dispatch_once(&onceToken, ^
+    {
         profiles = [[Profiles alloc] init];
     });
 
@@ -90,7 +91,7 @@
 
 - (void)requestProfileDownload:(NSUUID *)profileToken
 {
-    Paquet *paquet = [[Paquet alloc] initWithCommand:PaquetDownloadProfiles];
+    Paquet *paquet = [[Paquet alloc] initWithCommand:API_PaquetDownloadProfiles];
 
     [paquet setSenderDelegate:self];
 

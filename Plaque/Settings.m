@@ -34,7 +34,8 @@
     static dispatch_once_t onceToken;
     static Settings *settings;
 
-    dispatch_once(&onceToken, ^{
+    dispatch_once(&onceToken, ^
+    {
         settings = [[Settings alloc] init];
     });
 

@@ -61,12 +61,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 
     [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
 
-    if (systemVersion < 8.0f) {
-        [[UIApplication sharedApplication] registerForRemoteNotificationTypes:
-         (UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound | UIRemoteNotificationTypeAlert)];
-    } else {
-        [[UIApplication sharedApplication] registerForRemoteNotifications];
-    }
+    [[UIApplication sharedApplication] registerForRemoteNotifications];
 
     NSDictionary *remoteNotif = [launchOptions objectForKey:UIApplicationLaunchOptionsRemoteNotificationKey];
     if (remoteNotif != nil)

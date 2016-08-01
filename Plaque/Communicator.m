@@ -22,6 +22,7 @@
 #define VERBOSE_STREAM
 #define VERBOSE_INPUT
 #define VERBOSE_PROCESS_CARDS
+#define DUMP_RECEIVED_PAYLOAD
 #endif
 
 #define BytesPerSendFragment                512
@@ -80,7 +81,8 @@
     static dispatch_once_t onceToken;
     static Communicator *communicator;
 
-    dispatch_once(&onceToken, ^{
+    dispatch_once(&onceToken, ^
+    {
         communicator = [[Communicator alloc] init];
     });
 
@@ -168,7 +170,7 @@
     {
         // Paquet signature.
         //
-        UInt64 signature = CFSwapInt64HostToBig(PaquetSignature);
+        UInt64 signature = CFSwapInt64HostToBig(API_PaquetSignature);
         [piece appendBytes:&signature
                     length:sizeof(signature)];
 
@@ -191,7 +193,8 @@
 
     NSUInteger payloadSize = [paquet.payload length];
 
-    if ([piece length] + payloadSize <= BytesPerSendFragment) {
+    if ([piece length] + payloadSize <= BytesPerSendFragment)
+    {
         [piece appendData:paquet.payload];
 
         [self.outputPiecesLock lock];
@@ -200,9 +203,9 @@
 
 #ifdef VERBOSE_ENQUEUE
         NSLog(@"Enqueue single piece of paquet %d with %lu bytes command=0x%08X",
-              (unsigned int)paquet.paquetId,
-              (unsigned long)[piece length],
-              (unsigned int)[paquet commandCode]);
+              (unsigned int) paquet.paquetId,
+              (unsigned long) [piece length],
+              (unsigned int) [paquet commandCode]);
 #endif
     } else {
         NSUInteger packedBytes = 0;
@@ -216,8 +219,8 @@
             [self.outputPieces addObject:piece];
 #ifdef VERBOSE_ENQUEUE
             NSLog(@"Enqueue piece of paquet %d with %lu bytes",
-                  (unsigned int)paquet.paquetId,
-                  (unsigned long)[piece length]);
+                  (unsigned int) paquet.paquetId,
+                  (unsigned long) [piece length]);
 #endif
 
             // Reset piece for next loop.
@@ -241,8 +244,8 @@
 {
     [self.paquets removeObject:paquet];
 
-    if (disconnectWhenPossible == TRUE) {
-        //
+    if (disconnectWhenPossible == TRUE)
+    {
         // If a non-forced disconnect has being requested then do disconnect
         // if there are no outstanding paquets in a queue.
         //
@@ -252,7 +255,8 @@
         disconnectWhenPossible = FALSE;
     }
 
-    dispatch_async(dispatch_get_main_queue(), ^{
+    dispatch_async(dispatch_get_main_queue(), ^
+    {
         [paquet complete:payload];
     });
 }
@@ -261,7 +265,8 @@
 {
     // If not connected then start connect.
     //
-    if (connected == NO) {
+    if (connected == NO)
+    {
 #ifdef VERBOSE_SOCKET_CONNECTION
         NSLog(@"Not connected");
 #endif
@@ -276,7 +281,8 @@
             needToLoop = FALSE;
             for (Paquet *paquet in self.paquets)
             {
-                if ([paquet cancelWhenPossible] == YES) {
+                if ([paquet cancelWhenPossible] == YES)
+                {
                     [self.paquets removeObject:paquet];
                     needToLoop = TRUE;
                     break;
@@ -290,11 +296,14 @@
         [self.paquetsLock unlock];
     }
 
-    if (dialogueEstablished == NO) {
+    if (dialogueEstablished == NO)
+    {
 #ifdef VERBOSE_SOCKET_CONNECTION
         NSLog(@"Dialogue not established yet");
 #endif
-    } else {
+    }
+    else
+    {
         [self.outputPiecesLock lock];
 
         while ([self.outputPieces count] > 0)
@@ -319,7 +328,8 @@
     // Already connected or trying to establish connection right now?
     // If yes, then quit.
     //
-    if ([self.connectionLock tryLock] == NO) {
+    if ([self.connectionLock tryLock] == NO)
+    {
 #ifdef VERBOSE_SOCKET_CONNECTION
         NSLog(@"Already connected or establishing a connection");
 #endif
@@ -328,7 +338,7 @@
 
 #ifdef VERBOSE_SOCKET_CONNECTION
     NSLog(@"Establish connection");
-    [statusBar postMessage:@"DEBUG: Establish connection"];
+    [statusBar postMessage:NSLocalizedString(@"STATUS_BAR_VPCLOUD_ESTABLISH_CONNECTION", nil)];
 #endif
 
     dialogueEstablished = NO;
@@ -345,8 +355,10 @@
     self.socket = [[GCDAsyncSocket alloc] initWithDelegate:self
                                              delegateQueue:dispatch_get_main_queue()];
 
-    if (background == YES) {
-        [self.socket performBlock:^{
+    if (background == YES)
+    {
+        [self.socket performBlock:^
+        {
             [self.socket enableBackgroundingOnSocket];
         }];
     }
@@ -365,7 +377,8 @@
         [statusBar postMessage:NSLocalizedString(@"STATUS_BAR_VPCLOUD_CANNOT_CONNECT", nil)];
 
 #ifdef VERBOSE_SOCKET_CONNECTION
-        NSLog(@"Cannot connect: %@", error);
+        NSLog(@"Cannot connect: %@",
+              error);
 #endif
     }
 }
@@ -450,7 +463,8 @@ didConnectToHost:(NSString *)host
                withTimeout:TimeoutOnDialogueTransmit
                        tag:0];
 
-    if (anticipantConnection == YES) {
+    if (anticipantConnection == YES)
+    {
         NSMutableData *anticipant = [[Authentificator sharedAuthentificator] prepareAnticipant];
         [self.socket writeData:anticipant
                    withTimeout:TimeoutOnAnticipantTransmit
@@ -492,7 +506,8 @@ didConnectToHost:(NSString *)host
 didWritePartialDataOfLength:(NSUInteger)partialLength
            tag:(long)tag
 {
-    NSLog(@"Written %lu bytes of tag %ld", (unsigned long)partialLength, tag);
+    NSLog(@"Written %lu bytes of tag %ld",
+          (unsigned long) partialLength, tag);
 }
 #endif
 
@@ -513,13 +528,21 @@ didWriteDataWithTag:(long)tag
        withTag:(long)tag
 {
 #ifdef VERBOSE_INPUT
-    NSLog(@"Read %lu bytes from socket", (unsigned long)[data length]);
+    NSLog(@"Read %lu bytes from socket",
+          (unsigned long) [data length]);
 #endif
-    if (anticipantConnection == YES) {
+    if (anticipantConnection == YES)
+    {
         NSMutableData *anticipant = [NSMutableData dataWithData:data];
         [[Authentificator sharedAuthentificator] processAnticipant:anticipant];
-    } else {
+    }
+    else
+    {
         NSMutableData *recivedPiece = [NSMutableData dataWithData:data];
+
+#ifdef DUMP_RECEIVED_PAYLOAD
+        // TODO
+#endif
 
         [self.inputPiecesLock lock];
         [self.inputPieces addObject:recivedPiece];
@@ -545,7 +568,7 @@ didWriteDataWithTag:(long)tag
 
     // Dialogue signature.
     //
-    UInt64 dialogueSignature = CFSwapInt64HostToBig(DialogueSignature);
+    UInt64 dialogueSignature = CFSwapInt64HostToBig(API_DialogueSignature);
     [payload appendBytes:&dialogueSignature
                   length:sizeof(dialogueSignature)];
 
@@ -559,9 +582,9 @@ didWriteDataWithTag:(long)tag
     //
     UInt32 dialogueType;
     if (anticipantConnection == YES) {
-        dialogueType = CFSwapInt32HostToBig(DialogueTypeAnticipant);
+        dialogueType = CFSwapInt32HostToBig(API_DialogueTypeAnticipant);
     } else {
-        dialogueType = CFSwapInt32HostToBig(DialogueTypeRegular);
+        dialogueType = CFSwapInt32HostToBig(API_DialogueTypeRegular);
     }
     [payload appendBytes:&dialogueType
                   length:sizeof(dialogueType)];
@@ -577,9 +600,9 @@ didWriteDataWithTag:(long)tag
     NSString *build = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"];
 
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
-        deviceType = DeviceTypeAppleiPad;
+        deviceType = API_DeviceTypeAppleiPad;
     } else {
-        deviceType = DeviceTypeAppleiPhone;
+        deviceType = API_DeviceTypeAppleiPhone;
     }
 
     NSData *buildData = [build dataUsingEncoding:NSUTF8StringEncoding];
@@ -602,7 +625,7 @@ didWriteDataWithTag:(long)tag
     uuid_t deviceTokenBytes;
     [deviceToken getUUIDBytes:deviceTokenBytes];
     NSData *deviceTokenData = [NSData dataWithBytes:deviceTokenBytes
-                                             length:TokenBinarySize];
+                                             length:API_TokenBinarySize];
     [payload appendData:deviceTokenData];
 
     // Profile token.
@@ -613,7 +636,7 @@ didWriteDataWithTag:(long)tag
     uuid_t profileTokenBytes;
     [profileToken getUUIDBytes:profileTokenBytes];
     NSData *profileTokenData = [NSData dataWithBytes:profileTokenBytes
-                                              length:TokenBinarySize];
+                                              length:API_TokenBinarySize];
     [payload appendData:profileTokenData];
 
     // Session token.
@@ -624,7 +647,7 @@ didWriteDataWithTag:(long)tag
     uuid_t sessionTokenBytes;
     [sessionToken getUUIDBytes:sessionTokenBytes];
     NSData *sessionTokenData = [NSData dataWithBytes:sessionTokenBytes
-                                              length:TokenBinarySize];
+                                              length:API_TokenBinarySize];
     [payload appendData:sessionTokenData];
 
     return payload;
@@ -645,7 +668,7 @@ didWriteDataWithTag:(long)tag
     
     // Dialogue signature.
     //
-    fetchData = [NSData dataWithBytesNoCopy:(char *)[data bytes] + payloadOffset
+    fetchData = [NSData dataWithBytesNoCopy:(char *) [data bytes] + payloadOffset
                                      length:sizeof(dialogueSignature)
                                freeWhenDone:NO];
     [fetchData getBytes:&dialogueSignature length:sizeof(dialogueSignature)];
@@ -656,7 +679,7 @@ didWriteDataWithTag:(long)tag
 
     // Dialogue status.
     //
-    fetchData = [NSData dataWithBytesNoCopy:(char *)[data bytes] + payloadOffset
+    fetchData = [NSData dataWithBytesNoCopy:(char *) [data bytes] + payloadOffset
                                      length:sizeof(verdictCode)
                                freeWhenDone:NO];
     [fetchData getBytes:&verdictCode length:sizeof(verdictCode)];
@@ -667,14 +690,16 @@ didWriteDataWithTag:(long)tag
 
     // Session token.
     //
-    fetchData = [NSData dataWithBytesNoCopy:(char *)[data bytes] + payloadOffset
-                                     length:TokenBinarySize
+    fetchData = [NSData dataWithBytesNoCopy:(char *) [data bytes] + payloadOffset
+                                     length:API_TokenBinarySize
                                freeWhenDone:NO];
     sessionToken = [[NSUUID alloc] initWithUUIDBytes:[fetchData bytes]];
 
-    if (dialogueSignature != DialogueSignature) {
+    if (dialogueSignature != API_DialogueSignature)
+    {
 #ifdef VERBOSE_DIALOGUE
-        NSLog(@"Wrong dialogue signature 0x%016llX", dialogueSignature);
+        NSLog(@"Wrong dialogue signature 0x%016llX",
+              dialogueSignature);
 #endif
         return FALSE;
     }
@@ -683,7 +708,7 @@ didWriteDataWithTag:(long)tag
 
     switch (verdictCode)
     {
-        case DialogueVerdictWelcome:
+        case API_DialogueVerdictWelcome:
         {
 #ifdef VERBOSE_DIALOGUE
             NSLog(@"Dialogue established");
@@ -696,7 +721,7 @@ didWriteDataWithTag:(long)tag
             break;
         }
 
-        case DialogueVerdictInvalidDevice:
+        case API_DialogueVerdictInvalidDevice:
 #ifdef VERBOSE_DIALOGUE
             NSLog(@"Dialogue verdict: invalid device");
 #endif
@@ -704,14 +729,14 @@ didWriteDataWithTag:(long)tag
             return FALSE;
             break;
 
-        case DialogueVerdictInvalidProfile:
+        case API_DialogueVerdictInvalidProfile:
 #ifdef VERBOSE_DIALOGUE
             NSLog(@"Dialogue verdict: invalid profile");
 #endif
             [authentificator setProfileToken:nil];
             break;
 
-        case DialogueVerdictNewSession:
+        case API_DialogueVerdictNewSession:
 #ifdef VERBOSE_DIALOGUE
             NSLog(@"Dialogue verdict: open new session %@", [sessionToken UUIDString]);
 #endif
@@ -721,7 +746,8 @@ didWriteDataWithTag:(long)tag
 
         default:
 #ifdef VERBOSE_DIALOGUE
-            NSLog(@"Unknown dialogue status 0x%08X", (unsigned int)verdictCode);
+            NSLog(@"Unknown dialogue status 0x%08X",
+                  (unsigned int) verdictCode);
 #endif
             break;
     }
@@ -750,7 +776,8 @@ didWriteDataWithTag:(long)tag
     {
         [self.inputPiecesLock lock];
 
-        if ([self.inputPieces count] == 0) {
+        if ([self.inputPieces count] == 0)
+        {
             [self.inputPiecesLock unlock];
             break;
         }
@@ -764,21 +791,31 @@ didWriteDataWithTag:(long)tag
         UInt32 payloadSize;
         NSUInteger headerSize;
 
-        if (dialogueEstablished == NO) {
+        if (dialogueEstablished == NO)
+        {
             paquetId = 0;
             commandCode = 0;
             commandSubcode = 0;
-            payloadSize = sizeof(UInt64) + sizeof(UInt32) + TokenBinarySize;
+            payloadSize = sizeof(UInt64) + sizeof(UInt32) + API_TokenBinarySize;
             headerSize = 0;
 
-            if ([piece length] < payloadSize) {
+            if ([piece length] < payloadSize)
+            {
                 [self.inputPiecesLock unlock];
                 break;
             }
-        } else {
-            headerSize = sizeof(cardSignature) + sizeof(paquetId) + sizeof(commandCode) + sizeof(commandSubcode) + sizeof(payloadSize);
+        }
+        else
+        {
+            headerSize =
+            sizeof(cardSignature) +
+            sizeof(paquetId) +
+            sizeof(commandCode) +
+            sizeof(commandSubcode) +
+            sizeof(payloadSize);
 
-            if ([piece length] < headerSize) {
+            if ([piece length] < headerSize)
+            {
                 [self.inputPiecesLock unlock];
                 break;
             }
@@ -786,35 +823,35 @@ didWriteDataWithTag:(long)tag
             NSData *data;
             NSUInteger dataOffset = 0;
 
-            data = [NSData dataWithBytesNoCopy:(char *)[piece bytes] + dataOffset
+            data = [NSData dataWithBytesNoCopy:(char *) [piece bytes] + dataOffset
                                         length:sizeof(cardSignature)
                                   freeWhenDone:NO];
             [data getBytes:&cardSignature length:sizeof(cardSignature)];
 
             dataOffset += sizeof(cardSignature);
 
-            data = [NSData dataWithBytesNoCopy:(char *)[piece bytes] + dataOffset
+            data = [NSData dataWithBytesNoCopy:(char *) [piece bytes] + dataOffset
                                         length:sizeof(paquetId)
                                   freeWhenDone:NO];
             [data getBytes:&paquetId length:sizeof(paquetId)];
 
             dataOffset += sizeof(paquetId);
 
-            data = [NSData dataWithBytesNoCopy:(char *)[piece bytes] + dataOffset
+            data = [NSData dataWithBytesNoCopy:(char *) [piece bytes] + dataOffset
                                         length:sizeof(commandCode)
                                   freeWhenDone:NO];
             [data getBytes:&commandCode length:sizeof(commandCode)];
 
             dataOffset += sizeof(commandCode);
 
-            data = [NSData dataWithBytesNoCopy:(char *)[piece bytes] + dataOffset
+            data = [NSData dataWithBytesNoCopy:(char *) [piece bytes] + dataOffset
                                         length:sizeof(commandSubcode)
                                   freeWhenDone:NO];
             [data getBytes:&commandSubcode length:sizeof(commandSubcode)];
 
             dataOffset += sizeof(commandSubcode);
 
-            data = [NSData dataWithBytesNoCopy:(char *)[piece bytes] + dataOffset
+            data = [NSData dataWithBytesNoCopy:(char *) [piece bytes] + dataOffset
                                         length:sizeof(payloadSize)
                                   freeWhenDone:NO];
             [data getBytes:&payloadSize length:sizeof(payloadSize)];
@@ -827,9 +864,9 @@ didWriteDataWithTag:(long)tag
             
 #ifdef VERBOSE_PROCESS_CARDS
             NSLog(@"Piece contains paquet %d for command 0x%08X with payload %d bytes",
-                  (unsigned int)paquetId,
-                  (unsigned int)commandCode,
-                  (unsigned int)payloadSize);
+                  (unsigned int) paquetId,
+                  (unsigned int) commandCode,
+                  (unsigned int) payloadSize);
 #endif
         }
 
@@ -843,19 +880,21 @@ didWriteDataWithTag:(long)tag
 
         // Quit if not enough data received yet.
         //
-        if (sizeOfAllPieces < sizeOfFirstPaquet) {
+        if (sizeOfAllPieces < sizeOfFirstPaquet)
+        {
 #ifdef VERBOSE_PROCESS_CARDS
             NSLog(@"Not enough data received yet: available %lu bytes in %lu pieces, expected %lu bytes",
-                  (unsigned long)sizeOfAllPieces,
-                  (unsigned long)[self.inputPieces count],
-                  (unsigned long)sizeOfFirstPaquet);
+                  (unsigned long) sizeOfAllPieces,
+                  (unsigned long) [self.inputPieces count],
+                  (unsigned long) sizeOfFirstPaquet);
 #endif
             [self.inputPiecesLock unlock];
             break;
         }
 
         NSMutableData *payload;
-        if ([piece length] == sizeOfFirstPaquet) {
+        if ([piece length] == sizeOfFirstPaquet)
+        {
             //
             // First piece is a complete paquet.
             //
@@ -865,7 +904,9 @@ didWriteDataWithTag:(long)tag
             // Remove piece from the queue.
             //
             [self.inputPieces removeObject:piece];
-        } else {
+        }
+        else
+        {
             //
             // First piece is either a part of a paquet or it contains also data of the next paquet as well.
 
@@ -884,16 +925,19 @@ didWriteDataWithTag:(long)tag
                 // If it is less then needed for current paquet then take complete data and get to the next piece.
                 // If it is exactly an amount of data needed for current paquet then just take the data.
                 //
-                if (bytesToTakeFromPiece <= bytesOfRestOfPayload) {
+                if (bytesToTakeFromPiece <= bytesOfRestOfPayload)
+                {
                     NSUInteger pieceSize = [piece length];
 
-                    if (pieceSize <= offsetInCurrentPiece) {
-                        //
+                    if (pieceSize <= offsetInCurrentPiece)
+                    {
                         // If current piece contains only a paquet pilot or even just part of paquet pilot
                         // then mention how many bytes of paquet pilot are already skipped.
                         //
                         offsetInCurrentPiece -= pieceSize;
-                    } else {
+                    }
+                    else
+                    {
                         NSMutableData *payloadPart;
 
                         if (offsetInCurrentPiece == 0) {
@@ -928,8 +972,9 @@ didWriteDataWithTag:(long)tag
                     // Switch to next piece.
                     //
                     piece = [self.inputPieces firstObject];
-                } else {
-                    //
+                }
+                else
+                {
                     // This piece contains data from the next paquet(s).
                     // Split piece in two parts.
 
@@ -966,18 +1011,21 @@ didWriteDataWithTag:(long)tag
 
 #ifdef VERBOSE_PROCESS_CARDS
         NSLog(@"Taken payload %lu bytes (%lu pieces left in a queue)",
-              (unsigned long)[payload length],
-              (unsigned long)[self.inputPieces count]);
+              (unsigned long) [payload length],
+              (unsigned long) [self.inputPieces count]);
 #endif
 
-        if (dialogueEstablished == NO) {
+        if (dialogueEstablished == NO)
+        {
             if ([self parseDialogueVerdict:payload] == FALSE) {
                 [self disconnect:YES];
                 [self scheduleReconnectWithInterval:ReconnectIntervalIfHandshakeFailed];
             } else {
                 dialogueEstablished = YES;
             }
-        } else {
+        }
+        else
+        {
             if (paquetId == 0) {
                 //
                 // This paquet was initiated by cloud. Look for a corresponding handler.
@@ -998,8 +1046,10 @@ didWriteDataWithTag:(long)tag
                 [self.paquetsLock lock];
                 for (Paquet *paquet in self.paquets)
                 {
-                    if (paquet.paquetId == paquetId) {
-                        if (paquet.commandCode == commandCode) {
+                    if (paquet.paquetId == paquetId)
+                    {
+                        if (paquet.commandCode == commandCode)
+                        {
                             paquet.commandSubcode = commandSubcode;
                             [self dequeue:paquet payload:payload];
                             break;

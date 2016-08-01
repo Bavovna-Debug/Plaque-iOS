@@ -41,7 +41,8 @@
     static dispatch_once_t onceToken;
     static Authentificator *authentificator;
 
-    dispatch_once(&onceToken, ^{
+    dispatch_once(&onceToken, ^
+    {
         authentificator = [[Authentificator alloc] init];
     });
 
@@ -182,7 +183,7 @@
 
     if ((knownToken == nil) || ([notificationsToken isEqualToData:knownToken] == NO))
     {
-        Paquet *paquet = [[Paquet alloc] initWithCommand:PaquetNotificationsToken];
+        Paquet *paquet = [[Paquet alloc] initWithCommand:API_PaquetNotificationsToken];
 
         [paquet setSenderDelegate:self];
         [paquet setUserInfo:notificationsToken];
@@ -208,44 +209,44 @@
     uuid_t deviceVendorIdBytes;
     [deviceVendorId getUUIDBytes:deviceVendorIdBytes];
     NSData *deviceVendorIdData = [NSData dataWithBytes:deviceVendorIdBytes
-                                                length:TokenBinarySize];
+                                                length:API_TokenBinarySize];
     [anticipant appendData:deviceVendorIdData];
 
     NSString *paddedString;
     NSData *paddedStringData;
 
-    paddedString = [deviceName stringByPaddingToLength:AnticipantDeviceNameLength
+    paddedString = [deviceName stringByPaddingToLength:API_AnticipantDeviceNameLength
                                         withString:@"\0"
                                    startingAtIndex:0];
     paddedStringData = [paddedString dataUsingEncoding:NSUTF8StringEncoding];
-    [anticipant appendBytes:[paddedStringData bytes] length:AnticipantDeviceNameLength];
+    [anticipant appendBytes:[paddedStringData bytes] length:API_AnticipantDeviceNameLength];
 
-    paddedString = [deviceModel stringByPaddingToLength:AnticipantDeviceModelLength
+    paddedString = [deviceModel stringByPaddingToLength:API_AnticipantDeviceModelLength
                                         withString:@"\0"
                                    startingAtIndex:0];
     paddedStringData = [paddedString dataUsingEncoding:NSUTF8StringEncoding];
-    [anticipant appendBytes:[paddedStringData bytes] length:AnticipantDeviceModelLength];
+    [anticipant appendBytes:[paddedStringData bytes] length:API_AnticipantDeviceModelLength];
 
-    paddedString = [systemName stringByPaddingToLength:AnticipantSystemNamelLength
+    paddedString = [systemName stringByPaddingToLength:API_AnticipantSystemNamelLength
                                         withString:@"\0"
                                    startingAtIndex:0];
     paddedStringData = [paddedString dataUsingEncoding:NSUTF8StringEncoding];
-    [anticipant appendBytes:[paddedStringData bytes] length:AnticipantSystemNamelLength];
+    [anticipant appendBytes:[paddedStringData bytes] length:API_AnticipantSystemNamelLength];
 
-    paddedString = [systemVersion stringByPaddingToLength:AnticipantSystemVersionlLength
+    paddedString = [systemVersion stringByPaddingToLength:API_AnticipantSystemVersionlLength
                                         withString:@"\0"
                                    startingAtIndex:0];
     paddedStringData = [paddedString dataUsingEncoding:NSUTF8StringEncoding];
-    [anticipant appendBytes:[paddedStringData bytes] length:AnticipantSystemVersionlLength];
+    [anticipant appendBytes:[paddedStringData bytes] length:API_AnticipantSystemVersionlLength];
 
     return anticipant;
 }
 
 - (void)processAnticipant:(NSMutableData *)anticipant
 {
-    if ([anticipant length] == TokenBinarySize) {
+    if ([anticipant length] == API_TokenBinarySize) {
         NSData* tokenData = [NSData dataWithBytesNoCopy:(char *)[anticipant bytes]
-                                                 length:TokenBinarySize
+                                                 length:API_TokenBinarySize
                                            freeWhenDone:NO];
         NSUUID *deviceToken = [[NSUUID alloc] initWithUUIDBytes:[tokenData bytes]];
         if (deviceToken != nil)
@@ -259,10 +260,10 @@
 {
     switch (paquet.commandCode)
     {
-        case PaquetNotificationsToken:
+        case API_PaquetNotificationsToken:
         {
             UInt32 status = [paquet getUInt32];
-            if (status == PaquetNotificationsTokenAccepted) {
+            if (status == API_PaquetNotificationsTokenAccepted) {
 #ifdef VERBOSE
                 NSLog(@"Notifications token accepted");
 #endif

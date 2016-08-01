@@ -23,6 +23,8 @@
 @property (assign, nonatomic) Boolean           rejectedByCloud;
 @property (strong, nonatomic) NSData            *userInfo;
 
++ (void)report:(NSString *)message;
+
 - (id)initWithCommand:(UInt32)commandCode;
 
 - (void)send;

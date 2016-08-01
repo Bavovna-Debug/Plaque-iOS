@@ -8,7 +8,7 @@
 
 #import "AppStore.h"
 
-@interface AppStore () <SKProductsRequestDelegate, SKPaymentTransactionObserver, UIAlertViewDelegate>
+@interface AppStore () /*<SKProductsRequestDelegate, SKPaymentTransactionObserver, UIAlertViewDelegate>*/
 
 @property (nonatomic, strong) SKProduct *gameUnlockProduct;
 
@@ -21,7 +21,8 @@
     static dispatch_once_t onceToken;
     static AppStore *appStore;
 
-    dispatch_once(&onceToken, ^{
+    dispatch_once(&onceToken, ^
+    {
         appStore = [[AppStore alloc] init];
     });
 
