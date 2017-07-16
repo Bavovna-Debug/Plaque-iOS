@@ -1,7 +1,7 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -12,10 +12,10 @@
 
 @property (strong, nonatomic, readwrite) id<ProfileDelegate> profileDelegate;
 
-@property (nonatomic, strong) NSUUID *deviceToken;
-@property (nonatomic, strong) NSUUID *sessionToken;
-@property (nonatomic, strong) NSUUID *profileToken;
-@property (nonatomic, strong) NSData *notificationsToken;
+@property (nonatomic, strong, readwrite) NSUUID *deviceToken;
+@property (nonatomic, strong, readwrite) NSUUID *sessionToken;
+@property (nonatomic, strong, readwrite) NSUUID *profileToken;
+@property (nonatomic, strong, readwrite) NSData *notificationsToken;
 
 + (Authentificator *)sharedAuthentificator;
 

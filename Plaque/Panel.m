@@ -1,7 +1,7 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import "Navigator.h"
@@ -34,9 +34,9 @@
 
 - (void)translate:(CGFloat)direction
 {
-    CGFloat rotateX = degreesToRadians(20.0f);
-    CGFloat rotateY = degreesToRadians(25.0f);
-    CGFloat rotateZ = degreesToRadians(8.0f);
+    CGFloat rotateX = DegreesToRadians(20.0f);
+    CGFloat rotateY = DegreesToRadians(25.0f);
+    CGFloat rotateZ = DegreesToRadians(8.0f);
     CATransform3D transform = CATransform3DIdentity;
     transform.m34 = -1.0f / 750.0f;
     transform = CATransform3DRotate(transform, rotateX, 1, 0, 0);

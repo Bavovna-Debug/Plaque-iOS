@@ -1,7 +1,7 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import "Communicator.h"
@@ -15,6 +15,13 @@
 #undef VERBOSE_FROM_ARGB_FLOATS
 #endif
 
+@interface Paquet ()
+
+@property (strong, nonatomic, readwrite) NSMutableData  *payload;
+@property (assign, atomic,    readwrite) Boolean        rejectedByCloud;
+
+@end
+
 @implementation Paquet
 {
     NSUInteger payloadOffset;
@@ -23,7 +30,9 @@
 + (void)report:(NSString *)message
 {
     Paquet *paquet = [[Paquet alloc] initWithCommand:API_PaquetReportMessage];
+
     [paquet putString:message];
+
     [paquet send];
 }
 
@@ -31,7 +40,9 @@
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
 
     self.commandCode = commandCode;
     self.commandSubcode = 0;
@@ -48,6 +59,10 @@
     return (self.commandSubcode == API_PaquetRejectBusy) || (self.commandSubcode == API_PaquetRejectError);
 }
 
+- (void)setRejectedByCloud:(Boolean)rejectedByCloud
+{
+}
+
 - (void)send
 {
     [[Communicator sharedCommunicator] send:self];
@@ -56,6 +71,7 @@
 - (void)complete:(NSMutableData *)payload
 {
     self.payload = payload;
+
     payloadOffset = 0;
 
     id<PaquetSenderDelegate> senderDelegate = self.senderDelegate;
@@ -83,9 +99,10 @@
 {
     UInt8 value;
 
-    NSData *valueData = [NSData dataWithBytesNoCopy:(char *) [self.payload bytes] + payloadOffset
-                                             length:sizeof(value)
-                                       freeWhenDone:NO];
+    NSData *valueData =
+    [NSData dataWithBytesNoCopy:(char *) [self.payload bytes] + payloadOffset
+                         length:sizeof(value)
+                   freeWhenDone:NO];
 
     [valueData getBytes:&value
                  length:sizeof(value)];
@@ -107,9 +124,10 @@
 {
     UInt16 value;
 
-    NSData *valueData = [NSData dataWithBytesNoCopy:(char *) [self.payload bytes] + payloadOffset
-                                             length:sizeof(value)
-                                       freeWhenDone:NO];
+    NSData *valueData =
+    [NSData dataWithBytesNoCopy:(char *) [self.payload bytes] + payloadOffset
+                         length:sizeof(value)
+                   freeWhenDone:NO];
 
     [valueData getBytes:&value
                  length:sizeof(value)];
@@ -131,9 +149,10 @@
 {
     UInt32 value;
 
-    NSData *valueData = [NSData dataWithBytesNoCopy:(char *) [self.payload bytes] + payloadOffset
-                                             length:sizeof(value)
-                                       freeWhenDone:NO];
+    NSData *valueData =
+    [NSData dataWithBytesNoCopy:(char *) [self.payload bytes] + payloadOffset
+                         length:sizeof(value)
+                   freeWhenDone:NO];
 
     [valueData getBytes:&value
                  length:sizeof(value)];
@@ -155,9 +174,10 @@
 {
     UInt64 value;
 
-    NSData *valueData = [NSData dataWithBytesNoCopy:(char *)[self.payload bytes] + payloadOffset
-                                             length:sizeof(value)
-                                       freeWhenDone:NO];
+    NSData *valueData =
+    [NSData dataWithBytesNoCopy:(char *) [self.payload bytes] + payloadOffset
+                         length:sizeof(value)
+                   freeWhenDone:NO];
 
     [valueData getBytes:&value
                  length:sizeof(value)];
@@ -179,9 +199,10 @@
 {
     CFSwappedFloat64 value;
 
-    NSData *valueData = [NSData dataWithBytesNoCopy:(char *)[self.payload bytes] + payloadOffset
-                                             length:sizeof(value)
-                                       freeWhenDone:NO];
+    NSData *valueData =
+    [NSData dataWithBytesNoCopy:(char *) [self.payload bytes] + payloadOffset
+                         length:sizeof(value)
+                   freeWhenDone:NO];
 
     [valueData getBytes:&value
                  length:sizeof(value)];
@@ -203,9 +224,10 @@
 {
     CFSwappedFloat32 value;
 
-    NSData *valueData = [NSData dataWithBytesNoCopy:(char *)[self.payload bytes] + payloadOffset
-                                             length:sizeof(value)
-                                       freeWhenDone:NO];
+    NSData *valueData =
+    [NSData dataWithBytesNoCopy:(char *) [self.payload bytes] + payloadOffset
+                         length:sizeof(value)
+                   freeWhenDone:NO];
 
     [valueData getBytes:&value
                  length:sizeof(value)];
@@ -218,6 +240,7 @@
 - (void)putString:(NSString *)string
 {
     NSData *stringData = [string dataUsingEncoding:NSUTF8StringEncoding];
+
     UInt32 stringLength = (UInt32) [stringData length];
 
     [self putUInt32:stringLength];
@@ -230,11 +253,14 @@
 {
     UInt32 stringLength = [self getUInt32];
     if (stringLength == 0)
+    {
         return nil;
+    }
 
-    NSData *stringData = [NSData dataWithBytesNoCopy:(char *)[self.payload bytes] + payloadOffset
-                                              length:stringLength
-                                        freeWhenDone:NO];
+    NSData *stringData =
+    [NSData dataWithBytesNoCopy:(char *) [self.payload bytes] + payloadOffset
+                         length:stringLength
+                   freeWhenDone:NO];
 
     NSString *string = [[NSString alloc] initWithData:stringData
                                              encoding:NSUTF8StringEncoding];
@@ -247,13 +273,17 @@
 - (void)putFixedString:(NSString *)string length:(NSUInteger)length
 {
     if (string == nil)
+    {
         string = @"";
+    }
 
-    NSString *paddedString = [string stringByPaddingToLength:length
-                                                  withString:@"\0"
-                                             startingAtIndex:0];
+    NSString *paddedString =
+    [string stringByPaddingToLength:length
+                         withString:@"\0"
+                    startingAtIndex:0];
 
-    NSData *paddedStringData = [paddedString dataUsingEncoding:NSUTF8StringEncoding];
+    NSData *paddedStringData =
+    [paddedString dataUsingEncoding:NSUTF8StringEncoding];
 
     [self.payload appendBytes:[paddedStringData bytes]
                        length:length];
@@ -261,13 +291,16 @@
 
 - (NSString *)getFixedString:(NSUInteger)length
 {
-    NSData *stringData = [NSData dataWithBytesNoCopy:(char *)[self.payload bytes] + payloadOffset
-                                              length:length
-                                        freeWhenDone:NO];
+    NSData *stringData =
+    [NSData dataWithBytesNoCopy:(char *) [self.payload bytes] + payloadOffset
+                         length:length
+                   freeWhenDone:NO];
 
-    NSString *string = [[NSString alloc] initWithBytes:[stringData bytes]
-                                                length:length
-                                              encoding:NSUTF8StringEncoding];
+    NSString *string =
+    [[NSString alloc] initWithBytes:[stringData bytes]
+                             length:length
+                           encoding:NSUTF8StringEncoding];
+
     payloadOffset += length;
 
     return string;
@@ -287,9 +320,10 @@
 
 - (NSUUID *)getToken
 {
-    NSData *tokenData = [NSData dataWithBytesNoCopy:(char *)[self.payload bytes] + payloadOffset
-                                             length:API_TokenBinarySize
-                                       freeWhenDone:NO];
+    NSData *tokenData =
+    [NSData dataWithBytesNoCopy:(char *) [self.payload bytes] + payloadOffset
+                         length:API_TokenBinarySize
+                   freeWhenDone:NO];
 
     NSUUID *token = [[NSUUID alloc] initWithUUIDBytes:[tokenData bytes]];
 
@@ -305,9 +339,10 @@
 
 - (NSData *)getData:(NSUInteger)length
 {
-    NSData *data = [NSData dataWithBytesNoCopy:(char *)[self.payload bytes] + payloadOffset
-                                        length:length
-                                  freeWhenDone:NO];
+    NSData *data =
+    [NSData dataWithBytesNoCopy:(char *) [self.payload bytes] + payloadOffset
+                         length:length
+                   freeWhenDone:NO];
 
     payloadOffset += length;
 
@@ -362,7 +397,8 @@
                                      alpha:(float)alpha / 255.0f];
 
 #ifdef VERBOSE_FROM_ARGB
-    NSLog(@"0x%08X -> A:%d R:%d G:%d B:%d", originalARGB, alpha, red, green, blue);
+    NSLog(@"[Paquet] 0x%08X -> A:%d R:%d G:%d B:%d",
+          originalARGB, alpha, red, green, blue);
 #endif
 
 #ifdef VERBOSE_FROM_ARGB_FLOATS
@@ -373,7 +409,8 @@
     CGFloat blue2   = components[2];
     CGFloat alpha2  = components[3];
 
-    NSLog(@"0x%08X -> A:%0.3f R:%0.3f G:%0.3f B:%0.3f", originalARGB, alpha2, red2, green2, blue2);
+    NSLog(@"[Paquet] 0x%08X -> A:%0.3f R:%0.3f G:%0.3f B:%0.3f",
+          originalARGB, alpha2, red2, green2, blue2);
 #endif
 
     return color;
@@ -399,7 +436,8 @@
     argb |= blue;
 
 #ifdef VERBOSE_TO_ARGB
-    NSLog(@"A:%d R:%d G:%d B:%d -> 0x%08X", alpha, red, green, blue, argb);
+    NSLog(@"[Paquet] A:%d R:%d G:%d B:%d -> 0x%08X",
+          alpha, red, green, blue, argb);
 #endif
 
     return argb;

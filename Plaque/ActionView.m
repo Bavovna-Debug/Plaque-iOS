@@ -1,7 +1,7 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import "ActionButton.h"

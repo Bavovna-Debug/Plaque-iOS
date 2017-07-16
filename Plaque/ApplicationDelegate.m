@@ -1,7 +1,7 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import <CoreLocation/CoreLocation.h>
@@ -19,18 +19,12 @@
 #import "SQLite.h"
 #import "StatusBar.h"
 
-#ifdef DEBUG
-#define VERBOSE
-#endif
-
-#define MinimumBackgroundFetchInterval 120.0f
-
-#define AlertDoYouWantToCreateProfile 15
+#include "Definitions.h"
 
 @interface ApplicationDelegate () <CLLocationManagerDelegate, UIAlertViewDelegate>
 
-@property (strong, nonatomic) MainController *controller;
-@property (weak,   nonatomic) FullScreenShield *shield;
+@property (strong, nonatomic) MainController    *controller;
+@property (weak,   nonatomic) FullScreenShield  *shield;
 
 @end
 
@@ -45,27 +39,26 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     [application setIdleTimerDisabled:YES];
 
-    float systemVersion = [[[UIDevice currentDevice] systemVersion] floatValue];
+    [application setMinimumBackgroundFetchInterval:MinimumBackgroundFetchInterval];
 
-    if (systemVersion >= 7.0f) {
-        [application setMinimumBackgroundFetchInterval:MinimumBackgroundFetchInterval];
-    }
+    UIUserNotificationType types =
+    UIUserNotificationTypeSound | UIUserNotificationTypeBadge | UIUserNotificationTypeAlert;
 
-    if (systemVersion >= 8.0f) {
-        UIUserNotificationType types = UIUserNotificationTypeSound | UIUserNotificationTypeBadge | UIUserNotificationTypeAlert;
-
-        UIUserNotificationSettings *notificationSettings = [UIUserNotificationSettings settingsForTypes:types
-                                                                                             categories:nil];
-        [application registerUserNotificationSettings:notificationSettings];
-    }
+    UIUserNotificationSettings *notificationSettings =
+    [UIUserNotificationSettings settingsForTypes:types
+                                      categories:nil];
+    [application registerUserNotificationSettings:notificationSettings];
 
     [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
 
     [[UIApplication sharedApplication] registerForRemoteNotifications];
 
-    NSDictionary *remoteNotif = [launchOptions objectForKey:UIApplicationLaunchOptionsRemoteNotificationKey];
+    NSDictionary *remoteNotif =
+    [launchOptions objectForKey:UIApplicationLaunchOptionsRemoteNotificationKey];
     if (remoteNotif != nil)
+    {
         [self application:application didReceiveRemoteNotification:remoteNotif];
+    }
 
     [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
 
@@ -100,14 +93,14 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 - (void)applicationDidReceiveMemoryWarning:(UIApplication *)application
 {
 #ifdef VERBOSE
-    NSLog(@"Out of memory");
+    NSLog(@"[ApplicationDelegate] Out of memory");
 #endif
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application
 {
 #ifdef VERBOSE
-    NSLog(@"Application will resign active");
+    NSLog(@"[ApplicationDelegate] Application will resign active");
 #endif
     inBackground = TRUE;
     [self.controller switchToBackground];
@@ -124,11 +117,14 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 - (void)applicationWillEnterForeground:(UIApplication *)application
 {
 #ifdef VERBOSE
-    NSLog(@"Application will enter foreground");
+    NSLog(@"[ApplicationDelegate] Application will enter foreground");
 #endif
     [[Communicator sharedCommunicator] switchToForeground];
+
     [[Plaques sharedPlaques] switchToForeground];
+
     [self.controller switchToForeground];
+
     inBackground = FALSE;
 }
 
@@ -142,7 +138,7 @@ didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
 didFailToRegisterForRemoteNotificationsWithError:(NSError*)error
 {
 #ifdef VERBOSE
-    NSLog(@"Failed to get token, error: %@", error);
+    NSLog(@"[ApplicationDelegate] Failed to get token, error: %@", error);
 #endif
 }
 
@@ -150,18 +146,24 @@ didFailToRegisterForRemoteNotificationsWithError:(NSError*)error
 didReceiveRemoteNotification:(NSDictionary *)userInfo
 {
 #ifdef VERBOSE
-    NSLog(@"Remote notification: %@", userInfo);
+    NSLog(@"[ApplicationDelegate] Remote notification: %@", userInfo);
 #endif
 
-    if (inBackground == TRUE) {
+    if (inBackground == TRUE)
+    {
         UILocalNotification *notification = [[UILocalNotification alloc] init];
+
         [notification setFireDate:[NSDate date]];
         [notification setAlertBody:[NSString stringWithFormat:@"%@", userInfo]];
         [notification setSoundName:UILocalNotificationDefaultSoundName];
         [notification setApplicationIconBadgeNumber:0];
+
         [[UIApplication sharedApplication] scheduleLocalNotification:notification];
-    } else {
+    }
+    else
+    {
         UILocalNotification *notification = [[UILocalNotification alloc] init];
+
         [[StatusBar sharedStatusBar] postMessage:[notification alertBody]];
     }
 }
@@ -175,13 +177,18 @@ didReceiveLocalNotification:(UILocalNotification *)notification
                            closeOnTouch:(Boolean)closeOnTouch
 {
     if (self.shield != nil)
+    {
         [self.shield removeFromSuperview];
+    }
 
-    FullScreenShield *shield = [[FullScreenShield alloc] initWithCloseOnTouch:closeOnTouch];
+    FullScreenShield *shield =
+    [[FullScreenShield alloc] initWithCloseOnTouch:closeOnTouch];
+
     [shield setFrame:self.controller.view.frame];
     [shield setDelegate:delegate];
 
     TapMenu *tapMenu = [TapMenu mainTapMenu];
+
     [self.controller.view insertSubview:shield
                            belowSubview:tapMenu];
 
@@ -197,11 +204,12 @@ didReceiveLocalNotification:(UILocalNotification *)notification
     NSString *noButton = NSLocalizedString(@"DO_YOU_WANT_TO_CREATE_PROFILE_NOT_YET", nil);
     NSString *yesButton = NSLocalizedString(@"DO_YOU_WANT_TO_CREATE_PROFILE_YES_BUTTON", nil);
 
-    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:title
-                                                        message:message
-                                                       delegate:self
-                                              cancelButtonTitle:noButton
-                                              otherButtonTitles:yesButton, nil];
+    UIAlertView *alertView =
+    [[UIAlertView alloc] initWithTitle:title
+                               message:message
+                              delegate:self
+                     cancelButtonTitle:noButton
+                     otherButtonTitles:yesButton, nil];
 
     [alertView setTag:AlertDoYouWantToCreateProfile];
     [alertView setAlertViewStyle:UIAlertViewStyleDefault];
@@ -240,9 +248,13 @@ clickedButtonAtIndex:(NSInteger)buttonIndex
     switch ([alertView tag])
     {
         case AlertDoYouWantToCreateProfile:
+        {
             if (buttonIndex == 1)
+            {
                 [self openProfileForm];
+            }
             break;
+        }
 
         default:
             break;

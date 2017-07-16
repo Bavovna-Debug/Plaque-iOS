@@ -1,27 +1,24 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import "EditModeSizeSubview.h"
 #import "Plaques.h"
 
-#define MinPlaqueWidth      0.5f
-#define MaxPlaqueWidth      12.0f
-#define MinPlaqueHeight     0.5f
-#define MaxPlaqueHeight     12.0f
+#include "Definitions.h"
 
 @interface EditModeSizeSubview ()
 
-@property (weak,   nonatomic) Plaque *plaque;
-@property (strong, nonatomic) CALayer *plaqueLayer;
-@property (strong, nonatomic) UILabel *widthValue;
-@property (strong, nonatomic) UILabel *heightValue;
-@property (strong, nonatomic) UIView *touchPadWidth;
-@property (strong, nonatomic) UIView *touchPadHeight;
-@property (assign, nonatomic) Boolean resizing;
-@property (strong, nonatomic) NSTimer *touchPadTimer;
+@property (weak,   nonatomic) Plaque    *plaque;
+@property (strong, nonatomic) CALayer   *plaqueLayer;
+@property (strong, nonatomic) UILabel   *widthValue;
+@property (strong, nonatomic) UILabel   *heightValue;
+@property (strong, nonatomic) UIView    *touchPadWidth;
+@property (strong, nonatomic) UIView    *touchPadHeight;
+@property (assign, nonatomic) Boolean   resizing;
+@property (strong, nonatomic) NSTimer   *touchPadTimer;
 
 @end
 
@@ -35,9 +32,13 @@
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
 
     self.plaque = [[Plaques sharedPlaques] plaqueUnderEdit];
+
+    self.resizing = NO;
 
     return self;
 }
@@ -46,9 +47,12 @@
 {
     [super didMoveToSuperview];
 
-    if (self.superview != nil) {
+    if (self.superview != nil)
+    {
         [self preparePanel];
-    } else {
+    }
+    else
+    {
         [self destroyPanel];
     }
 }
@@ -64,14 +68,18 @@
     CGRect valueFrame = CGRectMake(0.0f, 0.0f, 96.0f, 20.0f);
     CGPoint widthValuePoint = CGPointMake(95.0f, 115.0f);
     CGPoint heightValuePoint = CGPointMake(210.0f, 55.0f);
-    CGRect touchPadWidthFrame = CGRectMake(CGRectGetMinX(bounds),
-                                           CGRectGetMaxY(bounds) - 80.0f,
-                                           CGRectGetMaxX(bounds) - 80.0f,
-                                           80.0f);
-    CGRect touchPadHeightFrame = CGRectMake(CGRectGetMaxX(bounds) - 80.0f,
-                                            CGRectGetMinY(bounds),
-                                            80.0f,
-                                            CGRectGetHeight(bounds));
+
+    CGRect touchPadWidthFrame =
+    CGRectMake(CGRectGetMinX(bounds),
+               CGRectGetMaxY(bounds) - 80.0f,
+               CGRectGetMaxX(bounds) - 80.0f,
+               80.0f);
+
+    CGRect touchPadHeightFrame =
+    CGRectMake(CGRectGetMaxX(bounds) - 80.0f,
+               CGRectGetMinY(bounds),
+               80.0f,
+               CGRectGetHeight(bounds));
 
     UILabel *widthValue = [[UILabel alloc] init];
     [widthValue setFrame:valueFrame];
@@ -121,7 +129,9 @@
 {
     NSTimer *touchPadTimer = self.touchPadTimer;
     if (touchPadTimer != nil)
+    {
         [touchPadTimer invalidate];
+    }
 }
 
 - (void)recalculateWidthParameters:(CGPoint)fingerPoint
@@ -162,17 +172,25 @@
         plaqueSize.height = nearbyintf(plaqueSize.height * 100.0f);
         plaqueSize.height /= 100.0f;
 
-        if (plaqueSize.width < MinPlaqueWidth)
-            plaqueSize.width = MinPlaqueWidth;
+        if (plaqueSize.width < EditModeMinPlaqueWidth)
+        {
+            plaqueSize.width = EditModeMinPlaqueWidth;
+        }
 
-        if (plaqueSize.width > MaxPlaqueWidth)
-            plaqueSize.width = MaxPlaqueWidth;
+        if (plaqueSize.width > EditModeMaxPlaqueWidth)
+        {
+            plaqueSize.width = EditModeMaxPlaqueWidth;
+        }
 
-        if (plaqueSize.height < MinPlaqueHeight)
-            plaqueSize.height = MinPlaqueHeight;
+        if (plaqueSize.height < EditModeMinPlaqueHeight)
+        {
+            plaqueSize.height = EditModeMinPlaqueHeight;
+        }
 
-        if (plaqueSize.height > MaxPlaqueHeight)
-            plaqueSize.height = MaxPlaqueHeight;
+        if (plaqueSize.height > EditModeMaxPlaqueHeight)
+        {
+            plaqueSize.height = EditModeMaxPlaqueHeight;
+        }
 
         [plaque setSize:plaqueSize];
 
@@ -184,17 +202,29 @@
            withEvent:(UIEvent *)event
 {
     UITouch *touch = [touches anyObject];
+
     CGPoint point = [touch locationInView:[touch view]];
+
     point = [[touch view] convertPoint:point toView:self];
-    if (CGRectContainsPoint(self.touchPadWidth.frame, point) == YES) {
+
+    if (CGRectContainsPoint(self.touchPadWidth.frame, point) == YES)
+    {
         point = [touch locationInView:self.touchPadWidth];
+
         [self recalculateWidthParameters:point];
+
         self.resizing = YES;
+
         [self.touchPadTimer fire];
-    } else if (CGRectContainsPoint(self.touchPadHeight.frame, point) == YES) {
+    }
+    else if (CGRectContainsPoint(self.touchPadHeight.frame, point) == YES)
+    {
         point = [touch locationInView:self.touchPadHeight];
+
         [self recalculateHeightParameters:point];
+
         self.resizing = YES;
+
         [self.touchPadTimer fire];
     }
 }
@@ -215,15 +245,25 @@
            withEvent:(UIEvent *)event
 {
     UITouch *touch = [touches anyObject];
+
     CGPoint point = [touch locationInView:[touch view]];
+
     point = [[touch view] convertPoint:point toView:self];
-    if (CGRectContainsPoint(self.touchPadWidth.frame, point) == YES) {
+
+    if (CGRectContainsPoint(self.touchPadWidth.frame, point) == YES)
+    {
         point = [touch locationInView:self.touchPadWidth];
+
         [self recalculateWidthParameters:point];
-    } else if (CGRectContainsPoint(self.touchPadHeight.frame, point) == YES) {
+    }
+    else if (CGRectContainsPoint(self.touchPadHeight.frame, point) == YES)
+    {
         point = [touch locationInView:self.touchPadHeight];
+
         [self recalculateHeightParameters:point];
-    } else {
+    }
+    else
+    {
         self.resizing = NO;
     }
 }
@@ -246,7 +286,9 @@
     [self.heightValue setText:heightText];
 
     if (self.plaqueLayer != nil)
+    {
         [self.plaqueLayer removeFromSuperlayer];
+    }
 
     self.plaqueLayer = [self.plaque layerWithFrameToFit:CGRectMake(15.0f, 15.0f, 160.0f, 80.0f)];
     [self.plaque inscriptionLayerForLayer:self.plaqueLayer];

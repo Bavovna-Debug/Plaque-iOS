@@ -1,16 +1,23 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import <CoreLocation/CoreLocation.h>
 #import <Foundation/Foundation.h>
 
-#define degreesToRadians(degrees) (degrees * (M_PI / 180.0f))
-#define radiandsToDegrees(radiands) (radiands * (180.0f / M_PI))
-#define oppositeDirection(direction) ((direction < 180.0f) ? (direction + 180.0f) : (direction - 180.0f))
-#define correctDegrees(x) ((x < 0.0f) ? (360.0f + x) : ((x >= 360.0f) ? (x - 360.0f) : x))
+#define DegreesToRadians(degrees) \
+        (degrees * (M_PI / 180.0f))
+
+#define RadiandsToDegrees(radiands) \
+        (radiands * (180.0f / M_PI))
+
+#define OppositeDirection(direction) \
+        ((direction < 180.0f) ? (direction + 180.0f) : (direction - 180.0f))
+
+#define CorrectDegrees(x) \
+        ((x < 0.0f) ? (360.0f + x) : ((x >= 360.0f) ? (x - 360.0f) : x))
 
 @protocol NavigatorDelegate;
 
@@ -19,12 +26,12 @@
 @property (weak,   nonatomic, readwrite) id<NavigatorDelegate> delegate;
 @property (weak,   nonatomic, readwrite) id<NavigatorDelegate> backgroundDelegate;
 
-@property (assign, nonatomic, readwrite) Boolean inBackground;
+@property (assign, atomic,    readonly)  Boolean                inBackground;
 
-@property (assign, nonatomic, readonly) CLLocationCoordinate2D  startPosition;
-@property (assign, nonatomic, readonly) CLLocationCoordinate2D  deviceCoordinate;
-@property (assign, nonatomic, readonly) CLLocationDistance      deviceAltitude;
-@property (assign, nonatomic, readonly) CLLocationDirection     deviceDirection;
+@property (assign, atomic,    readonly)  CLLocationCoordinate2D startPosition;
+@property (assign, atomic,    readonly)  CLLocationCoordinate2D deviceCoordinate;
+@property (assign, atomic,    readonly)  CLLocationDistance     deviceAltitude;
+@property (assign, atomic,    readonly)  CLLocationDirection    deviceDirection;
 
 + (Navigator *)sharedNavigator;
 

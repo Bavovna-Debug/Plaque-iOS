@@ -1,7 +1,7 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import "EditModeColorSubview.h"
@@ -9,18 +9,23 @@
 
 @interface EditModeColorSubview ()
 
-@property (weak, nonatomic) Plaque *plaque;
-@property (weak, nonatomic) UIButton *transparentButton;
+@property (assign, nonatomic) EditModeColor editModeColor;
+@property (weak,   nonatomic) Plaque        *plaque;
+@property (weak,   nonatomic) UIButton      *transparentButton;
 
 @end
 
 @implementation EditModeColorSubview
 
-- (id)init
+- (id)initWithEditMode:(EditModeColor)editModeColor
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
+
+    self.editModeColor = editModeColor;
 
     self.plaque = [[Plaques sharedPlaques] plaqueUnderEdit];
 
@@ -31,9 +36,14 @@
 {
     [super didMoveToSuperview];
 
-    if (self.superview == nil)
-        return;
+    if (self.superview != nil)
+    {
+        [self preparePanel];
+    }
+}
 
+- (void)preparePanel
+{
     [self setBackgroundColor:[UIColor clearColor]];
 
     NSMutableArray *buttons = [NSMutableArray array];
@@ -72,6 +82,7 @@
     NSUInteger columnNumber = 0;
     NSUInteger rowNumber = 0;
     NSUInteger buttonColorIndex = 0;
+    
     for (UIButton *button in buttons)
     {
         CGRect buttonFrame;
@@ -97,7 +108,8 @@
          forControlEvents:UIControlEventTouchUpInside];
 
         columnNumber++;
-        if (columnNumber == 5) {
+        if (columnNumber == 5)
+        {
             columnNumber = 0;
             rowNumber++;
         }
@@ -120,16 +132,25 @@
     switch (self.editModeColor)
     {
         case EditModeColorBackground:
-            if (button == self.transparentButton) {
+        {
+            if (button == self.transparentButton)
+            {
                 [self.plaque setBackgroundColor:[UIColor clearColor]];
-            } else {
+            }
+            else
+            {
                 [self.plaque setBackgroundColor:color];
             }
+
             break;
+        }
 
         case EditModeColorForeground:
+        {
             [self.plaque setForegroundColor:color];
+
             break;
+        }
     }
 }
 

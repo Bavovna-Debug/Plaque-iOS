@@ -1,7 +1,7 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import "ApplicationDelegate.h"
@@ -12,18 +12,11 @@
 #import "Settings.h"
 #import "SurroundingSelector.h"
 
+#include "Definitions.h"
+
 @interface TapMenu () <FullScreenSchieldDelegate>
 
-#define AlphaMainButtonNormal        1.0f
-#define AlphaMainButtonOpenned       0.4f
-#define AnimationDurationOpen        0.4f
-#define AnimationDurationClose       0.4f
-
-#define DistanceBetweenRows         8.0f
-#define MarginToScreenBorder        8.0f
-#define DistanceBetweenButtons      8.0f
-
-@property (assign, nonatomic, readwrite) Boolean menuOpenned;
+@property (assign, nonatomic, readwrite) Boolean menuOpened;
 
 @property (weak,   nonatomic) FullScreenShield *shield;
 @property (strong, nonatomic) NSMutableArray *rows;
@@ -35,7 +28,7 @@
 
 @implementation TapMenu
 
-@synthesize menuOpenned = _menuOpenned;
+@synthesize menuOpened = _menuOpened;
 
 + (TapMenu *)mainTapMenu
 {
@@ -125,9 +118,9 @@
 {
     ControlPanel *controlPanel = [ControlPanel sharedControlPanel];
     [controlPanel open];
-    NSLog(@"%f %f", self.frame.origin.y, self.frame.size.height);
+    NSLog(@"TapMenu %f %f", self.frame.origin.y, self.frame.size.height);
 /*
-    if ([self menuOpenned] == YES) {
+    if ([self menuOpened] == YES) {
         [self closeMenu];
     } else {
         [self openMenu];
@@ -136,6 +129,7 @@
     [self.delegate mainButtonPressed];
 */
 }
+
 /*
 - (void)exitButtonPressed:(id)sender
 {
@@ -144,6 +138,7 @@
     [self.delegate exitButtonPressed];
 }
 */
+
 - (void)tapMenuItemPressed:(id)sender
 {
     [self closeMenu];
@@ -191,10 +186,10 @@
 - (void)openMenu
 {
 /*
-    if ([self menuOpenned] == YES)
+    if ([self menuOpened] == YES)
         return;
 
-    [self setMenuOpenned:YES];
+    [self setMenuOpened:YES];
 
     ApplicationDelegate *application = (ApplicationDelegate *)[[UIApplication sharedApplication] delegate];
     FullScreenShield *shield = [application fullScreenSchield:self
@@ -208,7 +203,7 @@
 
     [UIView beginAnimations:nil
                     context:nil];
-    [UIView setAnimationDuration:AnimationDurationOpen];
+    [UIView setAnimationDuration:TapMenuAnimationDurationOpen];
 
     [self.mainButton setAlpha:AlphaMainButtonOpenned];
     [self.exitButton setHidden:NO];
@@ -285,14 +280,14 @@
 - (void)closeMenu
 {
 /*
-    if ([self menuOpenned] == NO)
+    if ([self menuOpened] == NO)
         return;
 
-    [self setMenuOpenned:NO];
+    [self setMenuOpened:NO];
 
     [UIView beginAnimations:nil
                     context:nil];
-    [UIView setAnimationDuration:AnimationDurationClose];
+    [UIView setAnimationDuration:TapMenuAnimationDurationClose];
 
     [self.exitButton setHidden:YES];
     [self.mainButton setAlpha:AlphaMainButtonNormal];

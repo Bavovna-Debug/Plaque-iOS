@@ -6,6 +6,8 @@
 "AVERROR_TITLE"                             = "Kamera";
 "AVERROR_MESSAGE"                           = "Ohne Zugriff auf Kamera kann diese App die Inhalte der vpCloud in 3D nicht repräsentieren. Sie können Zugriff auf Kamera für diese App in den Systemeinstellungen Ihres Geräts aktivieren.";
 
+"CREATE_PLAQUE_LABEL"                       = "Plaque vor mir erstellen";
+
 "OK_BUTTON"                                 = "OK";
 
 "DO_YOU_WANT_TO_CREATE_PROFILE_TITLE"       = "Profil";
@@ -18,7 +20,7 @@
 
 "PROFILE_FORM_PROFILE_NAME_LABEL"           = "Profilname:";
 "PROFILE_FORM_PROFILE_NAME_HELP"            = "Profilname muss mindestens 4 und nicht mehr als 20 Zeichen lang sein und kann Buchstaben, Ziffern und einigen Sonderzeichen enthalten.";
-"PROFILE_FORM_PROFILE_NAME_VALIDATING_MESSAGE"          = "Prüfen %@' im vpCloud";
+"PROFILE_FORM_PROFILE_NAME_VALIDATING_MESSAGE"          = "Prüfen '%@' im vpCloud";
 "PROFILE_FORM_PROFILE_NAME_IS_AVAILABLE_MESSAGE"        = "Name '%@' ist frei";
 "PROFILE_FORM_PROFILE_NAME_ALREADY_IN_USE_MESSAGE"      = "Name '%@' ist schon vergeben";
 "PROFILE_FORM_PROFILE_NAME_CONSTRAINT_MESSAGE"          = "Name '%@' entspricht nicht den Regeln";
@@ -29,6 +31,10 @@
 
 "PROFILE_FORM_PASSWORD_LABEL"               = "Passwort:";
 "PROFILE_FORM_PASSWORD_HELP"                = "";
+
+"CREATE_PLAQUE_HELP_TEXT"                   = "Halte dein iPhone/iPad senkrecht. Richte es auf ein Objekt in deiner Nähe und drücke auf 'Platzieren'. Neuer Plaque erscheint in ca. 20 Meter vor dir.";
+"CREATE_PLAQUE_FIRE_BUTTON"                 = "Platzieren";
+"CREATE_PLAQUE_CANCEL_BUTTON"               = "Abbrechen";
 
 "DEFAULT_INSCRIPTION"                       = "Hier könnte Ihre Werbung sein";
 

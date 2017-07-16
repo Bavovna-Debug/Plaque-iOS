@@ -1,7 +1,7 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -25,17 +25,17 @@ typedef enum
 
 @interface Plaques : NSObject
 
-@property (weak,   nonatomic, readwrite) id<PlaquesDelegate> plaquesDelegate;
-@property (weak,   nonatomic, readwrite) id<PlaqueCaptureDelegate> captureDelegate;
-@property (weak,   nonatomic, readwrite) id<PlaqueEditDelegate> editDelegate;
+@property (weak,   nonatomic, readwrite) id<PlaquesDelegate>        plaquesDelegate;
+@property (weak,   nonatomic, readwrite) id<PlaqueCaptureDelegate>  captureDelegate;
+@property (weak,   nonatomic, readwrite) id<PlaqueEditDelegate>     editDelegate;
 
-@property (strong, nonatomic, readonly)  NSMutableArray  *plaquesOnRadar;
-@property (strong, nonatomic, readonly)  NSMutableArray  *plaquesInSight;
-@property (strong, nonatomic, readonly)  NSMutableArray  *plaquesOnMap;
-@property (strong, nonatomic, readonly)  NSMutableArray  *plaquesOnWorkdesk;
+@property (strong, nonatomic, readonly)  NSMutableArray     *plaquesOnRadar;
+@property (strong, nonatomic, readonly)  NSMutableArray     *plaquesInSight;
+@property (strong, nonatomic, readonly)  NSMutableArray     *plaquesOnMap;
+@property (strong, nonatomic, readonly)  NSMutableArray     *plaquesOnWorkdesk;
 
-@property (weak,   nonatomic, readwrite) Plaque *plaqueUnderEdit;
-@property (weak,   nonatomic, readwrite) Plaque *capturedPlaque;
+@property (weak,   atomic,    readwrite) Plaque             *plaqueUnderEdit;
+@property (weak,   atomic,    readwrite) Plaque             *capturedPlaque;
 
 + (Plaques *)sharedPlaques;
 

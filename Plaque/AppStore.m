@@ -1,12 +1,14 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import <StoreKit/StoreKit.h>
 
 #import "AppStore.h"
+
+#include "Definitions.h"
 
 @interface AppStore () /*<SKProductsRequestDelegate, SKPaymentTransactionObserver, UIAlertViewDelegate>*/
 
@@ -28,9 +30,8 @@
 
     return appStore;
 }
-/*
-#define RemoveAdsProductIdentifier  @"Zeppelinium.Plaque.Unlock"
 
+/*
 - (void)purchaseUnlock
 {
     if ([SKPaymentQueue canMakePayments] == NO)
@@ -68,7 +69,9 @@
      didReceiveResponse:(SKProductsResponse *)response
 {
     if ([response.products count] == 0)
+    {
         return;
+    }
 
     self.gameUnlockProduct = [response.products objectAtIndex:0];
 
@@ -98,7 +101,8 @@
 {
     for (SKPaymentTransaction *transaction in queue.transactions)
     {
-        if (SKPaymentTransactionStateRestored) {
+        if (SKPaymentTransactionStateRestored) 
+        {
             [self doUnlock];
             [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
             break;
@@ -114,31 +118,32 @@
         switch (transaction.transactionState)
         {
             case SKPaymentTransactionStatePurchasing:
-                NSLog(@"Transaction state -> Purchasing");
+                NSLog(@"[AppStore] Transaction state -> Purchasing");
                 break;
 
             case SKPaymentTransactionStatePurchased:
-                NSLog(@"Transaction state -> Purchased");
+                NSLog(@"[AppStore] Transaction state -> Purchased");
                 [self doUnlock];
                 [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
                 break;
 
             case SKPaymentTransactionStateRestored:
-                NSLog(@"Transaction state -> Restored");
+                NSLog(@"[AppStore] Transaction state -> Restored");
                 [self doUnlock];
                 [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
                 break;
                 
             case SKPaymentTransactionStateFailed:
-                if (transaction.error.code != SKErrorPaymentCancelled) {
-                    NSLog(@"Transaction state -> Cancelled");
+                if (transaction.error.code != SKErrorPaymentCancelled) 
+                {
+                    NSLog(@"[AppStore] Transaction state -> Cancelled");
                 }
                 
                 [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
                 break;
                 
             case SKPaymentTransactionStateDeferred:
-                NSLog(@"Transaction state -> Deferred");
+                NSLog(@"[AppStore] Transaction state -> Deferred");
                 break;
         }
     }
@@ -149,7 +154,9 @@
     [self setGameUnlocked:YES];
     
     if ((self.delegate != nil) && [self.delegate respondsToSelector:@selector(gameWasUnlocked)])
+    {
         [self.delegate gameWasUnlocked];
+    }
 }
 
 #pragma mark - Alert

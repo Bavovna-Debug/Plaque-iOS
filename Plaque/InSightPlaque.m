@@ -1,18 +1,16 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import "InSightPlaque.h"
 #import "InSightView.h"
 #import "Navigator.h"
 
-#ifdef DEBUG
-#undef REDRAW
-#endif
+#include "Definitions.h"
 
-@interface InSightPlaque ()
+@interface InSightPlaque () <CALayerDelegate>
 
 @property (weak, nonatomic) InSightView *parentView;
 
@@ -142,7 +140,7 @@
 
     scaleFactor = self.parentView.fullScreenMeterDistance / self.distanceToUser;
 
-    CGFloat angleX = radiandsToDegrees(sinf(degreesToRadians(self.directionFromUser)));
+    CGFloat angleX = RadiandsToDegrees(sinf(DegreesToRadians(self.directionFromUser)));
     transX = angleX / (self.parentView.fullScreenAngle / 2) * (self.parentView.fullScreenWidth / 2);
     transY = self.altitudeOverUser * scaleFactor * self.parentView.fullScreenWidth;
     transZ = 0.0f;
@@ -163,15 +161,15 @@
     transform = CATransform3DScale(transform, scaleFactor, scaleFactor, scaleFactor);
 
     if (self.rotationOnScreen != 0.0f)
-        transform = CATransform3DRotate(transform, degreesToRadians(self.rotationOnScreen), 0, -1, 0);
+        transform = CATransform3DRotate(transform, DegreesToRadians(self.rotationOnScreen), 0, -1, 0);
 
     if (self.plaque.tilt != 0.0f)
-        transform = CATransform3DRotate(transform, degreesToRadians(self.plaque.tilt), 1, 0, 0);
+        transform = CATransform3DRotate(transform, DegreesToRadians(self.plaque.tilt), 1, 0, 0);
 
     [plaqueLayer setZPosition:roundf(self.parentView.rangeInSight - self.distanceToUser)];
     [plaqueLayer setTransform:transform];
 
-#ifdef REDRAW
+#ifdef VerboseInSightPlaqueRedraw
     NSLog(@"Redraw plaque in sight %@ (%@)",
           [self.plaque.plaqueToken UUIDString],
           self.plaque.inscription);
@@ -214,7 +212,7 @@
 {
     if (CGColorEqualToColor([self.plaque.backgroundColor CGColor], [[UIColor clearColor] CGColor]) == NO) {
         [self.plaqueLayer setBackgroundColor:[self.plaque.backgroundColor CGColor]];
-        [self.plaqueLayer setBorderWidth:PLAQUE_BORDER_WIDTH];
+        [self.plaqueLayer setBorderWidth:PlaqueBorderWidth];
     } else {
         [self.plaqueLayer setBackgroundColor:nil];
         [self.plaqueLayer setBorderWidth:0.0f];

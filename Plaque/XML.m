@@ -1,7 +1,7 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import <CommonCrypto/CommonDigest.h>
@@ -41,7 +41,9 @@
     //
     NSMutableString *output = [NSMutableString stringWithCapacity:CC_MD5_DIGEST_LENGTH * 2];
     for(int i = 0; i < CC_MD5_DIGEST_LENGTH; i++)
+    {
         [output appendFormat:@"%02X", md5Buffer[i]];
+    }
 
     return output;
 }
@@ -50,15 +52,15 @@
 
 @interface XMLDocument () <NSXMLParserDelegate>
 
-@property (nonatomic, strong, readwrite) NSString  *target;
-@property (nonatomic, strong, readwrite) NSString  *documentVersion;
+@property (nonatomic, strong, readwrite) NSString       *target;
+@property (nonatomic, strong, readwrite) NSString       *documentVersion;
 
 @end
 
 @interface XMLElement ()
 
-@property (nonatomic, strong, readwrite) NSMutableArray  *elements;
-@property (nonatomic, assign)            Boolean         parsed;
+@property (nonatomic, strong, readwrite) NSMutableArray *elements;
+@property (nonatomic, assign)            Boolean        parsed;
 
 - (NSData *)data;
 
@@ -78,12 +80,14 @@
 {
     XMLDocument *document = [[XMLDocument alloc] initWithTarget:target
                                                         version:documentVersion];
+
     return document;
 }
 
 + (XMLDocument *)documentFromData:(NSData *)data
 {
     XMLDocument *document = [[XMLDocument alloc] initWithData:data];
+
     return document;
 }
 
@@ -92,7 +96,9 @@
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
 
     self.target = target;
     self.documentVersion = documentVersion;
@@ -104,7 +110,9 @@
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
 
     xmlParser = [[NSXMLParser alloc] initWithData:data];
     [xmlParser setDelegate:self];
@@ -118,7 +126,9 @@
     NSMutableData *data = [NSMutableData data];
     NSData *forest = [self.forest data];
     if (forest == nil)
+    {
         return nil;
+    }
 
     NSString *root = [NSString stringWithFormat:@"<?%@ version=\"%@\"?>",
                       self.target,
@@ -131,7 +141,7 @@
     }
     @catch (NSException *exception)
     {
-        NSLog(@"Error in xmlData");
+        NSLog(@"[XML] Error in xmlData");
         @throw exception;
     }
 
@@ -174,22 +184,33 @@ didStartElement:(NSString *)elementName
  qualifiedName:(NSString *)qualifiedName
     attributes:(NSDictionary *)attributes
 {
-    XMLElement *element;
-    if (self.forest == nil) {
+    XMLElement *element = nil;
+
+    if (self.forest == nil)
+    {
         element = [XMLElement elementWithName:elementName];
-        if (element != nil) {
+        if (element != nil)
+        {
             [self setForest:element];
         }
-    } else {
+    }
+    else
+    {
         element = [XMLElement elementWithName:elementName];
-        if (element != nil) {
+        if (element != nil)
+        {
             XMLElement *parent = [self lastParsingElement];
             if (parent != nil)
+            {
                 [parent addElement:element];
+            }
         }
     }
 
-    [element setAttributes:(NSMutableDictionary *)attributes];
+    if (element != nil)
+    {
+        [element setAttributes:(NSMutableDictionary *)attributes];
+    }
 }
 
 - (void)parser:(NSXMLParser *)parser
@@ -199,7 +220,9 @@ didStartElement:(NSString *)elementName
 {
     XMLElement *lastElement = [self lastParsingElement];
     if (lastElement != nil)
+    {
         [lastElement setParsed:YES];
+    }
 }
 
 - (void)parser:(NSXMLParser *)parser
@@ -207,7 +230,9 @@ foundCharacters:(NSString *)string
 {
     XMLElement *lastElement = [self lastParsingElement];
     if (lastElement != nil)
+    {
         [lastElement setContent:string];
+    }
 }
 
 - (XMLElement *)lastParsingElement
@@ -219,15 +244,22 @@ foundCharacters:(NSString *)string
         @try
         {
             if (elementUnderCursor.parsed == YES)
+            {
                 return nil;
+            }
 
             if ([elementUnderCursor.elements count] == 0)
+            {
                 return elementUnderCursor;
+            }
 
-            XMLElement *childElement = (XMLElement *)[elementUnderCursor.elements lastObject];
+            XMLElement *childElement =
+            (XMLElement *) [elementUnderCursor.elements lastObject];
 
             if (childElement.parsed == YES)
+            {
                 return elementUnderCursor;
+            }
             
             elementUnderCursor = childElement;
         }
@@ -265,7 +297,9 @@ foundCharacters:(NSString *)string
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
 
     self.name = name;
     self.elements = [NSMutableArray array];
@@ -320,7 +354,9 @@ foundCharacters:(NSString *)string
         [data appendData:[prefix dataUsingEncoding:NSUTF8StringEncoding]];
 
         for (XMLElement *element in self.elements)
+        {
             [data appendData:[element data]];
+        }
 
         [data appendData:[suffix dataUsingEncoding:NSUTF8StringEncoding]];
 
@@ -358,7 +394,8 @@ foundCharacters:(NSString *)string
         NSMutableArray *elements = [elementUnderCursor elements];
         for (XMLElement *element in elements)
         {
-            if ([element.name isEqualToString:part] == YES) {
+            if ([element.name isEqualToString:part] == YES)
+            {
                 found = YES;
                 elementUnderCursor = element;
                 break;
@@ -366,7 +403,9 @@ foundCharacters:(NSString *)string
         }
 
         if (found == NO)
+        {
             return nil;
+        }
     }
 
     return elementUnderCursor;

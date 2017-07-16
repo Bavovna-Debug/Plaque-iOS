@@ -1,12 +1,12 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import "PlaqueAnnotation.h"
 
-#define PlaqueSizeFixedScaleFactor 5.0f
+#include "Definitions.h"
 
 @implementation PlaqueAnnotation
 
@@ -52,6 +52,7 @@
 
     CGSize plaqueViewSize = CGSizeMake(self.plaque.size.width * PlaqueSizeFixedScaleFactor,
                                        self.plaque.size.height * PlaqueSizeFixedScaleFactor);
+
     CGRect frame = CGRectMake(-plaqueViewSize.width / 2,
                               -plaqueViewSize.height / 2,
                               plaqueViewSize.width,

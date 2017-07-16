@@ -1,18 +1,12 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import "StatusBar.h"
 
-#ifdef DEBUG
-#define DEBUG_MESSAGES
-#endif
-
-#define NextMessageInterval      2.0f
-#define LastMessageInterval      5.0f
-#define SlideMessageOffInterval  0.5f
+#include "Definitions.h"
 
 @interface StatusBarMessage : NSObject
 
@@ -72,7 +66,7 @@
 
 - (void)postMessage:(NSString *)text
 {
-#ifdef DEBUG_MESSAGES
+#ifdef VerboseStatusBarMessages
     NSLog(@"Enqueue message: %@ (%f seconds since last message)",
           text,
           (self.lastMessageStamp == nil) ? 0.0f : [self.lastMessageStamp timeIntervalSinceNow]);
@@ -149,7 +143,7 @@
 
 - (void)showNextMessage
 {
-#ifdef DEBUG_MESSAGES
+#ifdef VerboseStatusBarMessages
     NSLog(@"Show next message");
 #endif
 
@@ -183,7 +177,7 @@
 
         self.lastMessageStamp = [NSDate date];
 
-#ifdef DEBUG_MESSAGES
+#ifdef VerboseStatusBarMessages
         NSLog(@"Show message: %@", [message text]);
 #endif
     }

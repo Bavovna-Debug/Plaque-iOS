@@ -1,7 +1,7 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import <AVFoundation/AVFoundation.h>
@@ -17,16 +17,7 @@
 #import "Paquet.h"
 #import "InSightPlaque.h"
 
-#ifdef DEBUG
-#undef VERBOSE_CAMERA
-#define PLAQUE_DID_APPEAR
-#endif
-
-#define TiltAccuracy 0.5f
-#define TurnAccuracy 0.5f
-
-#define CaptureInterval                         1.0f
-#define CaptureOffAfterSelectionByUserInterval  5.0f
+#include "Definitions.h"
 
 @interface InSightView () <CLLocationManagerDelegate, PlaquesDelegate>
 
@@ -80,10 +71,12 @@
     [self setTranslatesAutoresizingMaskIntoConstraints:NO];
     [self setBackgroundColor:[UIColor colorWithWhite:0.2f alpha:1.0f]];
 
-    CGRect createPlaqueButtonRect = CGRectMake(0.0f, 0.0f, 48.0f, 48.0f);
+    NSString *createPlaqueText = NSLocalizedString(@"CREATE_PLAQUE_LABEL", nil);
+
+    CGRect createPlaqueButtonRect = CGRectMake(0.0f, 0.0f, 320.0f, 48.0f);
     UIButton *createPlaqueButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [createPlaqueButton setFrame:createPlaqueButtonRect];
-    [createPlaqueButton setTitle:@"(+)"
+    [createPlaqueButton setTitle:createPlaqueText
                         forState:UIControlStateNormal];
     [createPlaqueButton addTarget:controller
                            action:@selector(createNewPlaquePressed)
@@ -214,18 +207,27 @@
          //CGFloat tilt = correctDegrees(radiandsToDegrees(-atan2f(accelerometerData.acceleration.y, accelerometerData.acceleration.z)) - 90.0f);
          CGFloat tilt = atan2f(accelerometerData.acceleration.y, accelerometerData.acceleration.z) + M_PI_2;
 
-         CGFloat turn = correctDegrees(radiandsToDegrees(-atan2f(accelerometerData.acceleration.x, accelerometerData.acceleration.y)) - 180.0f);
+         CGFloat turn = CorrectDegrees(RadiandsToDegrees(-atan2f(accelerometerData.acceleration.x, accelerometerData.acceleration.y)) - 180.0f);
 
-         //if (round(tilt / TiltAccuracy) != round(self.tilt / TiltAccuracy))
-         //{
+#ifdef INSIGHTVIEW_TILT_BY_ACCURACY
+         if (round(tilt / TiltAccuracy) != round(self.tilt / TiltAccuracy))
+         {
              self.tilt = tilt;
              [self tiltUp];
-         //}
+         }
+#else
+        self.tilt = tilt;
+        [self tiltUp];
+#endif
 
+#ifdef INSIGHTVIEW_TURN_BY_ACCURACY
          if (round(turn / TurnAccuracy) != round(self.turn / TurnAccuracy))
          {
              self.turn = turn;
          }
+#else
+        self.turn = turn;
+#endif
 
          if (error)
              NSLog(@"%@", error);
@@ -288,7 +290,8 @@
 
     [[Plaques sharedPlaques] setCapturedPlaque:capturedPlaque];
 
-    if (timer.timeInterval == CaptureOffAfterSelectionByUserInterval) {
+    if (timer.timeInterval == CaptureOffAfterSelectionByUserInterval)
+    {
         [self stopCapturer];
         [self startCapturerWithInterval:CaptureInterval];
     }
@@ -337,11 +340,14 @@
             }
         }
 
-        if (existingInSightPlaque == nil) {
+        if (existingInSightPlaque == nil)
+        {
             InSightPlaque *inSightPlaque = [[InSightPlaque alloc] initWithParentView:self];
             [inSightPlaque setPlaque:plaque];
             [plaquesNewInSight addObject:inSightPlaque];
-        } else {
+        }
+        else
+        {
             [plaquesAlreadyInSight removeObject:existingInSightPlaque];
         }
     }
@@ -358,11 +364,14 @@
             }
         }
 
-        if (existingInSightPlaque == nil) {
+        if (existingInSightPlaque == nil)
+        {
             InSightPlaque *inSightPlaque = [[InSightPlaque alloc] initWithParentView:self];
             [inSightPlaque setPlaque:plaque];
             [plaquesNewInSight addObject:inSightPlaque];
-        } else {
+        }
+        else
+        {
             [plaquesAlreadyInSight removeObject:existingInSightPlaque];
         }
     }
@@ -393,8 +402,10 @@
     [self.recalculateLock lock];
 
     for (InSightPlaque *inSightPlaque in self.inSightPlaques)
+    {
         [self recalculateInSightPlaque:inSightPlaque
                            forLocation:location];
+    }
 
     [self.recalculateLock unlock];
 }
@@ -413,9 +424,12 @@
 
     distanceToUser = [plaque.location distanceFromLocation:self.location];
 
-    if ([plaque altitude] == 0.0f) {
+    if ([plaque altitude] == 0.0f)
+    {
         altitudeOverUser = 0.0f;
-    } else {
+    }
+    else
+    {
         altitudeOverUser = [plaque altitude] - self.location.altitude;
     }
 
@@ -429,8 +443,10 @@
     [self.recalculateLock lock];
 
     for (InSightPlaque *inSightPlaque in self.inSightPlaques)
+    {
         [self recalculateInSightPlaque:inSightPlaque
                             forHeading:heading];
+    }
 
     [self.recalculateLock unlock];
 }
@@ -449,7 +465,7 @@
     {
         CLLocationDirection rotationOnScreen;
 
-        rotationOnScreen = correctDegrees(plaque.direction - oppositeDirection(self.heading.trueHeading));
+        rotationOnScreen = CorrectDegrees(plaque.direction - OppositeDirection(self.heading.trueHeading));
 
         [inSightPlaque setRotationOnScreen:rotationOnScreen];
     }
@@ -561,7 +577,7 @@
 
     [self.inSightPlaques addObject:inSightPlaque];
 
-#ifdef PLAQUE_DID_APPEAR
+#ifdef VerboseInSightViewPlaqueDidAppear
     NSLog(@"Plaque did appear in sight %@",
           [inSightPlaque.plaque.plaqueToken UUIDString]);
 #endif
@@ -686,9 +702,12 @@
     {
         [AVCaptureDevice requestAccessForMediaType:mediaType completionHandler:^(BOOL granted)
         {
-            if (granted) {
+            if (granted)
+            {
                 self.cameraAuthorized = YES;
-            } else {
+            }
+            else
+            {
                 self.cameraAuthorized = NO;
                 dispatch_async(dispatch_get_main_queue(), ^
                 {
@@ -708,7 +727,8 @@
     if (self.cameraController != nil)
         return;
 
-    @try {
+    @try
+    {
         self.cameraController = [[UIImagePickerController alloc] init];
         [self.cameraController setSourceType:UIImagePickerControllerSourceTypeCamera];
         [self.cameraController setCameraDevice:UIImagePickerControllerCameraDeviceRear];
@@ -749,11 +769,12 @@
                               metrics:nil
                               views:viewsDictionary]];
 
-#ifdef VERBOSE_CAMERA
+#ifdef VerboseInSightViewCamera
         NSLog(@"Camera aspect ratio: %f", cameraAspectRatio);
 #endif
     }
-    @catch (NSException *exception) {
+    @catch (NSException *exception)
+    {
         NSLog(@"Camera exception: %@", exception);
     }
 }

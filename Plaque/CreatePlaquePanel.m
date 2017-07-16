@@ -1,7 +1,7 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import "CreatePlaquePanel.h"
@@ -21,9 +21,29 @@
                                    panelSize.height);
     [self setFrame:panelFrame];
 
+    CGSize margin = CGSizeMake(20.0f, 8.0f);
+
+    {
+        UIColor *helpTextColor = [UIColor lightTextColor];
+        UIFont *helpFont = [UIFont systemFontOfSize:13.0f];
+        CGRect helpRect = CGRectMake(0.0f,
+                                     0.0f,
+                                     CGRectGetWidth(panelFrame),
+                                     CGRectGetHeight(panelFrame) - 40.0f);
+
+        UILabel *help = [[UILabel alloc] initWithFrame:CGRectInset(helpRect, margin.width, margin.height)];
+        [help setBackgroundColor:[UIColor clearColor]];
+        [help setTextColor:helpTextColor];
+        [help setLineBreakMode:NSLineBreakByWordWrapping];
+        [help setNumberOfLines:0];
+        [help setFont:helpFont];
+        [help setText:NSLocalizedString(@"CREATE_PLAQUE_HELP_TEXT", nil)];
+        [self addSubview:help];
+    }
+
     UIButton *cancelButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [cancelButton setFrame:CGRectMake(0.0f, 120.0f, 100.0f, 40.0f)];
-    [cancelButton setTitle:@"Cancel"
+    [cancelButton setFrame:CGRectMake(0.0f, 120.0f, 120.0f, 40.0f)];
+    [cancelButton setTitle:NSLocalizedString(@"CREATE_PLAQUE_CANCEL_BUTTON", nil)
                   forState:UIControlStateNormal];
     [cancelButton addTarget:self
                      action:@selector(cancelButtonPressed)
@@ -31,8 +51,8 @@
     [self addSubview:cancelButton];
 
     UIButton *submitButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [submitButton setFrame:CGRectMake(180.0f, 120.0f, 100.0f, 40.0f)];
-    [submitButton setTitle:@"Fire"
+    [submitButton setFrame:CGRectMake(160.0f, 120.0f, 120.0f, 40.0f)];
+    [submitButton setTitle:NSLocalizedString(@"CREATE_PLAQUE_FIRE_BUTTON", nil)
                   forState:UIControlStateNormal];
     [submitButton addTarget:self
                      action:@selector(submitButtonPressed)

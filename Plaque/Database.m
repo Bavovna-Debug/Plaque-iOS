@@ -1,18 +1,12 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import "Database.h"
 
-#ifdef DEBUG
-#define DATABASE_NAME   @"plaque3"
-#define TEMPLATE_NAME   @"plaque"
-#else
-#define DATABASE_NAME   @"plaque"
-#define TEMPLATE_NAME   @"plaque"
-#endif
+#include "Definitions.h"
 
 @implementation Database
 
@@ -23,8 +17,8 @@
 
     dispatch_once(&onceToken, ^
     {
-        database = [[SQLiteDatabase alloc] initWithDatabaseName:DATABASE_NAME
-                                                   templateName:TEMPLATE_NAME];
+        database = [[SQLiteDatabase alloc] initWithDatabaseName:DatabaseName
+                                                   templateName:TemplateName];
         
         //[database executeSQL:@"DELETE FROM plaques" ignoreConstraints:YES];
 

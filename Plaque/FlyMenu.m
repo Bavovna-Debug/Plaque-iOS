@@ -1,11 +1,13 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import "FlyMenu.h"
 #import "Navigator.h"
+
+#include "Definitions.h"
 
 @interface FlyMenu ()
 
@@ -138,7 +140,7 @@
                                   64.0f);
     [UIView beginAnimations:nil
                     context:nil];
-    [UIView setAnimationDuration:0.2f];
+    [UIView setAnimationDuration:FlyMenuAnimationDurationOpen];
 
     [self.mainButton setFrame:mainButtonFrame];
     [self.mainButton setAlpha:0.8f];
@@ -152,8 +154,8 @@
         CATransform3D transform = CATransform3DIdentity;
         transform.m34 = -1.0f / 500.0f;
         //transform = CATransform3DTranslate(transform, transX, -transY, -transZ);
-        transform = CATransform3DRotate(transform, degreesToRadians(angle), 0, 0, -1);
-        transform = CATransform3DRotate(transform, degreesToRadians(25.0f), 0, -1, 0);
+        transform = CATransform3DRotate(transform, DegreesToRadians(angle), 0, 0, -1);
+        transform = CATransform3DRotate(transform, DegreesToRadians(25.0f), 0, -1, 0);
         //transform = CATransform3DScale(transform, scaleFactor, scaleFactor, scaleFactor);
 
         [item.layer setTransform:transform];
@@ -184,7 +186,7 @@
 
     [UIView beginAnimations:nil
                     context:nil];
-    [UIView setAnimationDuration:0.4f];
+    [UIView setAnimationDuration:FlyMenuAnimationDurationClose];
 
     [self.mainButton setFrame:mainButtonFrame];
     [self.mainButton setAlpha:1.0f];

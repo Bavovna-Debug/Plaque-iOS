@@ -1,7 +1,7 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import "ApplicationDelegate.h"
@@ -24,10 +24,13 @@
     CGRect bounds = self.superview.bounds;
 
     CGSize panelSize = CGSizeMake(280.0f, 200.0f);
-    CGRect panelFrame = CGRectMake(CGRectGetMidX(bounds) - panelSize.width / 2,
-                                   CGRectGetMaxY(bounds) - panelSize.height - 64.0f,
-                                   panelSize.width,
-                                   panelSize.height);
+
+    CGRect panelFrame =
+    CGRectMake(CGRectGetMidX(bounds) - panelSize.width / 2,
+               CGRectGetMaxY(bounds) - panelSize.height - 64.0f,
+               panelSize.width,
+               panelSize.height);
+
     [self setFrame:panelFrame];
 
     /*
@@ -47,7 +50,8 @@
     [inscriptionLabel setText:plaque.inscription];
     [self addSubview:inscriptionLabel];
 
-    if (profile != nil) {
+    if (profile != nil)
+    {
         UILabel *profileNameLabel = [[UILabel alloc] initWithFrame:profileNameFrame];
         [profileNameLabel setText:profile.profileName];
         [self addSubview:profileNameLabel];
@@ -80,15 +84,20 @@
     Plaques *plaques = [Plaques sharedPlaques];
     Plaque *capturedPlaque = [plaques capturedPlaque];
     if (capturedPlaque == self.plaque)
+    {
         [plaques setCapturedPlaque:nil];
+    }
 }
 
 - (void)editButtonPressed:(id)sender
 {
-    if ([[Authentificator sharedAuthentificator] profileRegistered] == NO) {
-        ApplicationDelegate *application = [[UIApplication sharedApplication] delegate];
+    if ([[Authentificator sharedAuthentificator] profileRegistered] == NO)
+    {
+        ApplicationDelegate *application = (ApplicationDelegate *) [[UIApplication sharedApplication] delegate];
         [application askToCreateProfile];
-    } else {
+    }
+    else
+    {
         [[Plaques sharedPlaques] setPlaqueUnderEdit:self.plaque];
     }
 }

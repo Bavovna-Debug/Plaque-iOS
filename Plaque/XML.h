@@ -1,7 +1,7 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -16,8 +16,8 @@
 
 @interface XMLDocument : NSObject
 
-@property (nonatomic, strong, readonly) NSString *target;
-@property (nonatomic, strong, readonly) NSString *documentVersion;
+@property (nonatomic, strong, readonly)  NSString   *target;
+@property (nonatomic, strong, readonly)  NSString   *documentVersion;
 
 @property (nonatomic, strong, readwrite) XMLElement *forest;
 
@@ -34,10 +34,10 @@
 
 @interface XMLElement : NSObject
 
-@property (nonatomic, strong, readwrite) NSString             *name;
-@property (nonatomic, strong, readwrite) NSMutableDictionary  *attributes;
-@property (nonatomic, strong, readwrite) NSString             *content;
-@property (nonatomic, strong, readonly)  NSMutableArray       *elements;
+@property (nonatomic, strong, readwrite) NSString               *name;
+@property (nonatomic, strong, readwrite) NSMutableDictionary    *attributes;
+@property (nonatomic, strong, readwrite) NSString               *content;
+@property (nonatomic, strong, readonly)  NSMutableArray         *elements;
 
 + (XMLElement *)elementWithName:(NSString *)name;
 

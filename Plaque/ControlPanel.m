@@ -1,14 +1,14 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import "ApplicationDelegate.h"
 #import "ControlPanel.h"
 #import "FullScreenShield.h"
 
-#define ControlPanelOpenDuration 0.25f
+#include "Definitions.h"
 
 @interface ControlPanel ()
 
@@ -97,15 +97,15 @@
     UIButton *onMapButton = [self buttonWithIcon:onMapImage];
     [surroundingSelectorView addSubview:onMapButton];
 
-    UIButton *manualNavigationButtonButton = [self buttonWithIcon:onMapImage];
-    [surroundingSelectorView addSubview:manualNavigationButtonButton];
+    //UIButton *manualNavigationButtonButton = [self buttonWithIcon:onMapImage];
+    //[surroundingSelectorView addSubview:manualNavigationButtonButton];
 
     [inSightButton setCenter:CGPointMake(round(CGRectGetWidth(frame) / 4),
                                          CGRectGetMidY(frame))];
     [onMapButton setCenter:CGPointMake(round(CGRectGetWidth(frame) / 4 * 2),
                                        CGRectGetMidY(frame))];
-    [manualNavigationButtonButton setCenter:CGPointMake(round(CGRectGetWidth(frame) / 4 * 3),
-                                                        CGRectGetMidY(frame))];
+    /*[manualNavigationButtonButton setCenter:CGPointMake(round(CGRectGetWidth(frame) / 4 * 3),
+                                                        CGRectGetMidY(frame))];*/
 
     [inSightButton addTarget:self
                       action:@selector(inSightButtonPressed:)
@@ -115,9 +115,9 @@
                     action:@selector(onMapButtonPressed:)
           forControlEvents:UIControlEventTouchUpInside];
 
-    [manualNavigationButtonButton addTarget:self
+    /*[manualNavigationButtonButton addTarget:self
                                      action:@selector(manualNavigationButtonButtonPressed:)
-                           forControlEvents:UIControlEventTouchUpInside];
+                           forControlEvents:UIControlEventTouchUpInside];*/
 
     return surroundingSelectorView;
 }

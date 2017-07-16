@@ -1,22 +1,21 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import "EditModeFontSubview.h"
 #import "Plaques.h"
 
-#define MinFontSize 0.05f
-#define MaxFontSize 0.6f
+#include "Definitions.h"
 
 @interface EditModeFontSubview ()
 
-@property (weak,   nonatomic) Plaque *plaque;
-@property (strong, nonatomic) CALayer *plaqueLayer;
-@property (strong, nonatomic) UIView *touchPad;
-@property (assign, nonatomic) Boolean moving;
-@property (strong, nonatomic) NSTimer *touchPadTimer;
+@property (weak,   nonatomic) Plaque    *plaque;
+@property (strong, nonatomic) CALayer   *plaqueLayer;
+@property (strong, nonatomic) UIView    *touchPad;
+@property (assign, nonatomic) Boolean   moving;
+@property (strong, nonatomic) NSTimer   *touchPadTimer;
 
 @end
 
@@ -29,9 +28,13 @@
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
 
     self.plaque = [[Plaques sharedPlaques] plaqueUnderEdit];
+
+    self.moving = NO;
 
     return self;
 }
@@ -40,9 +43,12 @@
 {
     [super didMoveToSuperview];
 
-    if (self.superview != nil) {
+    if (self.superview != nil)
+    {
         [self preparePanel];
-    } else {
+    }
+    else
+    {
         [self destroyPanel];
     }
 }
@@ -55,10 +61,12 @@
     [self addSubview:backgroundView];
 
     CGRect bounds = self.bounds;
-    CGRect touchPadFrame = CGRectMake(CGRectGetMaxX(bounds) - 80.0f,
-                                      CGRectGetMinY(bounds),
-                                      80.0f,
-                                      CGRectGetHeight(bounds));
+
+    CGRect touchPadFrame =
+    CGRectMake(CGRectGetMaxX(bounds) - 80.0f,
+               CGRectGetMinY(bounds),
+               80.0f,
+               CGRectGetHeight(bounds));
 
 
     UIView *touchPad = [[UIView alloc] initWithFrame:touchPadFrame];
@@ -83,7 +91,9 @@
 {
     NSTimer *touchPadTimer = self.touchPadTimer;
     if (touchPadTimer != nil)
+    {
         [touchPadTimer invalidate];
+    }
 }
 
 - (void)recalculateTiltParameters:(CGPoint)fingerPoint
@@ -107,11 +117,15 @@
         fontSize = nearbyintf(fontSize * 100.0f);
         fontSize /= 100.0f;
 
-        if (fontSize < MinFontSize)
-            fontSize = MinFontSize;
+        if (fontSize < EditModeMinFontSize)
+        {
+            fontSize = EditModeMinFontSize;
+        }
 
-        if (fontSize > MaxFontSize)
-            fontSize = MaxFontSize;
+        if (fontSize > EditModeMaxFontSize)
+        {
+            fontSize = EditModeMaxFontSize;
+        }
 
         [self.plaque setFontSize:fontSize];
 
@@ -123,12 +137,19 @@
            withEvent:(UIEvent *)event
 {
     UITouch *touch = [touches anyObject];
+
     CGPoint point = [touch locationInView:[touch view]];
+
     point = [[touch view] convertPoint:point toView:self];
-    if (CGRectContainsPoint(self.touchPad.frame, point) == YES) {
+
+    if (CGRectContainsPoint(self.touchPad.frame, point) == YES)
+    {
         point = [touch locationInView:self.touchPad];
+
         [self recalculateTiltParameters:point];
+
         self.moving = YES;
+
         [self.touchPadTimer fire];
     }
 }
@@ -149,12 +170,19 @@
            withEvent:(UIEvent *)event
 {
     UITouch *touch = [touches anyObject];
+
     CGPoint point = [touch locationInView:[touch view]];
+
     point = [[touch view] convertPoint:point toView:self];
-    if (CGRectContainsPoint(self.touchPad.frame, point) == YES) {
+
+    if (CGRectContainsPoint(self.touchPad.frame, point) == YES)
+    {
         point = [touch locationInView:self.touchPad];
+
         [self recalculateTiltParameters:point];
-    } else {
+    }
+    else
+    {
         self.moving = NO;
     }
 }
@@ -162,7 +190,9 @@
 - (void)refreshValues
 {
     if (self.plaqueLayer != nil)
+    {
         [self.plaqueLayer removeFromSuperlayer];
+    }
 
     self.plaqueLayer = [self.plaque layerWithFrameToFit:CGRectMake(15.0f, 15.0f, 225.0f, 170.0f)];
     [self.plaque inscriptionLayerForLayer:self.plaqueLayer];

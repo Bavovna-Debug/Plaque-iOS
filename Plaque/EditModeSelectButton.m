@@ -1,7 +1,7 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import "EditModeSelectButton.h"
@@ -13,6 +13,7 @@
 + (EditModeSelectButton *)button:(EditMode)editMode
 {
     EditModeSelectButton *editModeButton = [[EditModeSelectButton alloc] initWithEditMode:editMode];
+
     return editModeButton;
 }
 
@@ -30,15 +31,22 @@
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
 
     self.editMode = editMode;
 
     CGSize buttonSize = [EditModeSelectButton buttonSize];
-    [self setBounds:CGRectMake(0.0f, 0.0f, buttonSize.width, buttonSize.height)];
+
+    [self setBounds:CGRectMake(0.0f,
+                               0.0f,
+                               buttonSize.width,
+                               buttonSize.height)];
 
     NSString *logoName;
     NSString *labelText;
+
     switch (self.editMode)
     {
         case EditModeCoordinate:
@@ -86,12 +94,14 @@
             labelText = NSLocalizedString(@"EDIT_MODE_INSCRIPTION_BUTTON", nil);
             break;
     }
+
     [self setBackgroundImage:[UIImage imageNamed:logoName] forState:UIControlStateNormal];
 
     CGRect labelFrame = CGRectMake(CGRectGetMinX(self.bounds),
                                    CGRectGetMaxY(self.bounds),
                                    CGRectGetWidth(self.bounds),
                                    10.0f);
+    
     UILabel *label = [[UILabel alloc] initWithFrame:labelFrame];
     [label setBackgroundColor:[UIColor clearColor]];
     [label setTextColor:[UIColor darkTextColor]];

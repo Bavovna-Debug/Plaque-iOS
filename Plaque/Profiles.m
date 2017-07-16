@@ -1,7 +1,7 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import "Paquet.h"
@@ -17,7 +17,7 @@
 
 @interface Profiles () <PaquetSenderDelegate>
 
-@property (strong, nonatomic) NSMutableArray  *profilesCache;
+@property (strong, nonatomic) NSMutableArray *profilesCache;
 
 @end
 
@@ -40,7 +40,9 @@
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
 
     self.profilesCache = [NSMutableArray array];
 
@@ -57,18 +59,20 @@
 
     // If it is not cache then search for it in local database.
     //
-    if (profile == nil) {
+    if (profile == nil)
+    {
         profile = [[Profile alloc] initWithToken:profileToken];
 
         // If it does not exist in local database ...
         //
-        if (profile == nil) {
-            //
+        if (profile == nil)
+        {
             // ... then require a download.
             //
             [self requestProfileDownload:profileToken];
-        } else {
-            //
+        }
+        else
+        {
             // ... otherwise put it in cache.
             //
             [self.profilesCache addObject:profile];
@@ -83,7 +87,9 @@
     for (Profile *profile in self.profilesCache)
     {
         if ([profile.profileToken isEqual:profileToken] == YES)
+        {
             return profile;
+        }
     }
 
     return nil;
@@ -111,7 +117,7 @@
     NSString *userName = [paquet getString];
 
 #ifdef VERBOSE
-    NSLog(@"Received profile: %@ revision %d <%@> <%@>",
+    NSLog(@"[Profiles] Received profile %@ revision %d '%@' '%@'",
           profileToken,
           profileRevision,
           profileName,

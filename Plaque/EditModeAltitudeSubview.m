@@ -1,7 +1,7 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import "EditModeAltitudeSubview.h"
@@ -9,15 +9,16 @@
 
 @interface EditModeAltitudeSubview () <CLLocationManagerDelegate>
 
-@property (weak,   nonatomic) Plaque *plaque;
-@property (strong, nonatomic) UILabel *deviceOverSeaZeroValue;
-@property (strong, nonatomic) UILabel *plaqueOverSeaZeroValue;
-@property (strong, nonatomic) UILabel *plaqueOverDeviceValue;
-@property (strong, nonatomic) UIImageView *deviceLogo;
-@property (strong, nonatomic) UIImageView *plaqueLogo;
-@property (strong, nonatomic) UIView *touchPad;
-@property (assign, nonatomic) Boolean moving;
-@property (strong, nonatomic) NSTimer *touchPadTimer;
+@property (weak,   nonatomic) CLLocationManager *locationManager;
+@property (weak,   nonatomic) Plaque            *plaque;
+@property (strong, nonatomic) UILabel           *altitudeLabel1;
+@property (strong, nonatomic) UILabel           *altitudeLabel2;
+@property (strong, nonatomic) UILabel           *altitudeLabel3;
+@property (strong, nonatomic) UIImageView       *deviceLogo;
+@property (strong, nonatomic) UIImageView       *plaqueLogo;
+@property (strong, nonatomic) UIView            *touchPad;
+@property (assign, nonatomic) Boolean           moving;
+@property (strong, nonatomic) NSTimer           *touchPadTimer;
 
 @end
 
@@ -26,13 +27,19 @@
     CLLocationDistance shiftAltitudePerTimerTick;
 }
 
-- (id)init
+- (id)initWithLocationManager:(CLLocationManager *)locationManager
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
+
+    self.locationManager = locationManager;
 
     self.plaque = [[Plaques sharedPlaques] plaqueUnderEdit];
+
+    self.moving = NO;
 
     return self;
 }
@@ -41,9 +48,16 @@
 {
     [super didMoveToSuperview];
 
-    if (self.superview != nil) {
+    if (self.superview != nil)
+    {
         [self preparePanel];
-    } else {
+
+        [self.locationManager setDelegate:self];
+    }
+    else
+    {
+        [self.locationManager setDelegate:nil];
+
         [self destroyPanel];
     }
 }
@@ -57,49 +71,51 @@
 
     CGRect bounds = self.bounds;
     CGRect valueFrame = CGRectMake(0.0f, 0.0f, 96.0f, 20.0f);
-    CGPoint deviceOverSeaZeroValuePoint = CGPointMake(40.0f, 140.0f);
-    CGPoint plaqueOverSeaZeroValuePoint = CGPointMake(190.0f, 105.0f);
-    CGPoint plaqueOverDeviceValuePoint = CGPointMake(115.0f, 65.0f);
+
+    CGPoint altitudeLabel1Point = CGPointMake(40.0f, 140.0f);
+    CGPoint altitudeLabel2Point = CGPointMake(115.0f, 65.0f);
+    CGPoint altitudeLabel3Point = CGPointMake(190.0f, 105.0f);
+
     CGRect touchPadFrame = CGRectMake(CGRectGetMaxX(bounds) - 80.0f,
                                       CGRectGetMinY(bounds),
                                       80.0f,
                                       CGRectGetHeight(bounds));
 
-    UILabel *deviceOverSeaZeroValue = [[UILabel alloc] init];
-    [deviceOverSeaZeroValue setFrame:valueFrame];
-    [deviceOverSeaZeroValue setCenter:deviceOverSeaZeroValuePoint];
-    [deviceOverSeaZeroValue setFont:[UIFont boldSystemFontOfSize:14.0f]];
-    [deviceOverSeaZeroValue setTextAlignment:NSTextAlignmentCenter];
-    [deviceOverSeaZeroValue setBackgroundColor:[UIColor clearColor]];
-    [deviceOverSeaZeroValue setTextColor:[UIColor darkTextColor]];
-    [self addSubview:deviceOverSeaZeroValue];
+    UILabel *altitudeLabel1 = [[UILabel alloc] init];
+    [altitudeLabel1 setFrame:valueFrame];
+    [altitudeLabel1 setCenter:altitudeLabel1Point];
+    [altitudeLabel1 setFont:[UIFont boldSystemFontOfSize:14.0f]];
+    [altitudeLabel1 setTextAlignment:NSTextAlignmentCenter];
+    [altitudeLabel1 setBackgroundColor:[UIColor clearColor]];
+    [altitudeLabel1 setTextColor:[UIColor darkTextColor]];
+    [self addSubview:altitudeLabel1];
 
-    UILabel *plaqueOverSeaZeroValue = [[UILabel alloc] init];
-    [plaqueOverSeaZeroValue setFrame:valueFrame];
-    [plaqueOverSeaZeroValue setCenter:plaqueOverSeaZeroValuePoint];
-    [plaqueOverSeaZeroValue setFont:[UIFont boldSystemFontOfSize:14.0f]];
-    [plaqueOverSeaZeroValue setTextAlignment:NSTextAlignmentCenter];
-    [plaqueOverSeaZeroValue setBackgroundColor:[UIColor clearColor]];
-    [plaqueOverSeaZeroValue setTextColor:[UIColor darkTextColor]];
-    [self addSubview:plaqueOverSeaZeroValue];
+    UILabel *altitudeLabel2 = [[UILabel alloc] init];
+    [altitudeLabel2 setFrame:valueFrame];
+    [altitudeLabel2 setCenter:altitudeLabel2Point];
+    [altitudeLabel2 setFont:[UIFont boldSystemFontOfSize:14.0f]];
+    [altitudeLabel2 setTextAlignment:NSTextAlignmentCenter];
+    [altitudeLabel2 setBackgroundColor:[UIColor clearColor]];
+    [altitudeLabel2 setTextColor:[UIColor darkTextColor]];
+    [self addSubview:altitudeLabel2];
 
-    UILabel *plaqueOverDeviceValue = [[UILabel alloc] init];
-    [plaqueOverDeviceValue setFrame:valueFrame];
-    [plaqueOverDeviceValue setCenter:plaqueOverDeviceValuePoint];
-    [plaqueOverDeviceValue setFont:[UIFont boldSystemFontOfSize:14.0f]];
-    [plaqueOverDeviceValue setTextAlignment:NSTextAlignmentCenter];
-    [plaqueOverDeviceValue setBackgroundColor:[UIColor clearColor]];
-    [plaqueOverDeviceValue setTextColor:[UIColor darkTextColor]];
-    [self addSubview:plaqueOverDeviceValue];
+    UILabel *altitudeLabel3 = [[UILabel alloc] init];
+    [altitudeLabel3 setFrame:valueFrame];
+    [altitudeLabel3 setCenter:altitudeLabel3Point];
+    [altitudeLabel3 setFont:[UIFont boldSystemFontOfSize:14.0f]];
+    [altitudeLabel3 setTextAlignment:NSTextAlignmentCenter];
+    [altitudeLabel3 setBackgroundColor:[UIColor clearColor]];
+    [altitudeLabel3 setTextColor:[UIColor darkTextColor]];
+    [self addSubview:altitudeLabel3];
 
     UIView *touchPad = [[UIView alloc] initWithFrame:touchPadFrame];
     [touchPad setBackgroundColor:[UIColor clearColor]];
     [touchPad setOpaque:YES];
     [self addSubview:touchPad];
 
-    self.deviceOverSeaZeroValue = deviceOverSeaZeroValue;
-    self.plaqueOverSeaZeroValue = plaqueOverSeaZeroValue;
-    self.plaqueOverDeviceValue = plaqueOverDeviceValue;
+    self.altitudeLabel1 = altitudeLabel1;
+    self.altitudeLabel2 = altitudeLabel2;
+    self.altitudeLabel3 = altitudeLabel3;
     self.touchPad = touchPad;
 
     self.deviceLogo = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"EditModeAltitudeViewDevice"]];
@@ -123,7 +139,9 @@
 {
     NSTimer *touchPadTimer = self.touchPadTimer;
     if (touchPadTimer != nil)
+    {
         [touchPadTimer invalidate];
+    }
 }
 
 - (void)recalculateMoveParameters:(CGPoint)fingerPoint
@@ -157,12 +175,19 @@
            withEvent:(UIEvent *)event
 {
     UITouch *touch = [touches anyObject];
+
     CGPoint point = [touch locationInView:[touch view]];
+
     point = [[touch view] convertPoint:point toView:self];
-    if (CGRectContainsPoint(self.touchPad.frame, point) == YES) {
+
+    if (CGRectContainsPoint(self.touchPad.frame, point) == YES)
+    {
         point = [touch locationInView:self.touchPad];
+
         [self recalculateMoveParameters:point];
+
         self.moving = YES;
+
         [self.touchPadTimer fire];
     }
 }
@@ -183,12 +208,19 @@
            withEvent:(UIEvent *)event
 {
     UITouch *touch = [touches anyObject];
+
     CGPoint point = [touch locationInView:[touch view]];
+
     point = [[touch view] convertPoint:point toView:self];
-    if (CGRectContainsPoint(self.touchPad.frame, point) == YES) {
+
+    if (CGRectContainsPoint(self.touchPad.frame, point) == YES)
+    {
         point = [touch locationInView:self.touchPad];
+
         [self recalculateMoveParameters:point];
-    } else {
+    }
+    else
+    {
         self.moving = NO;
     }
 }
@@ -209,22 +241,29 @@
 
     CGPoint lowerPoint = CGPointMake(78.0f, 100.0f);
     CGPoint higherPoint = CGPointMake(152.0f, 30.0f);
-    if (plaqueOverDevice > 0.0f) {
-        [self.deviceLogo setCenter:lowerPoint];
-        [self.plaqueLogo setCenter:higherPoint];
-    } else {
-        [self.deviceLogo setCenter:higherPoint];
-        [self.plaqueLogo setCenter:lowerPoint];
-        plaqueOverDevice = -plaqueOverDevice;
-    }
 
     NSString *deviceOverSeaZeroText = [NSString stringWithFormat:@"%0.02f m", deviceOverSeaZero];
     NSString *plaqueOverSeaZeroText = [NSString stringWithFormat:@"%0.02f m", plaqueOverSeaZero];
     NSString *plaqueOverDeviceText = [NSString stringWithFormat:@"%0.02f m", plaqueOverDevice];
 
-    [self.deviceOverSeaZeroValue setText:deviceOverSeaZeroText];
-    [self.plaqueOverSeaZeroValue setText:plaqueOverSeaZeroText];
-    [self.plaqueOverDeviceValue setText:plaqueOverDeviceText];
+    if (plaqueOverDevice > 0.0f)
+    {
+        [self.deviceLogo setCenter:lowerPoint];
+        [self.plaqueLogo setCenter:higherPoint];
+
+        [self.altitudeLabel1 setText:deviceOverSeaZeroText];
+        [self.altitudeLabel2 setText:plaqueOverDeviceText];
+        [self.altitudeLabel3 setText:plaqueOverSeaZeroText];
+    }
+    else
+    {
+        [self.deviceLogo setCenter:higherPoint];
+        [self.plaqueLogo setCenter:lowerPoint];
+
+        [self.altitudeLabel1 setText:plaqueOverSeaZeroText];
+        [self.altitudeLabel2 setText:plaqueOverDeviceText];
+        [self.altitudeLabel3 setText:deviceOverSeaZeroText];
+    }
 }
 
 #pragma mark - LocationManager delegate

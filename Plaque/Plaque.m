@@ -1,7 +1,7 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import "Authentificator.h"
@@ -14,18 +14,7 @@
 #import "StatusBar.h"
 
 #include "API.h"
-
-#ifdef DEBUG
-#undef VERBOSE_PLAQUES_DB_SELECT
-#define VERBOSE_PLAQUES_DB_INSERT
-#define VERBOSE_PLAQUE_UPLOAD
-#define VERBOSE_PLAQUE_CHANGE
-#endif
-
-#define DefaultPlaqueWidth      4.0f
-#define DefaultPlaqueHeight     2.0f
-
-#define ModificationsUploadInterval 3.0f
+#include "Definitions.h"
 
 @interface Plaque () <PaquetSenderDelegate>
 
@@ -60,7 +49,9 @@
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
 
     self.ownPlaqueId = [[Settings defaultSettings] lastOwnObjectId];
 
@@ -73,20 +64,27 @@
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
 
     SQLiteDatabase *database = [Database mainDatabase];
 
     NSString *query = [NSString stringWithFormat:@"SELECT rowid, profile_token, revision, creation_stamp, latitude, longitude, altitude, direction, tilt, width, height, background_color, foreground_color, font_size, inscription FROM plaques WHERE plaque_token = '%@'",
                        [plaqueToken UUIDString]];
 
-    SQLiteDataReader *reader = [[SQLiteDataReader alloc] initWithDatabase:database
-                                                                    query:query];
+    SQLiteDataReader *reader =
+    [[SQLiteDataReader alloc] initWithDatabase:database
+                                         query:query];
     if (reader == nil)
+    {
         return nil;
+    }
 
     if ([reader next] == FALSE)
+    {
         return nil;
+    }
 
     int rowId               = [reader getInt:0];
     NSString *profileToken  = [reader getString:1];
@@ -108,13 +106,14 @@
 
     NSDate *creationStamp = [NSDate dateWithTimeIntervalSince1970:creationStampInt];
 
-    CLLocation *location = [[CLLocation alloc] initWithCoordinate:CLLocationCoordinate2DMake(latitude, longitude)
-                                                         altitude:altitude
-                                               horizontalAccuracy:0
-                                                 verticalAccuracy:0
-                                                           course:direction
-                                                            speed:0.0f
-                                                        timestamp:[NSDate date]];
+    CLLocation *location =
+    [[CLLocation alloc] initWithCoordinate:CLLocationCoordinate2DMake(latitude, longitude)
+                                  altitude:altitude
+                        horizontalAccuracy:0
+                          verticalAccuracy:0
+                                    course:direction
+                                     speed:0.0f
+                                 timestamp:[NSDate date]];
 
     self.rowId              = rowId;
     self.plaqueToken        = plaqueToken;
@@ -138,8 +137,10 @@
     //
     storedInDatabase = YES;
 
-#ifdef VERBOSE_PLAQUES_DB_SELECT
-    NSLog(@"Loaded plaque: %llu <%@>", self.rowId, self.inscription);
+#ifdef VerbosePlaqueDbSelect
+    NSLog(@"[Plaque] Loaded plaque: %llu <%@>",
+          self.rowId,
+          self.inscription);
 #endif
 
     return self;
@@ -151,7 +152,9 @@
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
 
     self.rowId              = 0;
     self.plaqueToken        = nil;
@@ -181,185 +184,250 @@
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
 
     // Plaque token.
     //
-    XMLElement *plaqueTokenXML = [XMLElement elementWithName:@"plaque_token"];
-    NSUUID *plaqueToken = [[NSUUID alloc] initWithUUIDString:[plaqueTokenXML content]];
-    self.plaqueToken = plaqueToken;
+    {
+        XMLElement *plaqueTokenXML = [XMLElement elementWithName:@"plaque_token"];
+
+        NSUUID *plaqueToken = [[NSUUID alloc] initWithUUIDString:[plaqueTokenXML content]];
+
+        self.plaqueToken = plaqueToken;
+    }
 
     // Creation stamp.
     //
-    XMLElement *creationStampXML = [plaqueXML elementByPath:@"creation_stamp"];
-    NSString *unixCreationStamp = [creationStampXML content];
-    NSTimeInterval since1970 = [unixCreationStamp doubleValue];
-    NSDate *creationStamp = [NSDate dateWithTimeIntervalSince1970:since1970];
-    self.creationStamp = creationStamp;
+    {
+        XMLElement *creationStampXML = [plaqueXML elementByPath:@"creation_stamp"];
+
+        NSString *unixCreationStamp = [creationStampXML content];
+
+        NSTimeInterval since1970 = [unixCreationStamp doubleValue];
+
+        NSDate *creationStamp = [NSDate dateWithTimeIntervalSince1970:since1970];
+
+        self.creationStamp = creationStamp;
+    }
 
     // Coordinate.
     //
-    XMLElement *coordinateXML = [plaqueXML elementByPath:@"coordinate2d"];
-    @try {
-        NSArray *coordinates2d = [[coordinateXML content] componentsSeparatedByString:@";"];
-        if ([coordinates2d count] != 2)
-            return nil;
+    {
+        XMLElement *coordinateXML = [plaqueXML elementByPath:@"coordinate2d"];
 
-        double latitude;
-        double longitude;
+        @try
+        {
+            NSArray *coordinates2d = [[coordinateXML content] componentsSeparatedByString:@";"];
+            if ([coordinates2d count] != 2)
+            {
+                return nil;
+            }
 
-        NSScanner *scanner;
+            double latitude;
+            double longitude;
 
-        scanner = [NSScanner scannerWithString:[coordinates2d objectAtIndex:0]];
-        [scanner scanDouble:&latitude];
+            NSScanner *scanner;
 
-        scanner = [NSScanner scannerWithString:[coordinates2d objectAtIndex:1]];
-        [scanner scanDouble:&longitude];
+            scanner = [NSScanner scannerWithString:[coordinates2d objectAtIndex:0]];
+            [scanner scanDouble:&latitude];
 
-        self.coordinate = CLLocationCoordinate2DMake(latitude, longitude);
-    }
-    @catch (NSException *exception) {
-        NSLog(@"Cannot extract coordinate");
+            scanner = [NSScanner scannerWithString:[coordinates2d objectAtIndex:1]];
+            [scanner scanDouble:&longitude];
+
+            self.coordinate = CLLocationCoordinate2DMake(latitude, longitude);
+        }
+        @catch (NSException *exception)
+        {
+            NSLog(@"[Plaque] Cannot extract coordinate");
+        }
     }
 
     // Altitude.
     //
-    XMLElement *altitudeXML = [XMLElement elementWithName:@"altitude"];
-    NSString *altitudeString = [altitudeXML content];
-    @try {
-        double altitude;
+    {
+        XMLElement *altitudeXML = [XMLElement elementWithName:@"altitude"];
 
-        NSScanner *scanner;
+        NSString *altitudeString = [altitudeXML content];
 
-        scanner = [NSScanner scannerWithString:altitudeString];
-        [scanner scanDouble:&altitude];
+        @try
+        {
+            double altitude;
 
-        self.altitude = altitude;
-    }
-    @catch (NSException *exception) {
-        NSLog(@"Cannot extract direction");
+            NSScanner *scanner;
+
+            scanner = [NSScanner scannerWithString:altitudeString];
+            [scanner scanDouble:&altitude];
+
+            self.altitude = altitude;
+        }
+        @catch (NSException *exception)
+        {
+            NSLog(@"[Plaque] Cannot extract direction");
+        }
     }
 
     // Direction.
     //
-    XMLElement *directionXML = [plaqueXML elementByPath:@"direction"];
-    NSString *directionString = [directionXML content];
-    if ([directionString isEqualToString:@"null"] == YES) {
-        self.directed = NO;
-    } else {
-        self.directed = YES;
+    {
+        XMLElement *directionXML = [plaqueXML elementByPath:@"direction"];
 
-        @try {
-            double direction;
+        NSString *directionString = [directionXML content];
 
-            NSScanner *scanner;
-
-            scanner = [NSScanner scannerWithString:directionString];
-            [scanner scanDouble:&direction];
-
-            self.direction = direction;
+        if ([directionString isEqualToString:@"null"] == YES)
+        {
+            self.directed = NO;
         }
-        @catch (NSException *exception) {
-            NSLog(@"Cannot extract direction");
+        else
+        {
+            self.directed = YES;
+
+            @try
+            {
+                double direction;
+
+                NSScanner *scanner;
+
+                scanner = [NSScanner scannerWithString:directionString];
+                [scanner scanDouble:&direction];
+
+                self.direction = direction;
+            }
+            @catch (NSException *exception)
+            {
+                NSLog(@"[Plaque] Cannot extract direction");
+            }
         }
     }
 
     // Tilt.
     //
-    XMLElement *tiltXML = [plaqueXML elementByPath:@"tilt"];
-    NSString *tiltString = [tiltXML content];
-    if ([tiltString isEqualToString:@"null"] == YES) {
-        self.tilted = NO;
-    } else {
-        self.tilted = YES;
+    {
+        XMLElement *tiltXML = [plaqueXML elementByPath:@"tilt"];
 
-        @try {
-            double tilt;
+        NSString *tiltString = [tiltXML content];
 
-            NSScanner *scanner;
-
-            scanner = [NSScanner scannerWithString:tiltString];
-            [scanner scanDouble:&tilt];
-
-            self.tilt = tilt;
+        if ([tiltString isEqualToString:@"null"] == YES)
+        {
+            self.tilted = NO;
         }
-        @catch (NSException *exception) {
-            NSLog(@"Cannot extract tilt");
+        else
+        {
+            self.tilted = YES;
+
+            @try
+            {
+                double tilt;
+
+                NSScanner *scanner;
+
+                scanner = [NSScanner scannerWithString:tiltString];
+                [scanner scanDouble:&tilt];
+
+                self.tilt = tilt;
+            }
+            @catch (NSException *exception)
+            {
+                NSLog(@"[Plaque] Cannot extract tilt");
+            }
         }
     }
 
     // Size.
     //
-    XMLElement *sizeXML = [plaqueXML elementByPath:@"size"];
-    @try {
-        NSArray *sizeValues = [[sizeXML content] componentsSeparatedByString:@";"];
-        if ([sizeValues count] != 2)
-            return nil;
+    {
+        XMLElement *sizeXML = [plaqueXML elementByPath:@"size"];
 
-        double width;
-        double height;
+        @try
+        {
+            NSArray *sizeValues = [[sizeXML content] componentsSeparatedByString:@";"];
+            if ([sizeValues count] != 2)
+            {
+                return nil;
+            }
 
-        NSScanner *scanner;
+            double width;
+            double height;
 
-        scanner = [NSScanner scannerWithString:[sizeValues objectAtIndex:0]];
-        [scanner scanDouble:&width];
+            NSScanner *scanner;
 
-        scanner = [NSScanner scannerWithString:[sizeValues objectAtIndex:1]];
-        [scanner scanDouble:&height];
+            scanner = [NSScanner scannerWithString:[sizeValues objectAtIndex:0]];
+            [scanner scanDouble:&width];
 
-        self.size = CGSizeMake(width, height);
-    }
-    @catch (NSException *exception) {
-        NSLog(@"Cannot extract size");
+            scanner = [NSScanner scannerWithString:[sizeValues objectAtIndex:1]];
+            [scanner scanDouble:&height];
+
+            self.size = CGSizeMake(width, height);
+        }
+        @catch (NSException *exception)
+        {
+            NSLog(@"[Plaque] Cannot extract size");
+        }
     }
 
     // Background and foreground colors.
     //
-    XMLElement *colorsXML = [plaqueXML elementByPath:@"colors"];
-    @try {
-        NSArray *colorValues = [[colorsXML content] componentsSeparatedByString:@";"];
-        if ([colorValues count] != 2)
-            return nil;
+    {
+        XMLElement *colorsXML = [plaqueXML elementByPath:@"colors"];
 
-        NSInteger backgroundColor;
-        NSInteger foregroundColor;
+        @try
+        {
+            NSArray *colorValues = [[colorsXML content] componentsSeparatedByString:@";"];
+            if ([colorValues count] != 2)
+            {
+                return nil;
+            }
 
-        NSScanner *scanner;
+            NSInteger backgroundColor;
+            NSInteger foregroundColor;
 
-        scanner = [NSScanner scannerWithString:[colorValues objectAtIndex:0]];
-        [scanner scanInteger:&backgroundColor];
+            NSScanner *scanner;
 
-        scanner = [NSScanner scannerWithString:[colorValues objectAtIndex:1]];
-        [scanner scanInteger:&foregroundColor];
+            scanner = [NSScanner scannerWithString:[colorValues objectAtIndex:0]];
+            [scanner scanInteger:&backgroundColor];
 
-        self.backgroundColor = [UIColor colorWithARGB:(UInt32)backgroundColor];
-        self.foregroundColor = [UIColor colorWithARGB:(UInt32)foregroundColor];
-    }
-    @catch (NSException *exception) {
-        NSLog(@"Cannot extract colors");
+            scanner = [NSScanner scannerWithString:[colorValues objectAtIndex:1]];
+            [scanner scanInteger:&foregroundColor];
+
+            self.backgroundColor = [UIColor colorWithARGB:(UInt32)backgroundColor];
+            self.foregroundColor = [UIColor colorWithARGB:(UInt32)foregroundColor];
+        }
+        @catch (NSException *exception)
+        {
+            NSLog(@"[Plaque] Cannot extract colors");
+        }
     }
 
     // Font size.
     //
-    XMLElement *fontSizeXML = [XMLElement elementWithName:@"font_size"];
-    @try {
-        double fontSize;
+    {
+        XMLElement *fontSizeXML = [XMLElement elementWithName:@"font_size"];
 
-        NSScanner *scanner;
+        @try
+        {
+            double fontSize;
 
-        scanner = [NSScanner scannerWithString:[fontSizeXML content]];
-        [scanner scanDouble:&fontSize];
+            NSScanner *scanner;
 
-        self.fontSize = fontSize;
-    }
-    @catch (NSException *exception) {
-        NSLog(@"Cannot extract font size");
+            scanner = [NSScanner scannerWithString:[fontSizeXML content]];
+            [scanner scanDouble:&fontSize];
+
+            self.fontSize = fontSize;
+        }
+        @catch (NSException *exception)
+        {
+            NSLog(@"[Plaque] Cannot extract font size");
+        }
     }
 
     // Inscription.
     //
-    XMLElement *inscriptionXML = [plaqueXML elementByPath:@"inscription"];
-    self.inscription = [inscriptionXML content];
+    {
+        XMLElement *inscriptionXML = [plaqueXML elementByPath:@"inscription"];
+
+        self.inscription = [inscriptionXML content];
+    }
 
     return self;
 }
@@ -367,52 +435,124 @@
 - (XMLElement *)xml
 {
     XMLElement *plaqueXML = [XMLElement elementWithName:@"plaque"];
+    XMLElement *plaqueTokenXML;
+    XMLElement *creationStampXML;
+    XMLElement *coordinateXML;
+    XMLElement *altitudeXML;
+    XMLElement *directionXML;
+    XMLElement *tiltXML;
+    XMLElement *sizeXML;
+    XMLElement *colorsXML;
+    XMLElement *fontSizeXML;
+    XMLElement *inscriptionXML;
 
-    XMLElement *plaqueTokenXML = [XMLElement elementWithName:@"plaque_token"];
-    [plaqueTokenXML setContent:[self.plaqueToken UUIDString]];
+    // Plaque token.
+    //
+    {
+        plaqueTokenXML = [XMLElement elementWithName:@"plaque_token"];
 
-    XMLElement *creationStampXML = [XMLElement elementWithName:@"creation_stamp"];
-    NSTimeInterval since1970 = [self.creationStamp timeIntervalSince1970];
-    NSString *unixCreationStamp = [NSString stringWithFormat:@"%.0f", since1970];
-    [creationStampXML setContent:unixCreationStamp];
+        [plaqueTokenXML setContent:[self.plaqueToken UUIDString]];
+    }
 
-    XMLElement *coordinateXML = [XMLElement elementWithName:@"coordinate2d"];
-    NSString *coordinate2d = [NSString stringWithFormat:@"%f;%f",
-                              self.coordinate.latitude,
-                              self.coordinate.longitude];
-    [coordinateXML setContent:coordinate2d];
+    // Creation stamp.
+    //
+    {
+        creationStampXML = [XMLElement elementWithName:@"creation_stamp"];
 
-    XMLElement *altitudeXML = [XMLElement elementWithName:@"altitude"];
-    [altitudeXML setContent:[NSString stringWithFormat:@".2%f", self.altitude]];
+        NSTimeInterval since1970 = [self.creationStamp timeIntervalSince1970];
 
-    XMLElement *directionXML = [XMLElement elementWithName:@"direction"];
-    if (self.directed == NO)
-        [directionXML setContent:@"null"];
-    else
-        [directionXML setContent:[NSString stringWithFormat:@"%.0f", self.direction]];
+        NSString *unixCreationStamp = [NSString stringWithFormat:@"%.0f", since1970];
 
-    XMLElement *tiltXML = [XMLElement elementWithName:@"tilt"];
-    if (self.tilted == NO)
-        [tiltXML setContent:@"null"];
-    else
-        [tiltXML setContent:[NSString stringWithFormat:@"%.0f", self.tilt]];
+        [creationStampXML setContent:unixCreationStamp];
+    }
 
-    XMLElement *sizeXML = [XMLElement elementWithName:@"size"];
-    NSString *size = [NSString stringWithFormat:@"%.1f;%.1f",
-                      self.width,
-                      self.height];
-    [sizeXML setContent:size];
+    // Coordinate.
+    //
+    {
+        coordinateXML = [XMLElement elementWithName:@"coordinate2d"];
 
-    XMLElement *colorsXML = [XMLElement elementWithName:@"colors"];
-    [colorsXML setContent:[NSString stringWithFormat:@"%d;%d",
-                           (unsigned int)[self.backgroundColor argb],
-                           (unsigned int)[self.foregroundColor argb]]];
+        NSString *coordinate2d = [NSString stringWithFormat:@"%f;%f",
+                                  self.coordinate.latitude,
+                                  self.coordinate.longitude];
 
-    XMLElement *fontSizeXML = [XMLElement elementWithName:@"font_size"];
-    [fontSizeXML setContent:[NSString stringWithFormat:@"%.2f", self.fontSize]];
+        [coordinateXML setContent:coordinate2d];
+    }
 
-    XMLElement *inscriptionXML = [XMLElement elementWithName:@"inscription"];
-    [inscriptionXML setContent:self.inscription];
+    // Altitude.
+    //
+    {
+        altitudeXML = [XMLElement elementWithName:@"altitude"];
+
+        [altitudeXML setContent:[NSString stringWithFormat:@".2%f", self.altitude]];
+    }
+
+    // Direction.
+    //
+    {
+        directionXML = [XMLElement elementWithName:@"direction"];
+
+        if (self.directed == NO)
+        {
+            [directionXML setContent:@"null"];
+        }
+        else
+        {
+            [directionXML setContent:[NSString stringWithFormat:@"%.0f", self.direction]];
+        }
+    }
+
+    // Tilt.
+    //
+    {
+        tiltXML = [XMLElement elementWithName:@"tilt"];
+
+        if (self.tilted == NO)
+        {
+            [tiltXML setContent:@"null"];
+        }
+        else
+        {
+            [tiltXML setContent:[NSString stringWithFormat:@"%.0f", self.tilt]];
+        }
+    }
+
+    // Size.
+    //
+    {
+        sizeXML = [XMLElement elementWithName:@"size"];
+
+        NSString *size = [NSString stringWithFormat:@"%.1f;%.1f",
+                          self.width,
+                          self.height];
+
+        [sizeXML setContent:size];
+    }
+
+    // Background and foreground colors.
+    //
+    {
+        colorsXML = [XMLElement elementWithName:@"colors"];
+
+        [colorsXML setContent:[NSString stringWithFormat:@"%d;%d",
+                               (unsigned int)[self.backgroundColor argb],
+                               (unsigned int)[self.foregroundColor argb]]];
+    }
+
+    // Font size.
+    //
+    {
+        fontSizeXML = [XMLElement elementWithName:@"font_size"];
+
+        [fontSizeXML setContent:[NSString stringWithFormat:@"%.2f", self.fontSize]];
+    }
+    
+    // Inscription.
+    //
+    {
+        inscriptionXML = [XMLElement elementWithName:@"inscription"];
+
+        [inscriptionXML setContent:self.inscription];
+    }
 
     [plaqueXML addElement:plaqueTokenXML];
     [plaqueXML addElement:creationStampXML];
@@ -431,7 +571,9 @@
 {
     Plaque *clonedPlaque = [[Plaque alloc] initForClone];
     if (self == nil)
+    {
         return nil;
+    }
 
     clonedPlaque.plaqueToken        = (self.plaqueToken == nil) ? nil : [self.plaqueToken copy];
     clonedPlaque.profileToken       = (self.profileToken == nil) ? nil : [self.profileToken copy];
@@ -458,7 +600,9 @@
 {
     Plaque *copy = [[Plaque alloc] init];
     if (copy == nil)
+    {
         return nil;
+    }
 
     copy.plaqueToken        = self.plaqueToken;
     copy.profileToken       = self.profileToken;
@@ -505,6 +649,7 @@
     {
         query = [NSString stringWithFormat:@"UPDATE plaques SET direction = NULL WHERE rowid = %llu",
                  self.rowId];
+
         [database executeUPDATE:query ignoreConstraints:YES];
     }
 
@@ -512,6 +657,7 @@
     {
         query = [NSString stringWithFormat:@"UPDATE plaques SET tilt = NULL WHERE rowid = %llu",
                  self.rowId];
+
         [database executeUPDATE:query ignoreConstraints:YES];
     }
 
@@ -523,8 +669,8 @@
         storedInDatabase = YES;
     }
 
-#ifdef VERBOSE_PLAQUES_DB_INSERT
-    NSLog(@"Saved plaque: %llu %@", self.rowId, self.inscription);
+#ifdef VerbosePlaqueDbInsert
+    NSLog(@"[Plaque] Saved plaque: %llu %@", self.rowId, self.inscription);
 #endif
 }
 
@@ -533,6 +679,7 @@
 - (void)setProfileToken:(NSUUID *)profileToken
 {
     NSUUID *previousProfileToken = _profileToken;
+
     if ((previousProfileToken == nil) || ([previousProfileToken isEqual:profileToken] == NO))
     {
         _profileToken = profileToken;
@@ -579,22 +726,24 @@
     CLLocationCoordinate2D currentCoordinate = self.coordinate;
     if ((coordinate.latitude != currentCoordinate.latitude) || (coordinate.longitude != currentCoordinate.longitude))
     {
-        self.location = [[CLLocation alloc] initWithCoordinate:coordinate
-                                                      altitude:self.altitude
-                                            horizontalAccuracy:0
-                                              verticalAccuracy:0
-                                                        course:self.location.course
-                                                         speed:0.0f
-                                                     timestamp:[NSDate date]];
+        self.location =
+        [[CLLocation alloc] initWithCoordinate:coordinate
+                                      altitude:self.altitude
+                            horizontalAccuracy:0
+                              verticalAccuracy:0
+                                        course:self.location.course
+                                         speed:0.0f
+                                     timestamp:[NSDate date]];
 
         if (storedInDatabase == YES)
         {
             SQLiteDatabase *database = [Database mainDatabase];
 
-            NSString *query = [NSString stringWithFormat:@"UPDATE plaques SET latitude = %f, longitude = %f WHERE rowid = %llu",
-                               coordinate.latitude,
-                               coordinate.longitude,
-                               self.rowId];
+            NSString *query =
+            [NSString stringWithFormat:@"UPDATE plaques SET latitude = %f, longitude = %f WHERE rowid = %llu",
+             coordinate.latitude,
+             coordinate.longitude,
+             self.rowId];
 
             [database executeUPDATE:query ignoreConstraints:YES];
         }
@@ -612,21 +761,23 @@
 {
     if (altitude != self.altitude)
     {
-        self.location = [[CLLocation alloc] initWithCoordinate:self.coordinate
-                                                      altitude:altitude
-                                            horizontalAccuracy:0
-                                              verticalAccuracy:0
-                                                        course:self.location.course
-                                                         speed:0.0f
-                                                     timestamp:[NSDate date]];
+        self.location =
+        [[CLLocation alloc] initWithCoordinate:self.coordinate
+                                      altitude:altitude
+                            horizontalAccuracy:0
+                              verticalAccuracy:0
+                                        course:self.location.course
+                                         speed:0.0f
+                                     timestamp:[NSDate date]];
 
         if (storedInDatabase == YES)
         {
             SQLiteDatabase *database = [Database mainDatabase];
 
-            NSString *query = [NSString stringWithFormat:@"UPDATE plaques SET altitude = %f WHERE rowid = %llu",
-                               altitude,
-                               self.rowId];
+            NSString *query =
+            [NSString stringWithFormat:@"UPDATE plaques SET altitude = %f WHERE rowid = %llu",
+             altitude,
+             self.rowId];
 
             [database executeUPDATE:query ignoreConstraints:YES];
         }
@@ -646,10 +797,13 @@
             SQLiteDatabase *database = [Database mainDatabase];
 
             NSString *query;
-            if (directed == NO) {
+            if (directed == NO)
+            {
                 query = [NSString stringWithFormat:@"UPDATE plaques SET direction = NULL WHERE rowid = %llu",
                          self.rowId];
-            } else {
+            }
+            else
+            {
                 query = [NSString stringWithFormat:@"UPDATE plaques SET direction = %f WHERE rowid = %llu",
                          self.direction,
                          self.rowId];
@@ -674,9 +828,10 @@
         {
             SQLiteDatabase *database = [Database mainDatabase];
 
-            NSString *query = [NSString stringWithFormat:@"UPDATE plaques SET direction = %f WHERE rowid = %llu",
-                               direction,
-                               self.rowId];
+            NSString *query =
+            [NSString stringWithFormat:@"UPDATE plaques SET direction = %f WHERE rowid = %llu",
+             direction,
+             self.rowId];
 
             [database executeUPDATE:query ignoreConstraints:YES];
         }
@@ -696,10 +851,13 @@
             SQLiteDatabase *database = [Database mainDatabase];
 
             NSString *query;
-            if (tilted == NO) {
+            if (tilted == NO)
+            {
                 query = [NSString stringWithFormat:@"UPDATE plaques SET tilt = NULL WHERE rowid = %llu",
                          self.rowId];
-            } else {
+            }
+            else
+            {
                 query = [NSString stringWithFormat:@"UPDATE plaques SET tilt = %f WHERE rowid = %llu",
                          self.tilt,
                          self.rowId];
@@ -724,9 +882,10 @@
         {
             SQLiteDatabase *database = [Database mainDatabase];
 
-            NSString *query = [NSString stringWithFormat:@"UPDATE plaques SET tilt = %f WHERE rowid = %llu",
-                               tilt,
-                               self.rowId];
+            NSString *query =
+            [NSString stringWithFormat:@"UPDATE plaques SET tilt = %f WHERE rowid = %llu",
+             tilt,
+             self.rowId];
 
             [database executeUPDATE:query ignoreConstraints:YES];
         }
@@ -745,9 +904,10 @@
         {
             SQLiteDatabase *database = [Database mainDatabase];
 
-            NSString *query = [NSString stringWithFormat:@"UPDATE plaques SET width = %f WHERE rowid = %llu",
-                               width,
-                               self.rowId];
+            NSString *query =
+            [NSString stringWithFormat:@"UPDATE plaques SET width = %f WHERE rowid = %llu",
+             width,
+             self.rowId];
 
             [database executeUPDATE:query ignoreConstraints:YES];
         }
@@ -766,9 +926,10 @@
         {
             SQLiteDatabase *database = [Database mainDatabase];
 
-            NSString *query = [NSString stringWithFormat:@"UPDATE plaques SET height = %f WHERE rowid = %llu",
-                               height,
-                               self.rowId];
+            NSString *query =
+            [NSString stringWithFormat:@"UPDATE plaques SET height = %f WHERE rowid = %llu",
+             height,
+             self.rowId];
 
             [database executeUPDATE:query ignoreConstraints:YES];
         }
@@ -801,9 +962,10 @@
         {
             SQLiteDatabase *database = [Database mainDatabase];
 
-            NSString *query = [NSString stringWithFormat:@"UPDATE plaques SET background_color = %u WHERE rowid = %llu",
-                               (unsigned int)newColor,
-                               self.rowId];
+            NSString *query =
+            [NSString stringWithFormat:@"UPDATE plaques SET background_color = %u WHERE rowid = %llu",
+             (unsigned int)newColor,
+             self.rowId];
 
             [database executeUPDATE:query ignoreConstraints:YES];
         }
@@ -825,9 +987,10 @@
         {
             SQLiteDatabase *database = [Database mainDatabase];
 
-            NSString *query = [NSString stringWithFormat:@"UPDATE plaques SET foreground_color = %u WHERE rowid = %llu",
-                               (unsigned int)newColor,
-                               self.rowId];
+            NSString *query =
+            [NSString stringWithFormat:@"UPDATE plaques SET foreground_color = %u WHERE rowid = %llu",
+             (unsigned int)newColor,
+             self.rowId];
 
             [database executeUPDATE:query ignoreConstraints:YES];
         }
@@ -846,9 +1009,10 @@
         {
             SQLiteDatabase *database = [Database mainDatabase];
 
-            NSString *query = [NSString stringWithFormat:@"UPDATE plaques SET font_size = %f WHERE rowid = %llu",
-                               fontSize,
-                               self.rowId];
+            NSString *query =
+            [NSString stringWithFormat:@"UPDATE plaques SET font_size = %f WHERE rowid = %llu",
+             fontSize,
+             self.rowId];
 
             [database executeUPDATE:query ignoreConstraints:YES];
         }
@@ -867,9 +1031,10 @@
         {
             SQLiteDatabase *database = [Database mainDatabase];
 
-            NSString *query = [NSString stringWithFormat:@"UPDATE plaques SET inscription = '%@' WHERE rowid = %llu",
-                               inscription,
-                               self.rowId];
+            NSString *query =
+            [NSString stringWithFormat:@"UPDATE plaques SET inscription = '%@' WHERE rowid = %llu",
+             inscription,
+             self.rowId];
 
             [database executeUPDATE:query ignoreConstraints:YES];
         }
@@ -881,8 +1046,11 @@
 - (void)setImage:(UIImage *)image
 {
     _image = image;
+
     if ((self.cloneChain != nil) && (storedInDatabase == NO))
+    {
         [self.cloneChain setImage:image];
+    }
 }
 
 #pragma mark - Cloud
@@ -925,8 +1093,8 @@
 
             [paquet send];
 
-#ifdef VERBOSE_PLAQUE_UPLOAD
-            NSLog(@"Plaque create request sent");
+#ifdef VerbosePlaqueUpload
+            NSLog(@"[Plaque] Plaque create request sent");
 #endif
         }
 
@@ -964,8 +1132,8 @@
                 Paquet *locationPaquet = self.locationPaquet;
                 if (locationPaquet != nil)
                 {
-#ifdef VERBOSE_PLAQUE_CHANGE
-                    NSLog(@"Cancel previous plaque location change request");
+#ifdef VerbosePlaqueChange
+                    NSLog(@"[Plaque] Cancel previous plaque location change request");
 #endif
                     [locationPaquet setSenderDelegate:nil];
                     [locationPaquet setCancelWhenPossible:YES];
@@ -981,8 +1149,8 @@
                 [paquet putDouble:self.coordinate.longitude];
                 [paquet putFloat:self.altitude];
 
-#ifdef VERBOSE_PLAQUE_CHANGE
-                NSLog(@"Plaque change coordinate request: %f->%f %f->%f %f->%f",
+#ifdef VerbosePlaqueChange
+                NSLog(@"[Plaque] Plaque change coordinate request: %f->%f %f->%f %f->%f",
                       original.coordinate.latitude,
                       self.coordinate.latitude,
                       original.coordinate.longitude,
@@ -1004,8 +1172,8 @@
                 Paquet *orientationPaquet = self.orientationPaquet;
                 if (orientationPaquet != nil)
                 {
-#ifdef VERBOSE_PLAQUE_CHANGE
-                    NSLog(@"Cancel previous plaque orientation change request");
+#ifdef VerbosePlaqueChange
+                    NSLog(@"[Plaque] Cancel previous plaque orientation change request");
 #endif
                     [orientationPaquet setSenderDelegate:nil];
                     [orientationPaquet setCancelWhenPossible:YES];
@@ -1022,8 +1190,8 @@
                 [paquet putBoolean:self.tilted];
                 [paquet putFloat:self.tilt];
 
-#ifdef VERBOSE_PLAQUE_CHANGE
-                NSLog(@"Plaque change orientation request: directed=%d->%d, direction=%f->%f tilted=%d->%d tilt=%f->%f",
+#ifdef VerbosePlaqueChange
+                NSLog(@"[Plaque] Plaque change orientation request: directed=%d->%d, direction=%f->%f tilted=%d->%d tilt=%f->%f",
                     original.directed,
                     self.directed,
                     original.direction,
@@ -1045,8 +1213,8 @@
                 Paquet *sizePaquet = self.sizePaquet;
                 if (sizePaquet != nil)
                 {
-#ifdef VERBOSE_PLAQUE_CHANGE
-                    NSLog(@"Cancel previous plaque size change request");
+#ifdef VerbosePlaqueChange
+                    NSLog(@"[Plaque] Cancel previous plaque size change request");
 #endif
                     [sizePaquet setSenderDelegate:nil];
                     [sizePaquet setCancelWhenPossible:YES];
@@ -1061,8 +1229,8 @@
                 [paquet putFloat:self.size.width];
                 [paquet putFloat:self.size.height];
 
-#ifdef VERBOSE_PLAQUE_CHANGE
-                NSLog(@"Plaque change size request: width=%f->%f height=%f->%f",
+#ifdef VerbosePlaqueChange
+                NSLog(@"[Plaque] Plaque change size request: width=%f->%f height=%f->%f",
                       original.width,
                       self.width,
                       original.height,
@@ -1080,8 +1248,8 @@
                 Paquet *colorPaquet = self.colorPaquet;
                 if (colorPaquet != nil)
                 {
-#ifdef VERBOSE_PLAQUE_CHANGE
-                    NSLog(@"Cancel previous plaque color change request");
+#ifdef VerbosePlaqueChange
+                    NSLog(@"[Plaque] Cancel previous plaque color change request");
 #endif
                     [colorPaquet setSenderDelegate:nil];
                     [colorPaquet setCancelWhenPossible:YES];
@@ -1096,8 +1264,8 @@
                 [paquet putColor:[self.backgroundColor CGColor]];
                 [paquet putColor:[self.foregroundColor CGColor]];
 
-#ifdef VERBOSE_PLAQUE_CHANGE
-                NSLog(@"Plaque change color request: background=0x%08X->0x%08X forground=0x%08X->0x%08X",
+#ifdef VerbosePlaqueChange
+                NSLog(@"[Plaque] Plaque change color request: background=0x%08X->0x%08X forground=0x%08X->0x%08X",
                       (unsigned int)[original.backgroundColor argb],
                       (unsigned int)[self.backgroundColor argb],
                       (unsigned int)[original.foregroundColor argb],
@@ -1114,8 +1282,8 @@
                 Paquet *fontPaquet = self.fontPaquet;
                 if (fontPaquet != nil)
                 {
-#ifdef VERBOSE_PLAQUE_CHANGE
-                    NSLog(@"Cancel previous plaque font change request");
+#ifdef VerbosePlaqueChange
+                    NSLog(@"[Plaque] Cancel previous plaque font change request");
 #endif
                     [fontPaquet setSenderDelegate:nil];
                     [fontPaquet setCancelWhenPossible:YES];
@@ -1129,8 +1297,8 @@
                 [paquet putToken:original.plaqueToken];
                 [paquet putFloat:self.fontSize];
 
-#ifdef VERBOSE_PLAQUE_CHANGE
-                NSLog(@"Plaque change font: %f->%f",
+#ifdef VerbosePlaqueChange
+                NSLog(@"[Plaque] Plaque change font: %f->%f",
                       original.fontSize,
                       self.fontSize);
 #endif
@@ -1145,8 +1313,8 @@
                 Paquet *inscriptionPaquet = self.inscriptionPaquet;
                 if (inscriptionPaquet != nil)
                 {
-#ifdef VERBOSE_PLAQUE_CHANGE
-                    NSLog(@"Cancel previous plaque inscription change request");
+#ifdef VerbosePlaqueChange
+                    NSLog(@"[Plaque] Cancel previous plaque inscription change request");
 #endif
                     [inscriptionPaquet setSenderDelegate:nil];
                     [inscriptionPaquet setCancelWhenPossible:YES];
@@ -1160,8 +1328,8 @@
                 [paquet putToken:original.plaqueToken];
                 [paquet putString:self.inscription];
 
-#ifdef VERBOSE_PLAQUE_CHANGE
-                NSLog(@"Plaque change inscription request: <%@>",
+#ifdef VerbosePlaqueChange
+                NSLog(@"[Plaque] Plaque change inscription request: <%@>",
                       self.inscription);
 #endif
 
@@ -1186,17 +1354,22 @@
             UInt32 status = [paquet getUInt32];
             NSUUID *plaqueToken = [paquet getToken];
 
-#ifdef VERBOSE_PLAQUE_UPLOAD
-            if (status == API_PaquetCreatePlaqueSucceeded) {
-                NSLog(@"Plaque created with token %@",
+#ifdef VerbosePlaqueUpload
+            if (status == API_PaquetCreatePlaqueSucceeded)
+            {
+                NSLog(@"[Plaque] Plaque created with token %@",
                       [plaqueToken UUIDString]);
-            } else {
-                NSLog(@"Plaque creation failed");
+            }
+            else
+            {
+                NSLog(@"[Plaque] Plaque creation failed");
             }
 #endif
 
             if (status == API_PaquetCreatePlaqueSucceeded)
+            {
                 [self setPlaqueToken:plaqueToken];
+            }
 
             [[Plaques sharedPlaques] downloadPlaque:plaqueToken];
 
@@ -1231,8 +1404,10 @@
     CGFloat xScaleFactor = CGRectGetWidth(frame) / plaqueSize.width;
     CGFloat yScaleFactor = CGRectGetHeight(frame) / plaqueSize.height;
     CGFloat scaleFactor = MIN(xScaleFactor, yScaleFactor);
+
     CGSize plaqueSizeInBounds = CGSizeMake(plaqueSize.width * scaleFactor,
                                            plaqueSize.height * scaleFactor);
+
     CGRect layerFrame = CGRectMake(CGRectGetMinX(frame) + (CGRectGetWidth(frame) - plaqueSizeInBounds.width) / 2,
                                    CGRectGetMinY(frame) + (CGRectGetHeight(frame) - plaqueSizeInBounds.height) / 2,
                                    plaqueSizeInBounds.width,
@@ -1244,8 +1419,8 @@
     {
         [plaqueLayer setBackgroundColor:[self.backgroundColor CGColor]];
         [plaqueLayer setBorderColor:[[UIColor colorWithWhite:1.0f alpha:0.5f] CGColor]];
-        [plaqueLayer setBorderWidth:PLAQUE_BORDER_WIDTH];
-        [plaqueLayer setCornerRadius:PLAQUE_CORNER_RADIUS];
+        [plaqueLayer setBorderWidth:PlaqueBorderWidth];
+        [plaqueLayer setCornerRadius:PlaqueCornerRadius];
     }
 
     return plaqueLayer;

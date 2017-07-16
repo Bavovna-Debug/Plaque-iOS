@@ -1,7 +1,7 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import <CoreLocation/CoreLocation.h>
@@ -11,20 +11,20 @@
 #import "NavigationPanel.h"
 #import "Navigator.h"
 
-#define CameraUpdateInterval 0.5f
+#include "Definitions.h"
 
 @interface NavigationPanel () <MKMapViewDelegate, CLLocationManagerDelegate>
 
-@property (strong, nonatomic) NSLock *refreshLock;
-@property (strong, nonatomic) NSLock *mapViewLock;
-@property (strong, nonatomic) MKMapView *mapView;
-@property (strong, nonatomic) NSTimer *cameraTimer;
+@property (strong, nonatomic) NSLock                *refreshLock;
+@property (strong, nonatomic) NSLock                *mapViewLock;
+@property (strong, nonatomic) MKMapView             *mapView;
+@property (strong, nonatomic) NSTimer               *cameraTimer;
 
-@property (strong, nonatomic) CLLocationManager *locationManager;
-@property (assign, atomic)    CLLocationDirection heading;
+@property (strong, nonatomic) CLLocationManager     *locationManager;
+@property (assign, atomic)    CLLocationDirection   heading;
 
-@property (strong, nonatomic) CMMotionManager *motionManager;
-@property (assign, atomic)    CGFloat tilt;
+@property (strong, nonatomic) CMMotionManager       *motionManager;
+@property (assign, atomic)    CGFloat               tilt;
 
 @end
 
@@ -32,14 +32,15 @@
 {
     Boolean centeredToUser;
     Boolean regionSet;
-    Boolean mapCameraEnabled;
 }
 
 - (id)init
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
 
     self.refreshLock = [[NSLock alloc] init];
 
@@ -53,17 +54,17 @@
     CGRect bounds = self.superview.bounds;
 
     CGSize panelSize = CGSizeMake(280.0f, 200.0f);
-    CGRect panelFrame = CGRectMake(CGRectGetMidX(bounds) - panelSize.width / 2,
-                                   CGRectGetMaxY(bounds) - panelSize.height - 64.0f,
-                                   panelSize.width,
-                                   panelSize.height);
+
+    CGRect panelFrame =
+    CGRectMake(CGRectGetMidX(bounds) - panelSize.width / 2,
+               CGRectGetMaxY(bounds) - panelSize.height - 64.0f,
+               panelSize.width,
+               panelSize.height);
+
     [self setFrame:panelFrame];
 
     self.refreshLock = [[NSLock alloc] init];
     self.mapViewLock = [[NSLock alloc] init];
-
-    float systemVersion = [[[UIDevice currentDevice] systemVersion] floatValue];
-    mapCameraEnabled = (systemVersion >= 7.0f);
 
     [self setTranslatesAutoresizingMaskIntoConstraints:NO];
     [self setBackgroundColor:[UIColor clearColor]];
@@ -97,7 +98,9 @@
 
     NSTimer *cameraTimer = self.cameraTimer;
     if (cameraTimer != nil)
+    {
         [cameraTimer invalidate];
+    }
 
     [self stopLocationManager];
     [self stopMotionManager];
@@ -113,12 +116,9 @@
     [mapView setZoomEnabled:NO];
     [mapView setUserTrackingMode:MKUserTrackingModeFollowWithHeading];
 
-    float systemVersion = [[[UIDevice currentDevice] systemVersion] floatValue];
-    if (systemVersion >= 7.0f) {
-        [mapView setRotateEnabled:NO];
-        [mapView setShowsBuildings:YES];
-        [mapView setShowsPointsOfInterest:YES];
-    }
+    [mapView setRotateEnabled:NO];
+    [mapView setShowsBuildings:YES];
+    [mapView setShowsPointsOfInterest:YES];
 
     self.mapView = mapView;
 
@@ -148,16 +148,20 @@
      ^(CMAccelerometerData *accelerometerData, NSError *error)
     {
         CGFloat tilt = atan2f(accelerometerData.acceleration.y, accelerometerData.acceleration.z) + M_PI_2;
-        tilt = radiandsToDegrees(tilt);
+        tilt = RadiandsToDegrees(tilt);
         tilt = nearbyintf(tilt);
 
-        if (tilt != self.tilt) {
+        if (tilt != self.tilt)
+        {
             self.tilt = tilt;
+
             //[self updateCamera];
         }
 
         if (error)
-            NSLog(@"%@", error);
+        {
+            NSLog(@"[NavigationPanel] %@", error);
+        }
     }];
 }
 
@@ -168,29 +172,36 @@
 
 - (void)fireCameraUpdate:(NSTimer *)timer
 {
-    if (mapCameraEnabled == NO)
-        return;
-
     if (regionSet == NO)
+    {
         return;
+    }
 
     if ([self.mapViewLock tryLock] == FALSE)
+    {
         return;
+    }
 
     CGFloat pitch;
     CLLocationDistance altitude;
 
-    pitch = correctDegrees(90.0f + self.tilt);
+    pitch = CorrectDegrees(90.0f + self.tilt);
     if (pitch > 180.0f)
+    {
         pitch = 10.0f;
+    }
     else if (pitch > 80.0f)
+    {
         pitch = 80.0f;
+    }
     else if (pitch < 10.0f)
+    {
         pitch = 10.0f;
+    }
 
     altitude = 100.0f;// - pitch;
 
-    NSLog(@"PITCH: %f ALT: %f", pitch, altitude);
+    NSLog(@"[NavigationPanel] Pitch=%f, altitude=%f", pitch, altitude);
 
     MKMapCamera *mapCamera = [[self.mapView camera] copy];
     [mapCamera setHeading:self.heading];
@@ -208,7 +219,8 @@
 - (void)mapView:(MKMapView *)mapView
 didUpdateUserLocation:(MKUserLocation *)userLocation
 {
-    if (centeredToUser == NO) {
+    if (centeredToUser == NO) 
+    {
         centeredToUser = YES;
 
         CLLocationCoordinate2D userCoordinate = userLocation.coordinate;
@@ -223,10 +235,13 @@ didUpdateUserLocation:(MKUserLocation *)userLocation
 - (void)mapView:(MKMapView *)mapView
 regionDidChangeAnimated:(BOOL)animated
 {
-    if (regionSet == NO) {
+    if (regionSet == NO)
+    {
         MKCoordinateRegion region = mapView.region;
         if ((region.span.latitudeDelta < 0.1f) || (region.span.longitudeDelta < 0.1f))
+        {
             regionSet = YES;
+        }
     }
 }
 

@@ -1,7 +1,7 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>
@@ -19,10 +19,11 @@ typedef enum
     EditModeForegroundColor,
     EditModeFont,
     EditModeInscription
-} EditMode;
+}
+EditMode;
 
-@property (assign, nonatomic) EditMode editMode;
-@property (assign, nonatomic) Boolean down;
+@property (assign, nonatomic, readwrite) EditMode   editMode;
+@property (assign, nonatomic, readwrite) Boolean    down;
 
 + (EditModeSelectButton *)button:(EditMode)editMode;
 

@@ -1,7 +1,7 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import <sqlite3.h>
@@ -21,12 +21,18 @@
 + (void)removeDatabase:(NSString *)databaseName
 {
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+
     NSString *documentsDirectory = [paths objectAtIndex:0];
+
     NSString *databasePath = [documentsDirectory stringByAppendingPathComponent:databaseName];
+
     NSError *error;
     [[NSFileManager defaultManager] removeItemAtPath:databasePath error:&error];
     if (error != nil)
-        NSLog(@"Cannot remove database: %@", [error localizedDescription]);
+    {
+        NSLog(@"[SQLite] Cannot remove database: %@",
+              [error localizedDescription]);
+    }
 }
 
 - (id)initWithDatabaseName:(NSString *)databaseName
@@ -34,18 +40,29 @@
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
 
     self.databaseName = databaseName;
+
     self.lock = [[NSLock alloc] init];
 
     if (templateName != nil)
+    {
         if ([self databaseExists] == NO)
+        {
             if ([self createDatabase:templateName] == FALSE)
+            {
                 return nil;
+            }
+        }
+    }
 
     if ([self openDatabase] == FALSE)
+    {
         return nil;
+    }
 
     return self;
 }
@@ -54,12 +71,15 @@
 {
     // Get the documents directory path.
     //
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSArray *paths =
+    NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+
     NSString *documentsDirectory = [paths objectAtIndex:0];
 
     // Set the database file path.
     //
-    NSString *databasePath = [documentsDirectory stringByAppendingPathComponent:[self databaseName]];
+    NSString *databasePath =
+    [documentsDirectory stringByAppendingPathComponent:[self databaseName]];
 
     return databasePath;
 }
@@ -71,44 +91,66 @@
 
 - (Boolean)createDatabase:(NSString *)templateName
 {
-    NSString *templateFileName = [NSString stringWithFormat:@"%@.db", templateName];
-    NSString *templateFilePath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:templateFileName];
-    NSError *error;
+    NSString *templateFileName =
+    [NSString stringWithFormat:@"%@.db", templateName];
 
+    NSString *templateFilePath =
+    [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:templateFileName];
+
+    NSError *error;
     [[NSFileManager defaultManager] copyItemAtPath:templateFilePath
                                             toPath:[self databaseFullPath]
                                              error:&error];
-    if (error != nil) {
-        NSLog(@"%@", [error localizedDescription]);
+    if (error != nil)
+    {
+        NSLog(@"[SQLite] %@",
+              [error localizedDescription]);
+
         return FALSE;
-    } else {
-        NSLog(@"Database created from %@", templateFilePath);
+    }
+    else
+    {
+        NSLog(@"[SQLite] Database created from %@",
+              templateFilePath);
+
         return TRUE;
     }
 }
 
 - (Boolean)openDatabase
 {
-    NSLog(@"Open database: %@", [self databaseFullPath]);
+    NSLog(@"[SQLite] Open database: %@",
+          [self databaseFullPath]);
 
     sqlite3 *databaseHandler;
-    SQLITE_API int openDatabaseResult = sqlite3_open([[self databaseFullPath] UTF8String], &databaseHandler);
-    if (openDatabaseResult != SQLITE_OK) {
-        NSLog(@"Cannot open database");
+
+    SQLITE_API int openDatabaseResult =
+    sqlite3_open([[self databaseFullPath] UTF8String], &databaseHandler);
+
+    if (openDatabaseResult != SQLITE_OK)
+    {
+        NSLog(@"[SQLite] Cannot open database");
+
         return FALSE;
-    } else {
+    }
+    else
+    {
         self.databaseHandler = databaseHandler;
+
         return TRUE;
     }
 }
 
 - (void)setForeignKeys:(Boolean)support
 {
-    if (support == NO) {
-        [self executeSQL:@"PRAGMA foreign_keys = OFF"
+    if (support == NO)
+    {
+        [self executeSQL:@"[SQLite] PRAGMA foreign_keys = OFF"
        ignoreConstraints:YES];
-    } else {
-        [self executeSQL:@"PRAGMA foreign_keys = ON"
+    }
+    else
+    {
+        [self executeSQL:@"[SQLite] PRAGMA foreign_keys = ON"
        ignoreConstraints:YES];
     }
 }
@@ -120,14 +162,22 @@
 
     [self.lock lock];
 
-    int prepareStatementResult = sqlite3_prepare_v2(self.databaseHandler, [query UTF8String], -1, &statement, NULL);
+    int prepareStatementResult =
+    sqlite3_prepare_v2(self.databaseHandler,
+                       [query UTF8String],
+                       -1,
+                       &statement,
+                       NULL);
 
-    if (prepareStatementResult != SQLITE_OK) {
+    if (prepareStatementResult != SQLITE_OK)
+    {
         [self.lock unlock];
-        NSLog(@"SQLite prepare query error %d: %s (%@)",
+
+        NSLog(@"[SQLite] Prepare query error %d: %s (%@)",
               prepareStatementResult,
               sqlite3_errmsg(self.databaseHandler),
               query);
+
         return 0;
     }
 
@@ -144,7 +194,7 @@
             return (ignoreConstraints == YES);
 
         default:
-            NSLog(@"SQLite error %d: %s (%@)",
+            NSLog(@"[SQLite] Error %d: %s (%@)",
                   executeQueryResults,
                   sqlite3_errmsg(self.databaseHandler),
                   query);
@@ -159,20 +209,28 @@
 
     [self.lock lock];
 
-    int prepareStatementResult = sqlite3_prepare_v2(self.databaseHandler, [query UTF8String], -1, &statement, NULL);
+    int prepareStatementResult =
+    sqlite3_prepare_v2(self.databaseHandler,
+                       [query UTF8String],
+                       -1,
+                       &statement,
+                       NULL);
 
-    if (prepareStatementResult != SQLITE_OK) {
+    if (prepareStatementResult != SQLITE_OK)
+    {
         [self.lock unlock];
-        NSLog(@"SQLite prepare query error %d: %s (%@)",
+        NSLog(@"[SQLite] Prepare query error %d: %s (%@)",
               prepareStatementResult,
               sqlite3_errmsg(self.databaseHandler),
               query);
+
         return 0;
     }
 
     int executeQueryResults = sqlite3_step(statement);
 
     sqlite3_int64 rowId = sqlite3_last_insert_rowid(self.databaseHandler);
+
     [self.lock unlock];
 
     switch (executeQueryResults)
@@ -184,7 +242,7 @@
             return rowId;
 
         default:
-            NSLog(@"SQLite error %d: %s (%@)",
+            NSLog(@"[SQLite] Error %d: %s (%@)",
                   executeQueryResults,
                   sqlite3_errmsg(self.databaseHandler),
                   query);
@@ -199,14 +257,21 @@
 
     [self.lock lock];
 
-    int prepareStatementResult = sqlite3_prepare_v2(self.databaseHandler, [query UTF8String], -1, &statement, NULL);
+    int prepareStatementResult =
+    sqlite3_prepare_v2(self.databaseHandler,
+                       [query UTF8String],
+                       -1,
+                       &statement,
+                       NULL);
 
-    if (prepareStatementResult != SQLITE_OK) {
+    if (prepareStatementResult != SQLITE_OK)
+    {
         [self.lock unlock];
-        NSLog(@"SQLite prepare query error %d: %s (%@)",
+        NSLog(@"[SQLite] Prepare query error %d: %s (%@)",
               prepareStatementResult,
               sqlite3_errmsg(self.databaseHandler),
               query);
+
         return 0;
     }
 
@@ -225,7 +290,7 @@
             return affectedRows;
 
         default:
-            NSLog(@"SQLite error %d: %s (%@)",
+            NSLog(@"[SQLite] Error %d: %s (%@)",
                   executeQueryResults,
                   sqlite3_errmsg(self.databaseHandler),
                   query);
@@ -248,13 +313,22 @@
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
 
     sqlite3_stmt *statement;
 
-    int prepareStatementResult = sqlite3_prepare_v2(database.databaseHandler, [query UTF8String], -1, &statement, NULL);
-    if (prepareStatementResult != SQLITE_OK) {
-        NSLog(@"SQLite prepare query error %d: %s (%@)",
+    int prepareStatementResult =
+    sqlite3_prepare_v2(database.databaseHandler,
+                       [query UTF8String],
+                       -1,
+                       &statement,
+                       NULL);
+
+    if (prepareStatementResult != SQLITE_OK)
+    {
+        NSLog(@"[SQLite] Prepare query error %d: %s (%@)",
               prepareStatementResult,
               sqlite3_errmsg(database.databaseHandler),
               query);
@@ -318,11 +392,14 @@
 
 - (NSString *)getString:(int)columnNumber
 {
-    char *chars = (char *)sqlite3_column_text(self.statement, columnNumber);
+    char *chars = (char *) sqlite3_column_text(self.statement, columnNumber);
 
-    if (chars == NULL) {
+    if (chars == NULL)
+    {
         return nil;
-    } else {
+    }
+    else
+    {
         return [NSString stringWithUTF8String:chars];
     }
 }

@@ -6,6 +6,8 @@
 "AVERROR_TITLE"                             = "Camera";
 "AVERROR_MESSAGE"                           = "Without access to camera this app could not represent contents of vpCloud in 3D. You can enable camera access for this app in system settings of your device.";
 
+"CREATE_PLAQUE_LABEL"                       = "Create a plaque over here";
+
 "OK_BUTTON"                                 = "OK";
 
 "DO_YOU_WANT_TO_CREATE_PROFILE_TITLE"       = "Profile";
@@ -29,6 +31,10 @@
 
 "PROFILE_FORM_PASSWORD_LABEL"               = "Login password:";
 "PROFILE_FORM_PASSWORD_HELP"                = "";
+
+"CREATE_PLAQUE_HELP_TEXT"                   = "Keep your iPhone/iPad vertical. Point it at an object near you and press 'Fire'. New plaque appears in about 20 meters in front of you.";
+"CREATE_PLAQUE_FIRE_BUTTON"                 = "Fire";
+"CREATE_PLAQUE_CANCEL_BUTTON"               = "Cancel";
 
 "DEFAULT_INSCRIPTION"                       = "Here could be your advertising";
 

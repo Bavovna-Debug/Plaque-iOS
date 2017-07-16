@@ -1,17 +1,19 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import "PanelTwin.h"
 
-#define MoveLeftDuration    0.3f
-#define MoveRightDuration   0.3f
+#include "Definitions.h"
 
 @interface PanelTwin ()
 
-@property (strong, nonatomic) UIView *panelsView;
+@property (strong, nonatomic, readwrite) Panel  *leftPanel;
+@property (strong, nonatomic, readwrite) Panel  *rightPanel;
+
+@property (strong, nonatomic)            UIView *panelsView;
 
 @end
 
@@ -24,7 +26,9 @@
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
 
     bothFitOnScreen = (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad);
 
@@ -35,7 +39,8 @@
 {
     [super didMoveToSuperview];
 
-    if (self.superview != nil) {
+    if (self.superview != nil)
+    {
         [self setFrame:self.superview.bounds];
 
         [self setBackgroundColor:[UIColor clearColor]];
@@ -48,7 +53,9 @@
 {
     CGRect panelsViewFrame = self.bounds;
     if (bothFitOnScreen == NO)
+    {
         panelsViewFrame.size.width *= 2;
+    }
 
     UIView *panelsView = [[UIView alloc] initWithFrame:panelsViewFrame];
     [panelsView setBackgroundColor:[UIColor clearColor]];
@@ -56,17 +63,22 @@
 
     CGSize panelSize = CGSizeMake(320.0f, 200.0f);
 
-    CGRect selectorPanelRect = CGRectMake(CGRectGetMidX(panelsViewFrame) - panelSize.width / 2,
-                                          CGRectGetMaxY(panelsViewFrame) - panelSize.height - 64.0f,
-                                          panelSize.width,
-                                          panelSize.height);
+    CGRect selectorPanelRect =
+    CGRectMake(CGRectGetMidX(panelsViewFrame) - panelSize.width / 2,
+               CGRectGetMaxY(panelsViewFrame) - panelSize.height - 64.0f,
+               panelSize.width,
+               panelSize.height);
+
     CGRect controlsPanelRect = selectorPanelRect;
 
-    if (bothFitOnScreen == YES) {
+    if (bothFitOnScreen == YES)
+    {
         CGFloat distancer = panelSize.width / 2 + 4.0f;
         selectorPanelRect = CGRectOffset(selectorPanelRect, -distancer, 0.0f);
         controlsPanelRect = CGRectOffset(controlsPanelRect, +distancer, 0.0f);
-    } else {
+    }
+    else
+    {
         CGFloat distancer = CGRectGetWidth(self.bounds) / 2 - 8.0f;
         selectorPanelRect = CGRectOffset(selectorPanelRect, -distancer, 0.0f);
         controlsPanelRect = CGRectOffset(controlsPanelRect, +distancer, 0.0f);
@@ -93,12 +105,15 @@
           forControlEvents:UIControlEventTouchUpInside];
     [panelsView addSubview:closeButton];
 
-    if (bothFitOnScreen == YES) {
+    if (bothFitOnScreen == YES)
+    {
         [closeButton setFrame:CGRectMake(CGRectGetMidX(self.bounds) - closeButtonSize.width / 2,
                                          CGRectGetMinY(selectorPanelRect),
                                          closeButtonSize.width,
                                          closeButtonSize.height)];
-    } else {
+    }
+    else
+    {
         [closeButton setFrame:CGRectMake(CGRectGetMaxX(self.bounds) - closeButtonSize.width,
                                          CGRectGetMinY(selectorPanelRect),
                                          closeButtonSize.width,
@@ -107,19 +122,26 @@
 
     // Back button should be available only on small screen.
     //
-    if (bothFitOnScreen == NO) {
+    if (bothFitOnScreen == NO)
+    {
         UIImage *backButtonImage = [UIImage imageNamed:@"EditModeBackButton"];
+
         CGSize backButtonSize = backButtonImage.size;
+
         UIButton *backButton = [UIButton buttonWithType:UIButtonTypeCustom];
+
         [backButton setImage:backButtonImage
                     forState:UIControlStateNormal];
+
         [backButton setFrame:CGRectMake(CGRectGetMaxX(self.bounds),
                                         CGRectGetMinY(selectorPanelRect),
                                         backButtonSize.width,
                                         backButtonSize.height)];
+
         [backButton addTarget:self
                        action:@selector(backButtonPressed:)
              forControlEvents:UIControlEventTouchUpInside];
+
         [panelsView addSubview:backButton];
     }
 
@@ -131,7 +153,8 @@
     self.leftPanel = leftPanel;
     self.rightPanel = rightPanel;
 
-    if (bothFitOnScreen == NO) {
+    if (bothFitOnScreen == NO)
+    {
         CGPoint panelsCenter = [panelsView center];
         panelsCenter.x += CGRectGetWidth(self.bounds) / 2;
         [panelsView setCenter:panelsCenter];
@@ -140,10 +163,11 @@
 
 - (void)movePanelsLeft
 {
-    if (bothFitOnScreen == FALSE) {
+    if (bothFitOnScreen == FALSE)
+    {
         [UIView beginAnimations:nil
                         context:nil];
-        [UIView setAnimationDuration:MoveLeftDuration];
+        [UIView setAnimationDuration:PanelTwinMoveLeftDuration];
 
         CGPoint panelsCenter = [self.panelsView center];
         panelsCenter.x -= CGRectGetWidth(self.bounds);
@@ -155,10 +179,11 @@
 
 - (void)movePanelsRight
 {
-    if (bothFitOnScreen == FALSE) {
+    if (bothFitOnScreen == FALSE)
+    {
         [UIView beginAnimations:nil
                         context:nil];
-        [UIView setAnimationDuration:MoveRightDuration];
+        [UIView setAnimationDuration:PanelTwinMoveRightDuration];
 
         CGPoint panelsCenter = [self.panelsView center];
         panelsCenter.x += CGRectGetWidth(self.bounds);

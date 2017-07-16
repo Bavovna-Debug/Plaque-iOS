@@ -1,7 +1,7 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import "GCDAsyncSocket.h"
@@ -13,54 +13,22 @@
 #import "StatusBar.h"
 
 #include "API.h"
-
-#ifdef DEBUG
-#define VERBOSE_SOCKET_CONNECTION
-#define VERBOSE_SOCKET
-#define VERBOSE_DIALOGUE
-#define VERBOSE_ENQUEUE
-#define VERBOSE_STREAM
-#define VERBOSE_INPUT
-#define VERBOSE_PROCESS_CARDS
-#define DUMP_RECEIVED_PAYLOAD
-#endif
-
-#define BytesPerSendFragment                512
-
-#define FlushQueueBackgroundInterval        1800.0f
-#define FlushQueueForegroundInterval        5.0f
-
-#define ReconnectIntervalAfterAnticipation  1.0f
-#define ReconnectIntervalIfFailedToConnect  3.0f
-#define ReconnectIntervalIfLostConnection   1.0f
-#define ReconnectIntervalIfDroppedByRemote  1.0f
-#define ReconnectIntervalIfErrorOcurred     1.0f
-#define ReconnectIntervalIfHandshakeFailed  1.0f
-#define ReconnectIntervalWhenNeedToSend     1.0f
-#define ReconnectIntervalIfErrorOnSend      1.0f
-
-#define TimeoutOnDialogueTransmit           5.0f
-#define TimeoutOnDialogueReceive            5.0f
-#define TimeoutOnAnticipantTransmit         5.0f
-#define TimeoutOnWaitingForPaquetTransmit   20.0f
-#define TimeoutOnWaitingForPaquetReceive    600.0f
-
-#define TimerIntervalProcessInputPieces     3.0f
+#include "Definitions.h"
 
 @interface Communicator () <GCDAsyncSocketDelegate>
 
-@property (strong, nonatomic) NSLock          *connectionLock;
-@property (strong, nonatomic) NSTimer         *reconnectTimer;
-@property (strong, nonatomic) NSTimer         *flushQueueTimer;
-@property (strong, nonatomic) NSMutableArray  *inputPieces;
-@property (strong, nonatomic) NSLock          *inputPiecesLock;
-@property (strong, nonatomic) NSLock          *inputPiecesReaderLock;
-@property (strong, nonatomic) NSTimer         *inputPiecesReaderTimer;
-@property (strong, nonatomic) NSMutableArray  *outputPieces;
-@property (strong, nonatomic) NSLock          *outputPiecesLock;
-@property (strong, nonatomic) GCDAsyncSocket  *socket;
-@property (strong, nonatomic) NSMutableArray  *paquets;
-@property (strong, nonatomic) NSLock          *paquetsLock;
+@property (strong, nonatomic) NSLock            *connectionLock;
+@property (strong, nonatomic) NSTimer           *reconnectTimer;
+@property (strong, nonatomic) NSTimer           *flushQueueTimer;
+@property (strong, nonatomic) NSMutableArray    *inputPieces;
+@property (strong, nonatomic) NSLock            *inputPiecesLock;
+@property (strong, nonatomic) NSLock            *inputPiecesReaderLock;
+@property (strong, nonatomic) NSTimer           *inputPiecesReaderTimer;
+@property (strong, nonatomic) NSMutableArray    *outputPieces;
+@property (strong, nonatomic) NSLock            *outputPiecesLock;
+@property (strong, nonatomic) GCDAsyncSocket    *socket;
+@property (strong, nonatomic) NSMutableArray    *paquets;
+@property (strong, nonatomic) NSLock            *paquetsLock;
 
 @end
 
@@ -93,7 +61,9 @@
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
 
     self.connectionLock = [[NSLock alloc] init];
     self.inputPieces = [NSMutableArray array];
@@ -119,7 +89,9 @@
     background = YES;
 
     if (self.flushQueueTimer != nil)
+    {
         [self.flushQueueTimer invalidate];
+    }
 
     self.flushQueueTimer =
     [NSTimer scheduledTimerWithTimeInterval:FlushQueueBackgroundInterval
@@ -136,7 +108,9 @@
     [self connect];
 
     if (self.flushQueueTimer != nil)
+    {
         [self.flushQueueTimer invalidate];
+    }
 
     self.flushQueueTimer =
     [NSTimer scheduledTimerWithTimeInterval:FlushQueueForegroundInterval
@@ -201,13 +175,15 @@
         [self.outputPieces addObject:piece];
         [self.outputPiecesLock unlock];
 
-#ifdef VERBOSE_ENQUEUE
-        NSLog(@"Enqueue single piece of paquet %d with %lu bytes command=0x%08X",
+#ifdef VerboseCommunicationEnqueue
+        NSLog(@"[Communicator] Enqueue single piece of paquet %d with %lu bytes command=0x%08X",
               (unsigned int) paquet.paquetId,
               (unsigned long) [piece length],
               (unsigned int) [paquet commandCode]);
 #endif
-    } else {
+    }
+    else
+    {
         NSUInteger packedBytes = 0;
         NSUInteger bytesToPack = BytesPerSendFragment - [piece length];
 
@@ -217,8 +193,8 @@
             [piece appendBytes:[paquet.payload bytes] + packedBytes
                         length:bytesToPack];
             [self.outputPieces addObject:piece];
-#ifdef VERBOSE_ENQUEUE
-            NSLog(@"Enqueue piece of paquet %d with %lu bytes",
+#ifdef VerboseCommunicationEnqueue
+            NSLog(@"[Communicator] Enqueue piece of paquet %d with %lu bytes",
                   (unsigned int) paquet.paquetId,
                   (unsigned long) [piece length]);
 #endif
@@ -250,7 +226,9 @@
         // if there are no outstanding paquets in a queue.
         //
         if ([self.paquets count] == 0)
+        {
             [self disconnect:YES];
+        }
 
         disconnectWhenPossible = FALSE;
     }
@@ -267,8 +245,8 @@
     //
     if (connected == NO)
     {
-#ifdef VERBOSE_SOCKET_CONNECTION
-        NSLog(@"Not connected");
+#ifdef VerboseCommunicationSocketConnection
+        NSLog(@"[Communicator] Not connected");
 #endif
         [self connect];
         return;
@@ -277,7 +255,9 @@
     if ([self.paquetsLock tryLock] == YES)
     {
         BOOL needToLoop;
-        do {
+
+        do
+        {
             needToLoop = FALSE;
             for (Paquet *paquet in self.paquets)
             {
@@ -289,17 +269,20 @@
                 }
 
                 if ([paquet inTheAir] == NO)
+                {
                     [self enqueue:paquet];
+                }
             }
-        } while (needToLoop == TRUE);
+        }
+        while (needToLoop == TRUE);
 
         [self.paquetsLock unlock];
     }
 
     if (dialogueEstablished == NO)
     {
-#ifdef VERBOSE_SOCKET_CONNECTION
-        NSLog(@"Dialogue not established yet");
+#ifdef VerboseCommunicationSocketConnection
+        NSLog(@"[Communicator] Dialogue not established yet");
 #endif
     }
     else
@@ -330,30 +313,38 @@
     //
     if ([self.connectionLock tryLock] == NO)
     {
-#ifdef VERBOSE_SOCKET_CONNECTION
-        NSLog(@"Already connected or establishing a connection");
+#ifdef VerboseCommunicationSocketConnection
+        NSLog(@"[Communicator] Already connected or establishing a connection");
 #endif
         return;
     }
 
-#ifdef VERBOSE_SOCKET_CONNECTION
-    NSLog(@"Establish connection");
+#ifdef VerboseCommunicationSocketConnection
+    NSLog(@"[Communicator] Establish connection");
     [statusBar postMessage:NSLocalizedString(@"STATUS_BAR_VPCLOUD_ESTABLISH_CONNECTION", nil)];
 #endif
 
     dialogueEstablished = NO;
 
     Authentificator *authentificator = [Authentificator sharedAuthentificator];
-    if ([authentificator deviceRegistered] == NO) {
+    if ([authentificator deviceRegistered] == NO)
+    {
         anticipantConnection = YES;
-    } else {
+    }
+    else
+    {
         anticipantConnection = NO;
     }
 
     Servers *servers = [Servers sharedServers];
 
-    self.socket = [[GCDAsyncSocket alloc] initWithDelegate:self
-                                             delegateQueue:dispatch_get_main_queue()];
+    self.socket =
+    [[GCDAsyncSocket alloc] initWithDelegate:self
+                               delegateQueue:dispatch_get_main_queue()];
+
+    [self.socket setIPv4Enabled:YES];
+    [self.socket setIPv6Enabled:YES];
+    [self.socket setIPv4PreferredOverIPv6:YES];
 
     if (background == YES)
     {
@@ -367,6 +358,9 @@
     BOOL status = [self.socket connectToHost:[servers serverAddress]
                                       onPort:[servers serverPort]
                                        error:&error];
+    NSLog(@"[Communicator] Connecting %@ %u",
+          [servers serverAddress],
+          (unsigned int) [servers serverPort]);
 
     [servers nextServer];
 
@@ -376,18 +370,20 @@
 
         [statusBar postMessage:NSLocalizedString(@"STATUS_BAR_VPCLOUD_CANNOT_CONNECT", nil)];
 
-#ifdef VERBOSE_SOCKET_CONNECTION
-        NSLog(@"Cannot connect: %@",
-              error);
+#ifdef VerboseCommunicationSocketConnection
+        NSLog(@"[Communicator] Cannot connect: %@", error);
 #endif
     }
 }
 
 - (void)disconnect:(Boolean)forced
 {
-    if (forced == YES) {
+    if (forced == YES)
+    {
         [self.socket disconnect];
-    } else {
+    }
+    else
+    {
         disconnectWhenPossible = TRUE;
     }
 }
@@ -399,7 +395,9 @@
     [self.outputPiecesLock lock];
 
     for (Paquet *paquet in self.paquets)
+    {
         [paquet setInTheAir:NO];
+    }
 
     [self.inputPieces removeAllObjects];
 
@@ -421,7 +419,9 @@
     //
     NSTimer *reconnectTimer = self.reconnectTimer;
     if (reconnectTimer != nil)
+    {
         [reconnectTimer invalidate];
+    }
 
     self.reconnectTimer =
     [NSTimer scheduledTimerWithTimeInterval:reconnectInterval
@@ -429,6 +429,7 @@
                                    selector:@selector(fireReconnect:)
                                    userInfo:nil
                                     repeats:NO];
+
     [statusBar postMessage:[NSString stringWithFormat:
                             NSLocalizedString(@"STATUS_BAR_VPCLOUD_SCHEDULE_RECONNECT", nil),
                             reconnectInterval]];
@@ -445,8 +446,8 @@
 didConnectToHost:(NSString *)host
           port:(uint16_t)port
 {
-#ifdef VERBOSE_SOCKET_CONNECTION
-    NSLog(@"Connected");
+#ifdef VerboseCommunicationSocketConnection
+    NSLog(@"[Communicator] Connected");
 #endif
 
     connected = YES;
@@ -455,8 +456,8 @@ didConnectToHost:(NSString *)host
 
     [statusBar postMessage:NSLocalizedString(@"STATUS_BAR_VPCLOUD_CONNECTION_ESTABLISHED", nil)];
 
-#ifdef VERBOSE_SOCKET
-    NSLog(@"Send dialogue demande");
+#ifdef VerboseCommunicationSocket
+    NSLog(@"[Communicator] Send dialogue demande");
 #endif
     NSMutableData *payload = [self prepareDialogueDemande];
     [self.socket writeData:payload
@@ -475,8 +476,8 @@ didConnectToHost:(NSString *)host
 - (void)socketDidDisconnect:(GCDAsyncSocket *)sock
                   withError:(NSError *)error
 {
-#ifdef VERBOSE_SOCKET_CONNECTION
-    NSLog(@"Disconnected");
+#ifdef VerboseCommunicationSocketConnection
+    NSLog(@"[Communicator] Disconnected");
 #endif
 
     self.socket = nil;
@@ -485,11 +486,14 @@ didConnectToHost:(NSString *)host
 
     // If connection lock is occupied then disconnect happened right after connect request.
     //
-    if ([self.connectionLock tryLock] == NO) {
-#ifdef VERBOSE_SOCKET_CONNECTION
-        NSLog(@"Disconnect without I/O");
+    if ([self.connectionLock tryLock] == NO)
+    {
+#ifdef VerboseCommunicationSocketConnection
+        NSLog(@"[Communicator] Disconnect without I/O");
 #endif
-    } else {
+    }
+    else
+    {
         [statusBar postMessage:NSLocalizedString(@"STATUS_BAR_VPCLOUD_LOST_CONNECTION", nil)];
     }
 
@@ -501,12 +505,12 @@ didConnectToHost:(NSString *)host
 
 }
 
-#ifdef VERBOSE_SOCKET
+#ifdef VerboseCommunicationSocket
 - (void)socket:(GCDAsyncSocket *)sock
 didWritePartialDataOfLength:(NSUInteger)partialLength
            tag:(long)tag
 {
-    NSLog(@"Written %lu bytes of tag %ld",
+    NSLog(@"[Communicator] Written %lu bytes of tag %ld",
           (unsigned long) partialLength, tag);
 }
 #endif
@@ -517,6 +521,7 @@ didWriteDataWithTag:(long)tag
     [self flushOutputQueue];
 
     NSMutableData *nextPieceToReceive = [NSMutableData data];
+
     [self.socket readDataWithTimeout:TimeoutOnWaitingForPaquetReceive
                               buffer:nextPieceToReceive
                         bufferOffset:0
@@ -527,8 +532,8 @@ didWriteDataWithTag:(long)tag
    didReadData:(NSData *)data
        withTag:(long)tag
 {
-#ifdef VERBOSE_INPUT
-    NSLog(@"Read %lu bytes from socket",
+#ifdef VerboseCommunicationReadData
+    NSLog(@"[Communicator] Read %lu bytes from socket",
           (unsigned long) [data length]);
 #endif
     if (anticipantConnection == YES)
@@ -540,7 +545,7 @@ didWriteDataWithTag:(long)tag
     {
         NSMutableData *recivedPiece = [NSMutableData dataWithData:data];
 
-#ifdef DUMP_RECEIVED_PAYLOAD
+#ifdef VerboseCommunicationDumpReceivedPayload
         // TODO
 #endif
 
@@ -581,9 +586,12 @@ didWriteDataWithTag:(long)tag
     // Dialogue type.
     //
     UInt32 dialogueType;
-    if (anticipantConnection == YES) {
+    if (anticipantConnection == YES)
+    {
         dialogueType = CFSwapInt32HostToBig(API_DialogueTypeAnticipant);
-    } else {
+    }
+    else
+    {
         dialogueType = CFSwapInt32HostToBig(API_DialogueTypeRegular);
     }
     [payload appendBytes:&dialogueType
@@ -599,9 +607,12 @@ didWriteDataWithTag:(long)tag
     //NSString *version = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
     NSString *build = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"];
 
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+    {
         deviceType = API_DeviceTypeAppleiPad;
-    } else {
+    }
+    else
+    {
         deviceType = API_DeviceTypeAppleiPhone;
     }
 
@@ -619,44 +630,59 @@ didWriteDataWithTag:(long)tag
 
     // Device token.
     //
-    NSUUID *deviceToken = [[Authentificator sharedAuthentificator] deviceToken];
-    if (deviceToken == nil)
-        deviceToken = [[NSUUID alloc] initWithUUIDString:@"00000000-0000-0000-0000-000000000000"];
-    uuid_t deviceTokenBytes;
-    [deviceToken getUUIDBytes:deviceTokenBytes];
-    NSData *deviceTokenData = [NSData dataWithBytes:deviceTokenBytes
-                                             length:API_TokenBinarySize];
-    [payload appendData:deviceTokenData];
+    {
+        NSUUID *deviceToken = [[Authentificator sharedAuthentificator] deviceToken];
+        if (deviceToken == nil)
+        {
+            deviceToken = [[NSUUID alloc] initWithUUIDString:@"00000000-0000-0000-0000-000000000000"];
+        }
+
+        uuid_t deviceTokenBytes;
+        [deviceToken getUUIDBytes:deviceTokenBytes];
+        NSData *deviceTokenData = [NSData dataWithBytes:deviceTokenBytes
+                                                 length:API_TokenBinarySize];
+        [payload appendData:deviceTokenData];
+    }
 
     // Profile token.
     //
-    NSUUID *profileToken = [[Authentificator sharedAuthentificator] profileToken];
-    if (profileToken == nil)
-        profileToken = [[NSUUID alloc] initWithUUIDString:@"00000000-0000-0000-0000-000000000000"];
-    uuid_t profileTokenBytes;
-    [profileToken getUUIDBytes:profileTokenBytes];
-    NSData *profileTokenData = [NSData dataWithBytes:profileTokenBytes
-                                              length:API_TokenBinarySize];
-    [payload appendData:profileTokenData];
+    {
+        NSUUID *profileToken = [[Authentificator sharedAuthentificator] profileToken];
+        if (profileToken == nil)
+        {
+            profileToken = [[NSUUID alloc] initWithUUIDString:@"00000000-0000-0000-0000-000000000000"];
+        }
+
+        uuid_t profileTokenBytes;
+        [profileToken getUUIDBytes:profileTokenBytes];
+        NSData *profileTokenData = [NSData dataWithBytes:profileTokenBytes
+                                                  length:API_TokenBinarySize];
+        [payload appendData:profileTokenData];
+    }
 
     // Session token.
     //
-    NSUUID *sessionToken = [[Authentificator sharedAuthentificator] sessionToken];
-    if (sessionToken == nil)
-        sessionToken = [[NSUUID alloc] initWithUUIDString:@"00000000-0000-0000-0000-000000000000"];
-    uuid_t sessionTokenBytes;
-    [sessionToken getUUIDBytes:sessionTokenBytes];
-    NSData *sessionTokenData = [NSData dataWithBytes:sessionTokenBytes
-                                              length:API_TokenBinarySize];
-    [payload appendData:sessionTokenData];
+    {
+        NSUUID *sessionToken = [[Authentificator sharedAuthentificator] sessionToken];
+        if (sessionToken == nil)
+        {
+            sessionToken = [[NSUUID alloc] initWithUUIDString:@"00000000-0000-0000-0000-000000000000"];
+        }
+
+        uuid_t sessionTokenBytes;
+        [sessionToken getUUIDBytes:sessionTokenBytes];
+        NSData *sessionTokenData = [NSData dataWithBytes:sessionTokenBytes
+                                                  length:API_TokenBinarySize];
+        [payload appendData:sessionTokenData];
+    }
 
     return payload;
 }
 
 - (Boolean)parseDialogueVerdict:(NSMutableData *)data
 {
-#ifdef VERBOSE_DIALOGUE
-    NSLog(@"Parsing dialogue verdict");
+#ifdef VerboseCommunicationDialogue
+    NSLog(@"[Communicator] Parsing dialogue verdict");
 #endif
 
     UInt64 dialogueSignature;
@@ -668,37 +694,46 @@ didWriteDataWithTag:(long)tag
     
     // Dialogue signature.
     //
-    fetchData = [NSData dataWithBytesNoCopy:(char *) [data bytes] + payloadOffset
-                                     length:sizeof(dialogueSignature)
-                               freeWhenDone:NO];
-    [fetchData getBytes:&dialogueSignature length:sizeof(dialogueSignature)];
+    {
+        fetchData = [NSData dataWithBytesNoCopy:(char *) [data bytes] + payloadOffset
+                                         length:sizeof(dialogueSignature)
+                                   freeWhenDone:NO];
 
-    payloadOffset += sizeof(dialogueSignature);
+        [fetchData getBytes:&dialogueSignature length:sizeof(dialogueSignature)];
 
-    dialogueSignature = CFSwapInt64BigToHost(dialogueSignature);
+        payloadOffset += sizeof(dialogueSignature);
+
+        dialogueSignature = CFSwapInt64BigToHost(dialogueSignature);
+    }
 
     // Dialogue status.
     //
-    fetchData = [NSData dataWithBytesNoCopy:(char *) [data bytes] + payloadOffset
-                                     length:sizeof(verdictCode)
-                               freeWhenDone:NO];
-    [fetchData getBytes:&verdictCode length:sizeof(verdictCode)];
+    {
+        fetchData = [NSData dataWithBytesNoCopy:(char *) [data bytes] + payloadOffset
+                                         length:sizeof(verdictCode)
+                                   freeWhenDone:NO];
 
-    payloadOffset += sizeof(verdictCode);
+        [fetchData getBytes:&verdictCode length:sizeof(verdictCode)];
 
-    verdictCode = CFSwapInt32BigToHost(verdictCode);
+        payloadOffset += sizeof(verdictCode);
+
+        verdictCode = CFSwapInt32BigToHost(verdictCode);
+    }
 
     // Session token.
     //
-    fetchData = [NSData dataWithBytesNoCopy:(char *) [data bytes] + payloadOffset
-                                     length:API_TokenBinarySize
-                               freeWhenDone:NO];
-    sessionToken = [[NSUUID alloc] initWithUUIDBytes:[fetchData bytes]];
+    {
+        fetchData = [NSData dataWithBytesNoCopy:(char *) [data bytes] + payloadOffset
+                                         length:API_TokenBinarySize
+                                   freeWhenDone:NO];
+
+        sessionToken = [[NSUUID alloc] initWithUUIDBytes:[fetchData bytes]];
+    }
 
     if (dialogueSignature != API_DialogueSignature)
     {
-#ifdef VERBOSE_DIALOGUE
-        NSLog(@"Wrong dialogue signature 0x%016llX",
+#ifdef VerboseCommunicationDialogue
+        NSLog(@"[Communicator] Wrong dialogue signature 0x%016llX",
               dialogueSignature);
 #endif
         return FALSE;
@@ -710,46 +745,66 @@ didWriteDataWithTag:(long)tag
     {
         case API_DialogueVerdictWelcome:
         {
-#ifdef VERBOSE_DIALOGUE
-            NSLog(@"Dialogue established");
+#ifdef VerboseCommunicationDialogue
+            NSLog(@"[Communicator] Dialogue established");
 #endif
 
             id<ConnectionDelegate> delegate = self.connectionDelegate;
             if (delegate != nil)
+            {
                 [delegate communicatorDidEstablishDialogue];
+            }
 
             break;
         }
 
         case API_DialogueVerdictInvalidDevice:
-#ifdef VERBOSE_DIALOGUE
-            NSLog(@"Dialogue verdict: invalid device");
+        {
+#ifdef VerboseCommunicationDialogue
+            NSLog(@"[Communicator] Dialogue verdict: invalid device");
 #endif
+
             [authentificator setDeviceToken:nil];
+
             return FALSE;
+
             break;
+        }
 
         case API_DialogueVerdictInvalidProfile:
-#ifdef VERBOSE_DIALOGUE
-            NSLog(@"Dialogue verdict: invalid profile");
+        {
+#ifdef VerboseCommunicationDialogue
+            NSLog(@"[Communicator] Dialogue verdict: invalid profile");
 #endif
+
             [authentificator setProfileToken:nil];
+
             break;
+        }
 
         case API_DialogueVerdictNewSession:
-#ifdef VERBOSE_DIALOGUE
-            NSLog(@"Dialogue verdict: open new session %@", [sessionToken UUIDString]);
+        {
+#ifdef VerboseCommunicationDialogue
+            NSLog(@"[Communicator] Dialogue verdict: open new session %@",
+                  [sessionToken UUIDString]);
 #endif
+
             [authentificator setSessionToken:sessionToken];
+
             [[Plaques sharedPlaques] removeAllPlaques];
+
             break;
+        }
 
         default:
-#ifdef VERBOSE_DIALOGUE
-            NSLog(@"Unknown dialogue status 0x%08X",
+        {
+#ifdef VerboseCommunicationDialogue
+            NSLog(@"[Communicator] Unknown dialogue status 0x%08X",
                   (unsigned int) verdictCode);
 #endif
+
             break;
+        }
     }
 
     return TRUE;
@@ -779,6 +834,7 @@ didWriteDataWithTag:(long)tag
         if ([self.inputPieces count] == 0)
         {
             [self.inputPiecesLock unlock];
+
             break;
         }
 
@@ -802,6 +858,7 @@ didWriteDataWithTag:(long)tag
             if ([piece length] < payloadSize)
             {
                 [self.inputPiecesLock unlock];
+
                 break;
             }
         }
@@ -817,44 +874,70 @@ didWriteDataWithTag:(long)tag
             if ([piece length] < headerSize)
             {
                 [self.inputPiecesLock unlock];
+
                 break;
             }
 
             NSData *data;
             NSUInteger dataOffset = 0;
 
-            data = [NSData dataWithBytesNoCopy:(char *) [piece bytes] + dataOffset
-                                        length:sizeof(cardSignature)
-                                  freeWhenDone:NO];
-            [data getBytes:&cardSignature length:sizeof(cardSignature)];
+            {
+                data =
+                [NSData dataWithBytesNoCopy:(char *) [piece bytes] + dataOffset
+                                     length:sizeof(cardSignature)
+                               freeWhenDone:NO];
+
+                [data getBytes:&cardSignature
+                        length:sizeof(cardSignature)];
+            }
 
             dataOffset += sizeof(cardSignature);
 
-            data = [NSData dataWithBytesNoCopy:(char *) [piece bytes] + dataOffset
-                                        length:sizeof(paquetId)
-                                  freeWhenDone:NO];
-            [data getBytes:&paquetId length:sizeof(paquetId)];
+            {
+                data =
+                [NSData dataWithBytesNoCopy:(char *) [piece bytes] + dataOffset
+                                     length:sizeof(paquetId)
+                               freeWhenDone:NO];
+
+                [data getBytes:&paquetId
+                        length:sizeof(paquetId)];
+            }
 
             dataOffset += sizeof(paquetId);
 
-            data = [NSData dataWithBytesNoCopy:(char *) [piece bytes] + dataOffset
-                                        length:sizeof(commandCode)
-                                  freeWhenDone:NO];
-            [data getBytes:&commandCode length:sizeof(commandCode)];
+            {
+                data =
+                [NSData dataWithBytesNoCopy:(char *) [piece bytes] + dataOffset
+                                     length:sizeof(commandCode)
+                               freeWhenDone:NO];
+
+                [data getBytes:&commandCode
+                        length:sizeof(commandCode)];
+            }
 
             dataOffset += sizeof(commandCode);
 
-            data = [NSData dataWithBytesNoCopy:(char *) [piece bytes] + dataOffset
-                                        length:sizeof(commandSubcode)
-                                  freeWhenDone:NO];
-            [data getBytes:&commandSubcode length:sizeof(commandSubcode)];
+            {
+                data =
+                [NSData dataWithBytesNoCopy:(char *) [piece bytes] + dataOffset
+                                     length:sizeof(commandSubcode)
+                               freeWhenDone:NO];
+
+                [data getBytes:&commandSubcode
+                        length:sizeof(commandSubcode)];
+            }
 
             dataOffset += sizeof(commandSubcode);
 
-            data = [NSData dataWithBytesNoCopy:(char *) [piece bytes] + dataOffset
-                                        length:sizeof(payloadSize)
-                                  freeWhenDone:NO];
-            [data getBytes:&payloadSize length:sizeof(payloadSize)];
+            {
+                data =
+                [NSData dataWithBytesNoCopy:(char *) [piece bytes] + dataOffset
+                                     length:sizeof(payloadSize)
+                               freeWhenDone:NO];
+
+                [data getBytes:&payloadSize
+                        length:sizeof(payloadSize)];
+            }
 
             cardSignature = CFSwapInt64BigToHost(cardSignature);
             paquetId = CFSwapInt32BigToHost(paquetId);
@@ -862,8 +945,8 @@ didWriteDataWithTag:(long)tag
             commandSubcode = CFSwapInt32BigToHost(commandSubcode);
             payloadSize = CFSwapInt32BigToHost(payloadSize);
             
-#ifdef VERBOSE_PROCESS_CARDS
-            NSLog(@"Piece contains paquet %d for command 0x%08X with payload %d bytes",
+#ifdef VerboseCommunicationProcessCards
+            NSLog(@"[Communicator] Piece contains paquet %d for command 0x%08X with payload %d bytes",
                   (unsigned int) paquetId,
                   (unsigned int) commandCode,
                   (unsigned int) payloadSize);
@@ -876,19 +959,22 @@ didWriteDataWithTag:(long)tag
         NSUInteger sizeOfAllPieces = 0;
 
         for (NSMutableData *inputPiece in self.inputPieces)
+        {
             sizeOfAllPieces += [inputPiece length];
+        }
 
         // Quit if not enough data received yet.
         //
         if (sizeOfAllPieces < sizeOfFirstPaquet)
         {
-#ifdef VERBOSE_PROCESS_CARDS
-            NSLog(@"Not enough data received yet: available %lu bytes in %lu pieces, expected %lu bytes",
+#ifdef VerboseCommunicationProcessCards
+            NSLog(@"[Communicator] Not enough data received yet: available %lu bytes in %lu pieces, expected %lu bytes",
                   (unsigned long) sizeOfAllPieces,
                   (unsigned long) [self.inputPieces count],
                   (unsigned long) sizeOfFirstPaquet);
 #endif
             [self.inputPiecesLock unlock];
+
             break;
         }
 
@@ -898,7 +984,7 @@ didWriteDataWithTag:(long)tag
             //
             // First piece is a complete paquet.
             //
-            payload = [NSMutableData dataWithBytes:(char *)[piece bytes] + headerSize
+            payload = [NSMutableData dataWithBytes:(char *) [piece bytes] + headerSize
                                             length:payloadSize];
 
             // Remove piece from the queue.
@@ -917,7 +1003,8 @@ didWriteDataWithTag:(long)tag
             //
             payload = [NSMutableData data];
 
-            do {
+            do
+            {
                 // Which amount of data can be taken out of the piece.
                 //
                 NSUInteger bytesToTakeFromPiece = [piece length] - offsetInCurrentPiece;
@@ -940,13 +1027,14 @@ didWriteDataWithTag:(long)tag
                     {
                         NSMutableData *payloadPart;
 
-                        if (offsetInCurrentPiece == 0) {
-                            //
+                        if (offsetInCurrentPiece == 0)
+                        {
                             // This is a portion of data without paquet pilot.
                             //
                             payloadPart = piece;
-                        } else {
-                            //
+                        }
+                        else
+                        {
                             // This is a portion of data with paquet pilot. Skip paquet pilot.
                             //
                             payloadPart = [NSMutableData dataWithBytes:(char *)[piece bytes] + offsetInCurrentPiece
@@ -983,13 +1071,15 @@ didWriteDataWithTag:(long)tag
 
                     // Left part contains data for current paquet.
                     //
-                    NSData *leftPart = [NSData dataWithBytes:(char *)[piece bytes] + offsetInCurrentPiece
-                                                      length:numberOfBytesLeft - offsetInCurrentPiece];
+                    NSData *leftPart =
+                    [NSData dataWithBytes:(char *)[piece bytes] + offsetInCurrentPiece
+                                   length:numberOfBytesLeft - offsetInCurrentPiece];
 
                     // Right part contains data for the next paquet(s).
                     //
-                    NSData *rightPart = [NSData dataWithBytes:(char *)[piece bytes] + numberOfBytesLeft
-                                                       length:numberOfBytesRight];
+                    NSData *rightPart =
+                    [NSData dataWithBytes:(char *)[piece bytes] + numberOfBytesLeft
+                                   length:numberOfBytesRight];
 
                     // Append payload part.
                     //
@@ -1004,30 +1094,34 @@ didWriteDataWithTag:(long)tag
                     //
                     break;
                 }
-            } while (piece != nil);
+            }
+            while (piece != nil);
         }
 
         [self.inputPiecesLock unlock];
 
-#ifdef VERBOSE_PROCESS_CARDS
-        NSLog(@"Taken payload %lu bytes (%lu pieces left in a queue)",
+#ifdef VerboseCommunicationProcessCards
+        NSLog(@"[Communicator] Taken payload %lu bytes (%lu pieces left in a queue)",
               (unsigned long) [payload length],
               (unsigned long) [self.inputPieces count]);
 #endif
 
         if (dialogueEstablished == NO)
         {
-            if ([self parseDialogueVerdict:payload] == FALSE) {
+            if ([self parseDialogueVerdict:payload] == FALSE)
+            {
                 [self disconnect:YES];
                 [self scheduleReconnectWithInterval:ReconnectIntervalIfHandshakeFailed];
-            } else {
+            }
+            else
+            {
                 dialogueEstablished = YES;
             }
         }
         else
         {
-            if (paquetId == 0) {
-                //
+            if (paquetId == 0)
+            {
                 // This paquet was initiated by cloud. Look for a corresponding handler.
                 //
                 /*switch (commandCode)
@@ -1038,12 +1132,14 @@ didWriteDataWithTag:(long)tag
                     default:
                         break;
                 }*/
-            } else {
-                //
+            }
+            else
+            {
                 // Search for paquet in paquet queue. If there is one then dequeue it - paquet owner is waiting
                 // for paquet completion notification.
                 //
                 [self.paquetsLock lock];
+
                 for (Paquet *paquet in self.paquets)
                 {
                     if (paquet.paquetId == paquetId)
@@ -1051,11 +1147,14 @@ didWriteDataWithTag:(long)tag
                         if (paquet.commandCode == commandCode)
                         {
                             paquet.commandSubcode = commandSubcode;
+                            
                             [self dequeue:paquet payload:payload];
+
                             break;
                         }
                     }
                 }
+
                 [self.paquetsLock unlock];
             }
         }

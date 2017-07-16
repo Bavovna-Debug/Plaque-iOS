@@ -1,7 +1,7 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>
@@ -11,24 +11,7 @@
 #import "Paquet.h"
 
 #include "API.h"
-
-#ifdef DEBUG
-#define VERBOSE
-#endif
-
-#define DeviceRegistrationTryInterval   5.0f
-
-#ifdef DEBUG
-#define DeviceTokenKey                  @"DeviceToken2"
-#define SessionTokenKey                 @"SessionToken2"
-#define ProfileTokenKey                 @"ProfileToken2"
-#define NotificationsTokenKey           @"NotificationsToken2"
-#else
-#define DeviceTokenKey                  @"DeviceToken"
-#define SessionTokenKey                 @"SessionToken"
-#define ProfileTokenKey                 @"ProfileToken"
-#define NotificationsTokenKey           @"NotificationsToken"
-#endif
+#include "Definitions.h"
 
 @interface Authentificator () <PaquetSenderDelegate>
 
@@ -53,7 +36,9 @@
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
 
     //[self setDeviceToken:nil];
     //[self setNotificationsToken:nil];
@@ -90,9 +75,12 @@
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSString *tokenString = [defaults stringForKey:DeviceTokenKey];
     if (tokenString == nil)
+    {
         return nil;
+    }
 
     NSUUID *token = [[NSUUID alloc] initWithUUIDString:tokenString];
+
     return token;
 }
 
@@ -101,9 +89,12 @@
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSString *tokenString = [defaults stringForKey:SessionTokenKey];
     if (tokenString == nil)
+    {
         return nil;
+    }
 
     NSUUID *token = [[NSUUID alloc] initWithUUIDString:tokenString];
+
     return token;
 }
 
@@ -112,9 +103,12 @@
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSString *tokenString = [defaults stringForKey:ProfileTokenKey];
     if (tokenString == nil)
+    {
         return nil;
+    }
 
     NSUUID *token = [[NSUUID alloc] initWithUUIDString:tokenString];
+
     return token;
 }
 
@@ -122,42 +116,55 @@
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSData *data = [defaults dataForKey:NotificationsTokenKey];
+
     return data;
 }
 
 - (void)setDeviceToken:(NSUUID *)deviceToken
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSString *tokenString = (deviceToken == nil) ? nil : [deviceToken UUIDString];
+
+    NSString *tokenString =
+    (deviceToken == nil) ? nil : [deviceToken UUIDString];
+
     [defaults setValue:tokenString
                 forKey:DeviceTokenKey];
     
 #ifdef VERBOSE
-    NSLog(@"Set device token: %@", [deviceToken UUIDString]);
+    NSLog(@"[Authentificator] Set device token: %@",
+          [deviceToken UUIDString]);
 #endif
 }
 
 - (void)setSessionToken:(NSUUID *)sessionToken
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSString *tokenString = (sessionToken == nil) ? nil : [sessionToken UUIDString];
+
+    NSString *tokenString =
+    (sessionToken == nil) ? nil : [sessionToken UUIDString];
+
     [defaults setValue:tokenString
                 forKey:SessionTokenKey];
 
 #ifdef VERBOSE
-    NSLog(@"Set session token: %@", [sessionToken UUIDString]);
+    NSLog(@"[Authentificator] Set session token: %@",
+          [sessionToken UUIDString]);
 #endif
 }
 
 - (void)setProfileToken:(NSUUID *)profileToken
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSString *tokenString = (profileToken == nil) ? nil : [profileToken UUIDString];
+
+    NSString *tokenString =
+    (profileToken == nil) ? nil : [profileToken UUIDString];
+
     [defaults setValue:tokenString
                 forKey:ProfileTokenKey];
 
 #ifdef VERBOSE
-    NSLog(@"Set profile token: %@", [profileToken UUIDString]);
+    NSLog(@"[Authentificator] Set profile token: %@",
+          [profileToken UUIDString]);
 #endif
 }
 
@@ -172,7 +179,8 @@
                     forKey:NotificationsTokenKey];
 
 #ifdef VERBOSE
-        NSLog(@"Set notifications token: %@", notificationsToken);
+        NSLog(@"[Authentificator] Set notifications token: %@",
+              notificationsToken);
 #endif
     }
 }
@@ -215,42 +223,65 @@
     NSString *paddedString;
     NSData *paddedStringData;
 
-    paddedString = [deviceName stringByPaddingToLength:API_AnticipantDeviceNameLength
-                                        withString:@"\0"
-                                   startingAtIndex:0];
-    paddedStringData = [paddedString dataUsingEncoding:NSUTF8StringEncoding];
-    [anticipant appendBytes:[paddedStringData bytes] length:API_AnticipantDeviceNameLength];
+    {
+        paddedString =
+        [deviceName stringByPaddingToLength:API_AnticipantDeviceNameLength
+                                 withString:@"\0"
+                            startingAtIndex:0];
+        paddedStringData = [paddedString dataUsingEncoding:NSUTF8StringEncoding];
+        [anticipant appendBytes:[paddedStringData bytes]
+                         length:API_AnticipantDeviceNameLength];
+    }
 
-    paddedString = [deviceModel stringByPaddingToLength:API_AnticipantDeviceModelLength
-                                        withString:@"\0"
-                                   startingAtIndex:0];
-    paddedStringData = [paddedString dataUsingEncoding:NSUTF8StringEncoding];
-    [anticipant appendBytes:[paddedStringData bytes] length:API_AnticipantDeviceModelLength];
+    {
+        paddedString =
+        [deviceModel stringByPaddingToLength:API_AnticipantDeviceModelLength
+                                  withString:@"\0"
+                             startingAtIndex:0];
+        paddedStringData = [paddedString dataUsingEncoding:NSUTF8StringEncoding];
+        [anticipant appendBytes:[paddedStringData bytes]
+                         length:API_AnticipantDeviceModelLength];
+    }
 
-    paddedString = [systemName stringByPaddingToLength:API_AnticipantSystemNamelLength
-                                        withString:@"\0"
-                                   startingAtIndex:0];
-    paddedStringData = [paddedString dataUsingEncoding:NSUTF8StringEncoding];
-    [anticipant appendBytes:[paddedStringData bytes] length:API_AnticipantSystemNamelLength];
+    {
+        paddedString =
+        [systemName stringByPaddingToLength:API_AnticipantSystemNamelLength
+                                 withString:@"\0"
+                            startingAtIndex:0];
+        paddedStringData = [paddedString dataUsingEncoding:NSUTF8StringEncoding];
+        [anticipant appendBytes:[paddedStringData bytes]
+                         length:API_AnticipantSystemNamelLength];
+    }
 
-    paddedString = [systemVersion stringByPaddingToLength:API_AnticipantSystemVersionlLength
-                                        withString:@"\0"
-                                   startingAtIndex:0];
-    paddedStringData = [paddedString dataUsingEncoding:NSUTF8StringEncoding];
-    [anticipant appendBytes:[paddedStringData bytes] length:API_AnticipantSystemVersionlLength];
+    {
+        paddedString =
+        [systemVersion stringByPaddingToLength:API_AnticipantSystemVersionlLength
+                                    withString:@"\0"
+                               startingAtIndex:0];
+        paddedStringData = [paddedString dataUsingEncoding:NSUTF8StringEncoding];
+        [anticipant appendBytes:[paddedStringData bytes]
+                         length:API_AnticipantSystemVersionlLength];
+    }
 
     return anticipant;
 }
 
 - (void)processAnticipant:(NSMutableData *)anticipant
 {
-    if ([anticipant length] == API_TokenBinarySize) {
-        NSData* tokenData = [NSData dataWithBytesNoCopy:(char *)[anticipant bytes]
-                                                 length:API_TokenBinarySize
-                                           freeWhenDone:NO];
-        NSUUID *deviceToken = [[NSUUID alloc] initWithUUIDBytes:[tokenData bytes]];
+    if ([anticipant length] == API_TokenBinarySize)
+    {
+        NSData* tokenData =
+        [NSData dataWithBytesNoCopy:(char *)[anticipant bytes]
+                             length:API_TokenBinarySize
+                       freeWhenDone:NO];
+
+        NSUUID *deviceToken =
+        [[NSUUID alloc] initWithUUIDBytes:[tokenData bytes]];
+
         if (deviceToken != nil)
+        {
             [self setDeviceToken:deviceToken];
+        }
     }
 }
 
@@ -263,16 +294,20 @@
         case API_PaquetNotificationsToken:
         {
             UInt32 status = [paquet getUInt32];
-            if (status == API_PaquetNotificationsTokenAccepted) {
+            if (status == API_PaquetNotificationsTokenAccepted)
+            {
 #ifdef VERBOSE
-                NSLog(@"Notifications token accepted");
+                NSLog(@"[Authentificator] Notifications token accepted");
 #endif
                 NSData *notificationsToken = [paquet userInfo];
 
                 [self setNotificationsToken:notificationsToken];
-            } else {
+            }
+            else
+            {
 #ifdef VERBOSE
-                NSLog(@"Notifications token declined: 0x%08X", (unsigned int)status);
+                NSLog(@"[Authentificator] Notifications token declined: 0x%08X",
+                      (unsigned int) status);
 #endif
             }
             break;

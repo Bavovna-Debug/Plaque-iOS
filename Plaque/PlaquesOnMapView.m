@@ -1,7 +1,7 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import <MapKit/MapKit.h>
@@ -13,15 +13,13 @@
 #import "MainController.h"
 #import "Navigator.h"
 
-#ifdef DEBUG
-#define VERBOSE
-#endif
+#include "Definitions.h"
 
 @interface PlaquesOnMapView () <MKMapViewDelegate, PlaquesDelegate>
 
-@property (weak,   nonatomic) MainController *controller;
-@property (strong, nonatomic) NSLock *refreshLock;
-@property (strong, nonatomic) MKMapView *mapView;
+@property (weak,   nonatomic) MainController    *controller;
+@property (strong, nonatomic) NSLock            *refreshLock;
+@property (strong, nonatomic) MKMapView         *mapView;
 
 @end
 
@@ -37,7 +35,7 @@
     if (self == nil)
         return nil;
 
-    self.controller = (MainController *)controller;
+    self.controller = (MainController *) controller;
 
     self.refreshLock = [[NSLock alloc] init];
 
@@ -60,7 +58,8 @@
     [mapView setUserTrackingMode:MKUserTrackingModeFollowWithHeading];
 
     float systemVersion = [[[UIDevice currentDevice] systemVersion] floatValue];
-    if (systemVersion >= 7.0f) {
+    if (systemVersion >= 7.0f)
+    {
         [mapView setRotateEnabled:NO];
         [mapView setShowsBuildings:YES];
         [mapView setShowsPointsOfInterest:YES];
@@ -122,11 +121,13 @@
 
     for (Plaque *plaque in plaques.plaquesOnWorkdesk)
         [self refreshPlaqueAnnotation:plaque];
-/*
+
+/* TODO
     Plaque *currentPlaque = [plaques currentPlaque];
     if (currentPlaque != nil)
         [self refreshPlaqueAnnotation:currentPlaque];
 */
+
     [self.refreshLock unlock];
 }
 
@@ -145,11 +146,15 @@
 - (void)refreshPlaqueAnnotation:(Plaque *)plaque
 {
     PlaqueAnnotation *plaqueAnnotation = [self plaqueAnnotationByPlaque:plaque];
-    if (plaqueAnnotation == nil) {
+    if (plaqueAnnotation == nil)
+    {
         plaqueAnnotation = [[PlaqueAnnotation alloc] initWithPlaque:plaque];
         [self.mapView addAnnotation:plaqueAnnotation];
-    } else {
-        /*PlaqueAnnotation *annotation =  (PlaqueAnnotation *)plaque.presentationOnMap;
+    }
+    else
+    {
+        /* TODO
+        PlaqueAnnotation *annotation = (PlaqueAnnotation *) plaque.presentationOnMap;
         [self.mapView removeAnnotation:annotation];
         annotation.coordinate = plaque.coordinate;
         [self.mapView addAnnotation:annotation];*/
@@ -175,8 +180,9 @@
 {
     for (id<MKAnnotation>annotation in self.mapView.annotations)
     {
-        if ([annotation isKindOfClass:[PlaqueAnnotation class]]) {
-            PlaqueAnnotation *plaqueAnnotation = (PlaqueAnnotation *)annotation;
+        if ([annotation isKindOfClass:[PlaqueAnnotation class]])
+        {
+            PlaqueAnnotation *plaqueAnnotation = (PlaqueAnnotation *) annotation;
             if (plaqueAnnotation.plaque == plaque)
                 return plaqueAnnotation;
         }
@@ -192,11 +198,14 @@ didSelectAnnotationView:(MKAnnotationView *)view
 {
     Plaque *selectedPlaque;
 
-    PlaqueAnnotation *annotation = (PlaqueAnnotation *)view.annotation;
-    if ([annotation isKindOfClass:[PlaqueAnnotation class]]) {
+    PlaqueAnnotation *annotation = (PlaqueAnnotation *) view.annotation;
+    if ([annotation isKindOfClass:[PlaqueAnnotation class]])
+    {
         selectedPlaque = annotation.plaque;
         [[Plaques sharedPlaques] setCapturedPlaque:selectedPlaque];
-    } else {
+    }
+    else
+    {
         [[Plaques sharedPlaques] setCapturedPlaque:nil];
     }
 }
@@ -239,29 +248,42 @@ regionWillChangeAnimated:(BOOL)animated
 - (void)mapView:(MKMapView *)mapView
 regionDidChangeAnimated:(BOOL)animated
 {
-    if (centeredToUser == YES) {
+    if (centeredToUser == YES)
+    {
         MKCoordinateRegion region = mapView.region;
         if ((region.span.latitudeDelta < 0.1f) || (region.span.longitudeDelta < 0.1f))
             if (regionSet == NO)
                 regionSet = YES;
-        NSLog(@"REG %f %f %@", region.span.latitudeDelta, region.span.longitudeDelta, (regionSet==NO)?@"NO":@"YESSSSS");
+
+        NSLog(@"REG %f %f %@",
+              region.span.latitudeDelta,
+              region.span.longitudeDelta,
+              (regionSet == NO) ? @"NO" : @"YESSSSS");
     }
 }
 
 - (void)mapView:(MKMapView *)mapView
 didUpdateUserLocation:(MKUserLocation *)userLocation
 {
-    if (centeredToUser == NO) {
+    if (centeredToUser == NO)
+    {
         CLLocationCoordinate2D userCoordinate = userLocation.coordinate;
+
         MKCoordinateRegion completeRegion = //MKCoordinateRegionMakeWithDistance(userCoordinate, 1000.0f, 1000.0f);
             MKCoordinateRegionMake(userCoordinate, MKCoordinateSpanMake(0.005f, 0.005f));
+
         MKCoordinateRegion adjustedRegion = [self.mapView regionThatFits:completeRegion];
+
         [self.mapView setRegion:adjustedRegion animated:YES];
 
         centeredToUser = YES;
-    } else {
-        /*[self.mapView setCenterCoordinate:userLocation.coordinate
-                                 animated:YES];*/
+    }
+    else
+    {
+        /* TODO
+        [self.mapView setCenterCoordinate:userLocation.coordinate
+                                 animated:YES];
+        */
     }
 }
 
@@ -274,13 +296,17 @@ didUpdateUserLocation:(MKUserLocation *)userLocation
     if ([annotation isKindOfClass:[MKPointAnnotation class]])
         return nil;
 
-    if ([annotation isKindOfClass:[PlaqueAnnotation class]]) {
-        PlaqueAnnotation *plaqueAnnotation = (PlaqueAnnotation *)annotation;
+    if ([annotation isKindOfClass:[PlaqueAnnotation class]])
+    {
+        PlaqueAnnotation *plaqueAnnotation = (PlaqueAnnotation *) annotation;
+
         Plaque *plaque = [plaqueAnnotation plaque];
 
         NSString* AnnotationIdentifier = [[plaque plaqueToken] UUIDString];
+
         MKAnnotationView *annotationView = [mapView dequeueReusableAnnotationViewWithIdentifier:AnnotationIdentifier];
-        if (annotationView == nil) {
+        if (annotationView == nil)
+        {
             annotationView = [[MKAnnotationView alloc] initWithAnnotation:annotation
                                                           reuseIdentifier:AnnotationIdentifier];
         }
@@ -288,7 +314,8 @@ didUpdateUserLocation:(MKUserLocation *)userLocation
         [plaqueAnnotation createLayer];
         CALayer *annotationLayer = [plaqueAnnotation annotationLayer];
 
-        if (annotationLayer != nil) {
+        if (annotationLayer != nil)
+        {
             [annotationView.layer addSublayer:annotationLayer];
             /*        annotationView.image = [UIImage imageNamed:@"Annotation"];
              UIButton* rightButton = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
@@ -299,10 +326,14 @@ didUpdateUserLocation:(MKUserLocation *)userLocation
              annotationView.canShowCallout = YES;
              annotationView.draggable = YES;*/
             return annotationView;
-        } else {
+        }
+        else
+        {
             return nil;
         }
-    } else {
+    }
+    else
+    {
         return nil;
     }
 }
@@ -322,6 +353,7 @@ didAddAnnotationViews:(NSArray *)views
             continue;
 
         MKPointAnnotation *pointAnnotation = annotation;
+ 
         NSLog(@"ANNOT: %@", pointAnnotation.title);
     }
 }

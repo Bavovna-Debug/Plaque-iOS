@@ -1,7 +1,7 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import "EditModeDirectionSubview.h"
@@ -10,11 +10,12 @@
 
 @interface EditModeDirectionSubview ()
 
-@property (weak,   nonatomic) Plaque *plaque;
-@property (strong, nonatomic) CALayer *plaqueLayer;
-@property (strong, nonatomic) UIView *touchPad;
-@property (assign, nonatomic) Boolean moving;
-@property (strong, nonatomic) NSTimer *touchPadTimer;
+@property (weak,   nonatomic) CLLocationManager *locationManager;
+@property (weak,   nonatomic) Plaque            *plaque;
+@property (strong, nonatomic) CALayer           *plaqueLayer;
+@property (strong, nonatomic) UIView            *touchPad;
+@property (assign, nonatomic) Boolean           moving;
+@property (strong, nonatomic) NSTimer           *touchPadTimer;
 
 @end
 
@@ -23,13 +24,19 @@
     CGFloat changeDirectionPerTimerTick;
 }
 
-- (id)init
+- (id)initWithLocationManager:(CLLocationManager *)locationManager
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
+
+    self.locationManager = locationManager;
 
     self.plaque = [[Plaques sharedPlaques] plaqueUnderEdit];
+
+    self.moving = NO;
 
     return self;
 }
@@ -38,9 +45,16 @@
 {
     [super didMoveToSuperview];
 
-    if (self.superview != nil) {
+    if (self.superview != nil)
+    {
         [self preparePanel];
-    } else {
+
+        [self.locationManager setDelegate:self];
+    }
+    else
+    {
+        [self.locationManager setDelegate:nil];
+
         [self destroyPanel];
     }
 }
@@ -53,10 +67,11 @@
     [self addSubview:backgroundView];
 
     CGRect bounds = self.bounds;
-    CGRect touchPadFrame = CGRectMake(CGRectGetMinX(bounds) + 30.0f,
-                                      CGRectGetMaxY(bounds) - 90.0f,
-                                      310.0f,
-                                      90.0f);
+    CGRect touchPadFrame =
+    CGRectMake(CGRectGetMinX(bounds) + 30.0f,
+               CGRectGetMaxY(bounds) - 90.0f,
+               310.0f,
+               90.0f);
 
 
     UIView *touchPad = [[UIView alloc] initWithFrame:touchPadFrame];
@@ -86,7 +101,9 @@
 {
     NSTimer *touchPadTimer = self.touchPadTimer;
     if (touchPadTimer != nil)
+    {
         [touchPadTimer invalidate];
+    }
 }
 
 - (void)recalculateTiltParameters:(CGPoint)fingerPoint
@@ -109,7 +126,7 @@
 
         plaqueDirection = nearbyintf(plaqueDirection);
 
-        plaqueDirection = correctDegrees(plaqueDirection);
+        plaqueDirection = CorrectDegrees(plaqueDirection);
 
         [self.plaque setDirection:plaqueDirection];
 
@@ -121,12 +138,19 @@
            withEvent:(UIEvent *)event
 {
     UITouch *touch = [touches anyObject];
+
     CGPoint point = [touch locationInView:[touch view]];
+
     point = [[touch view] convertPoint:point toView:self];
-    if (CGRectContainsPoint(self.touchPad.frame, point) == YES) {
+
+    if (CGRectContainsPoint(self.touchPad.frame, point) == YES)
+    {
         point = [touch locationInView:self.touchPad];
+
         [self recalculateTiltParameters:point];
+
         self.moving = YES;
+
         [self.touchPadTimer fire];
     }
 }
@@ -147,12 +171,19 @@
            withEvent:(UIEvent *)event
 {
     UITouch *touch = [touches anyObject];
+
     CGPoint point = [touch locationInView:[touch view]];
+
     point = [[touch view] convertPoint:point toView:self];
-    if (CGRectContainsPoint(self.touchPad.frame, point) == YES) {
+
+    if (CGRectContainsPoint(self.touchPad.frame, point) == YES)
+    {
         point = [touch locationInView:self.touchPad];
+
         [self recalculateTiltParameters:point];
-    } else {
+    }
+    else
+    {
         self.moving = NO;
     }
 }
@@ -163,12 +194,12 @@
     CGFloat direction = [self.plaque direction];
     CGFloat tilt = [self.plaque tilt];
 
-    direction = correctDegrees(direction - oppositeDirection(heading.trueHeading));
+    direction = CorrectDegrees(direction - OppositeDirection(heading.trueHeading));
 
     CATransform3D transform = CATransform3DIdentity;
     transform.m34 = -1.0f / 500.0f;
-    transform = CATransform3DRotate(transform, degreesToRadians(direction), 0, -1, 0);
-    transform = CATransform3DRotate(transform, degreesToRadians(tilt), 1, 0, 0);
+    transform = CATransform3DRotate(transform, DegreesToRadians(direction), 0, -1, 0);
+    transform = CATransform3DRotate(transform, DegreesToRadians(tilt), 1, 0, 0);
 
     [self.plaqueLayer setTransform:transform];
 }

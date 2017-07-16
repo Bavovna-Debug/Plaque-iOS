@@ -1,7 +1,7 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import "EditModeCoordinateSubview.h"
@@ -11,29 +11,36 @@
 
 @interface EditModeCoordinateSubview ()
 
-@property (weak,   nonatomic) Plaque *plaque;
-@property (strong, nonatomic) UILabel *latitudeValue;
-@property (strong, nonatomic) UILabel *longitudeValue;
-@property (strong, nonatomic) UILabel *distanceValue;
-@property (strong, nonatomic) UIView *touchPad;
-@property (assign, nonatomic) Boolean moving;
-@property (strong, nonatomic) NSTimer *touchPadTimer;
+@property (weak,   nonatomic) CLLocationManager *locationManager;
+@property (weak,   nonatomic) Plaque            *plaque;
+@property (strong, nonatomic) UILabel           *latitudeValue;
+@property (strong, nonatomic) UILabel           *longitudeValue;
+@property (strong, nonatomic) UILabel           *distanceValue;
+@property (strong, nonatomic) UIView            *touchPad;
+@property (assign, nonatomic) Boolean           moving;
+@property (strong, nonatomic) NSTimer           *touchPadTimer;
 
 @end
 
 @implementation EditModeCoordinateSubview
 {
-    CLLocationDegrees shiftDirectionOnPad;
-    CLLocationDistance shiftDistancePerTimerTick;
+    CLLocationDegrees   shiftDirectionOnPad;
+    CLLocationDistance  shiftDistancePerTimerTick;
 }
 
-- (id)init
+- (id)initWithLocationManager:(CLLocationManager *)locationManager
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
+
+    self.locationManager = locationManager;
 
     self.plaque = [[Plaques sharedPlaques] plaqueUnderEdit];
+
+    self.moving = NO;
 
     return self;
 }
@@ -42,9 +49,16 @@
 {
     [super didMoveToSuperview];
 
-    if (self.superview != nil) {
+    if (self.superview != nil)
+    {
         [self preparePanel];
-    } else {
+
+        [self.locationManager setDelegate:self];
+    }
+    else
+    {
+        [self.locationManager setDelegate:nil];
+
         [self destroyPanel];
     }
 }
@@ -57,12 +71,23 @@
     [self addSubview:backgroundView];
 
     CGRect bounds = self.bounds;
-    CGRect latitudeValueFrame = CGRectMake(22.0f, 21.0f, 94.0f, 20.0f);
-    CGRect longitudeValueFrame = CGRectOffset(latitudeValueFrame, 0.0f, 20.0f);
-    CGRect touchPadFrame = CGRectMake(CGRectGetMaxX(bounds) - CGRectGetHeight(bounds),
-                                      CGRectGetMinY(bounds),
-                                      CGRectGetHeight(bounds),
-                                      CGRectGetHeight(bounds));
+
+    CGRect latitudeValueFrame =
+    CGRectMake(22.0f,
+               21.0f,
+               94.0f,
+               20.0f);
+
+    CGRect longitudeValueFrame =
+    CGRectOffset(latitudeValueFrame,
+                 0.0f,
+                 20.0f);
+
+    CGRect touchPadFrame =
+    CGRectMake(CGRectGetMaxX(bounds) - CGRectGetHeight(bounds),
+               CGRectGetMinY(bounds),
+               CGRectGetHeight(bounds),
+               CGRectGetHeight(bounds));
 
     UILabel *latitudeValue = [[UILabel alloc] init];
     [latitudeValue setFrame:latitudeValueFrame];
@@ -88,9 +113,9 @@
     [distanceValue setBackgroundColor:[UIColor clearColor]];
     [distanceValue setTextColor:[UIColor darkTextColor]];
 
-    CGFloat rotateX = degreesToRadians(50.0f);
-    CGFloat rotateY = degreesToRadians(30.0f);
-    CGFloat rotateZ = degreesToRadians(40.0f);
+    CGFloat rotateX = DegreesToRadians(50.0f);
+    CGFloat rotateY = DegreesToRadians(30.0f);
+    CGFloat rotateZ = DegreesToRadians(40.0f);
     CATransform3D transform = CATransform3DIdentity;
     transform.m34 = -1.0f / 250.0f;
     transform = CATransform3DRotate(transform, rotateX, 1, 0, 0);
@@ -124,18 +149,24 @@
 {
     NSTimer *touchPadTimer = self.touchPadTimer;
     if (touchPadTimer != nil)
+    {
         [touchPadTimer invalidate];
+    }
 }
 
 - (void)recalculateMoveParameters:(CGPoint)fingerPoint
 {
     CGRect padBounds = self.touchPad.bounds;
-    CGPoint padCenter = CGPointMake(CGRectGetMidX(padBounds),
-                                    CGRectGetMidY(padBounds));
-    CGVector moveVector = CGVectorMake(fingerPoint.x - padCenter.x,
-                                       fingerPoint.y - padCenter.y);
 
-    shiftDirectionOnPad = correctDegrees(radiandsToDegrees(atan2f(moveVector.dy, moveVector.dx)) + 90.0f);
+    CGPoint padCenter =
+    CGPointMake(CGRectGetMidX(padBounds),
+                CGRectGetMidY(padBounds));
+
+    CGVector moveVector =
+    CGVectorMake(fingerPoint.x - padCenter.x,
+                 fingerPoint.y - padCenter.y);
+
+    shiftDirectionOnPad = CorrectDegrees(RadiandsToDegrees(atan2f(moveVector.dy, moveVector.dx)) + 90.0f);
     shiftDistancePerTimerTick = sqrtf(powf(moveVector.dx, 2) + powf(moveVector.dy, 2)) / padCenter.x;
     shiftDistancePerTimerTick *=  2.0f;
 }
@@ -148,9 +179,10 @@
 
         CLLocationDegrees shiftDirectionInWorld = shiftDirectionOnPad;
 
-        if ([[SurroundingSelector panel] surroundingViewMode] == SurroundingInSight) {
+        if ([[SurroundingSelector panel] surroundingViewMode] == SurroundingInSight)
+        {
             CLLocationDirection userHeading = [[self.locationManager heading] trueHeading];
-            shiftDirectionInWorld = correctDegrees(shiftDirectionInWorld + userHeading);
+            shiftDirectionInWorld = CorrectDegrees(shiftDirectionInWorld + userHeading);
         }
 
         plaqueCoordinate = [Navigator shift:plaqueCoordinate
@@ -167,12 +199,19 @@
            withEvent:(UIEvent *)event
 {
     UITouch *touch = [touches anyObject];
+
     CGPoint point = [touch locationInView:[touch view]];
+
     point = [[touch view] convertPoint:point toView:self];
-    if (CGRectContainsPoint(self.touchPad.frame, point) == YES) {
+
+    if (CGRectContainsPoint(self.touchPad.frame, point) == YES)
+    {
         point = [touch locationInView:self.touchPad];
+
         [self recalculateMoveParameters:point];
+
         self.moving = YES;
+
         [self.touchPadTimer fire];
     }
 }
@@ -193,12 +232,19 @@
            withEvent:(UIEvent *)event
 {
     UITouch *touch = [touches anyObject];
+
     CGPoint point = [touch locationInView:[touch view]];
+
     point = [[touch view] convertPoint:point toView:self];
-    if (CGRectContainsPoint(self.touchPad.frame, point) == YES) {
+
+    if (CGRectContainsPoint(self.touchPad.frame, point) == YES)
+    {
         point = [touch locationInView:self.touchPad];
+        
         [self recalculateMoveParameters:point];
-    } else {
+    }
+    else
+    {
         self.moving = NO;
     }
 }

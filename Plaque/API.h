@@ -1,11 +1,14 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #ifndef __API__
 #define __API__
+
+#define TCP_PORT_NUMBER_IPV4                        12004
+#define TCP_PORT_NUMBER_IPV6                        12006
 
 #define API_DialogueSignature						0xC2D6D5D1D6E4D900
 

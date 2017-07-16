@@ -1,12 +1,17 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import "Servers.h"
 
+#include "API.h"
+
 @implementation Servers
+{
+    unsigned int currentServerNumber;
+}
 
 + (Servers *)sharedServers
 {
@@ -21,18 +26,46 @@
     return servers;
 }
 
+- (id)init
+{
+    self = [super init];
+    if (self == nil)
+    {
+        return nil;
+    }
+
+    currentServerNumber = 0;
+
+    return self;
+}
+
 - (NSString *)serverAddress
 {
-    return @"144.76.27.237";
+    if ((currentServerNumber % 2) == 0)
+    {
+        return @"144.76.27.237";
+    }
+    else
+    {
+        return @"2a01:4f8:191:13ec::2";
+    }
 }
 
 - (UInt32)serverPort
 {
-    return 12000;
+    if ((currentServerNumber % 2) == 0)
+    {
+        return TCP_PORT_NUMBER_IPV4;
+    }
+    else
+    {
+        return TCP_PORT_NUMBER_IPV6;
+    }
 }
 
 - (void)nextServer
 {
+    currentServerNumber++;
 }
 
 @end

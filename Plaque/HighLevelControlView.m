@@ -1,15 +1,14 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import "ApplicationDelegate.h"
 #import "HighLevelControlView.h"
 #import "TapMenu.h"
 
-#define AnimationDurationOpen        0.4f
-#define AnimationDurationClose       0.4f
+#include "Definitions.h"
 
 @interface HighLevelControlView () <TapMenuDelegate>
 
@@ -41,23 +40,27 @@
                           options:0
                           metrics:nil
                           views:viewsDictionary]];
+
     [self addConstraints:[NSLayoutConstraint
                           constraintsWithVisualFormat:@"V:[tapMenu]-0-|"
                           options:0
                           metrics:nil
                           views:viewsDictionary]];
+
 /*
     [self addConstraints:[NSLayoutConstraint
                           constraintsWithVisualFormat:@"H:[surroundingSelector(140)]-0-|"
                           options:NSLayoutFormatAlignAllBaseline
                           metrics:nil
                           views:viewsDictionary]];
+
     [self addConstraints:[NSLayoutConstraint
                           constraintsWithVisualFormat:@"V:[surroundingSelector(64)]-0-|"
                           options:NSLayoutFormatAlignAllBaseline
                           metrics:nil
                           views:viewsDictionary]];
 */
+
     [self openViewModePanel];
 
     [self switchTapMenuToMain];
@@ -72,12 +75,14 @@
     [self.tapMenu addItemWithIconName:@"TapMenuMainCreateNewPlaque"
                               command:TapMenuMainCreateNewPlaque
                             rowNumber:0];
+
     [self.tapMenu addItemWithIconName:@"ViewModeOnMap"
                               command:TapMenuMainProfile
                             rowNumber:0];
-    [self.tapMenu addItemWithIconName:@"ViewModeOnMap"
+
+    /*[self.tapMenu addItemWithIconName:@"ViewModeOnMap"
                               command:TapMenuViewOnRadar
-                            rowNumber:0];
+                            rowNumber:0];*/
 }
 
 - (void)openViewModePanel
@@ -85,7 +90,7 @@
 /*
     [UIView beginAnimations:nil
                     context:nil];
-    [UIView setAnimationDuration:AnimationDurationOpen];
+    [UIView setAnimationDuration:HighLevelAnimationDurationOpen];
 
     [self.surroundingSelector setHidden:NO];
 
@@ -103,7 +108,7 @@
 /*
     [UIView beginAnimations:nil
                     context:nil];
-    [UIView setAnimationDuration:AnimationDurationClose];
+    [UIView setAnimationDuration:HighLevelAnimationDurationClose];
 
     [self.surroundingSelector setHidden:YES];
 
@@ -126,12 +131,16 @@
         {
             ApplicationDelegate *application = (ApplicationDelegate *)[[UIApplication sharedApplication] delegate];
             [application openProfileForm];
+
             break;
         }
 
         case TapMenuMainCreateNewPlaque:
+        {
             [self.controller createNewPlaquePressed];
+
             break;
+        }
 
         default:
             break;

@@ -1,28 +1,18 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import "Settings.h"
 
-#ifdef DEBUG
-#define TapMenuOnlyIconsKey         @"TapMenuOnlyIcons"
-#define LastOwnObjectIdKey          @"LastOwnObjectId"
-/*
-#define OnRadarRevisionKey          @"OnRadarRevision2"
-#define InSightRevisionKey          @"InSightRevision2"
-#define OnMapRevisionKey            @"OnMapRevision2"
-*/
-#else
-#define TapMenuOnlyIconsKey         @"TapMenuOnlyIcons"
-#define LastOwnObjectIdKey          @"LastOwnObjectId"
-/*
-#define OnRadarRevisionKey          @"OnRadarRevision"
-#define InSightRevisionKey          @"InSightRevision"
-#define OnMapRevisionKey            @"OnMapRevision"
-*/
-#endif
+#include "Definitions.h"
+
+@interface Settings ()
+
+@property (assign, atomic, readwrite) NSUInteger lastOwnObjectId;
+
+@end
 
 @implementation Settings
 {
@@ -46,7 +36,9 @@
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
 
     defaults = [NSUserDefaults standardUserDefaults];
 
@@ -56,6 +48,7 @@
 - (Boolean)tapMenuOnlyIcons
 {
     Boolean tapMenuOnlyIcons = [defaults boolForKey:TapMenuOnlyIconsKey];
+
     return tapMenuOnlyIcons;
 }
 
@@ -77,10 +70,15 @@
     return lastOwnObjectId;
 }
 
+- (void)setLastOwnObjectId:(NSUInteger)lastOwnObjectId
+{
+}
+
 /*
 - (UInt32)radarOnRadarRevision
 {
     UInt32 radarOnRadarRevision = (UInt32)[defaults integerForKey:OnRadarRevisionKey];
+
     return radarOnRadarRevision;
 }
 
@@ -93,6 +91,7 @@
 - (UInt32)radarInSightRevision
 {
     UInt32 radarInSightRevision = (UInt32)[defaults integerForKey:InSightRevisionKey];
+
     return radarInSightRevision;
 }
 
@@ -105,6 +104,7 @@
 - (UInt32)radarOnMapRevision
 {
     UInt32 radarOnMapRevision = (UInt32)[defaults integerForKey:OnMapRevisionKey];
+ 
     return radarOnMapRevision;
 }
 

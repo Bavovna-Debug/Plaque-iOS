@@ -1,7 +1,7 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import "Paquet.h"
@@ -10,8 +10,7 @@
 #import "XML.h"
 
 #include "API.h"
-
-#define ProfileNameValidateInterval 2.0f
+#include "Definitions.h"
 
 @interface ProfileViewController () <UITableViewDataSource, UITableViewDelegate, PaquetSenderDelegate>
 
@@ -44,7 +43,9 @@
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
 
     [self setModalTransitionStyle:UIModalTransitionStyleCrossDissolve];
     [self setModalPresentationStyle:UIModalPresentationOverCurrentContext];
@@ -58,13 +59,15 @@
 {
     [super viewDidLoad];
 
-    [self.view setBackgroundColor:[UIColor colorWithWhite:0.4f alpha:0.4f]];
+    [self.view setBackgroundColor:[UIColor colorWithWhite:0.4f
+                                                    alpha:0.4f]];
 }
 
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-/*
+
+#if 0
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(keyboardWillShow)
                                                  name:UIKeyboardWillShowNotification
@@ -74,13 +77,14 @@
                                              selector:@selector(keyboardWillHide)
                                                  name:UIKeyboardWillHideNotification
                                                object:nil];
-*/
+#endif
 }
 
 - (void)viewDidDisappear:(BOOL)animated
 {
     [super viewDidDisappear:animated];
-/*
+
+#if 0
     [[NSNotificationCenter defaultCenter] removeObserver:self
                                                     name:UIKeyboardWillShowNotification
                                                   object:nil];
@@ -88,22 +92,25 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self
                                                     name:UIKeyboardWillHideNotification
                                                   object:nil];
-*/
+#endif
 }
 
 - (void)viewDidLayoutSubviews
 {
     [super viewDidLayoutSubviews];
 
-    if (didLayoutSubviews == NO) {
+    if (didLayoutSubviews == NO)
+    {
         self.cells = [NSMutableArray array];
 
-        [self.cells addObject:[self paddingCell:(UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) ? 40.0f : 100.0f]];
+        [self.cells addObject:[self paddingCell:
+                               (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) ? 40.0f : 100.0f]];
         [self.cells addObject:[self buttonsCell]];
         [self.cells addObject:[self profileNameCell]];
         //[self.cells addObject:[self userFullNameCell]];
         //[self.cells addObject:[self passwordCell]];
-        [self.cells addObject:[self paddingCell:(UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) ? 216.0f : 264.0f]];
+        [self.cells addObject:[self paddingCell:
+                               (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) ? 216.0f : 264.0f]];
         
         [self setupMainView];
         [self setupTableView];
@@ -115,29 +122,29 @@
 - (void)setupMainView
 {
     [self.view setBackgroundColor:[UIColor clearColor]];
-/*
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) 
+    {
         [self.view setBackgroundColor:[UIColor clearColor]];
-    } else {
+    } 
+    else 
+    {
         [self.view setBackgroundColor:[UIColor colorWithRed:0.784f green:0.784f blue:0.784f alpha:0.750f]];
     }
+
     [self.view.layer setBorderWidth:2.0f];
     [self.view.layer setBorderColor:[[UIColor colorWithRed:0.416f green:0.416f blue:0.416f alpha:0.9f] CGColor]];
     [self.view.layer setCornerRadius:4.0f];
-*/
 }
 
 - (void)setupTableView
 {
     self.tableView = [[UITableView alloc] initWithFrame:CGRectInset(self.view.bounds, 5.0f, 5.0f)
                                                   style:UITableViewStylePlain];
+
     [self.tableView setBackgroundColor:[UIColor clearColor]];
     [self.tableView setSeparatorStyle:UITableViewCellSeparatorStyleNone];
-
-    float systemVersion = [[[UIDevice currentDevice] systemVersion] floatValue];
-    if (systemVersion >= 7.0f) {
-        [self.tableView setKeyboardDismissMode:UIScrollViewKeyboardDismissModeOnDrag];
-    }
+    [self.tableView setKeyboardDismissMode:UIScrollViewKeyboardDismissModeOnDrag];
 
     [self.tableView setDataSource:self];
     [self.tableView setDelegate:self];
@@ -147,10 +154,19 @@
 
 - (UIView *)paddingCell:(CGFloat)paddingHeight
 {
-    CGRect cellViewFrame = CGRectMake(0.0f, 0.0f, 280.0f, paddingHeight);
-    cellViewFrame = CGRectOffset(cellViewFrame, (CGRectGetWidth(self.view.bounds) - CGRectGetWidth(cellViewFrame)) / 2, 0.0f);
+    CGRect cellViewFrame =
+    CGRectMake(0.0f,
+               0.0f,
+               280.0f,
+               paddingHeight);
+
+    cellViewFrame =
+    CGRectOffset(cellViewFrame,
+                 (CGRectGetWidth(self.view.bounds) - CGRectGetWidth(cellViewFrame)) / 2,
+                 0.0f);
 
     UIView *paddingView = [[UIView alloc] initWithFrame:cellViewFrame];
+
     return paddingView;
 }
 
@@ -158,34 +174,43 @@
 {
     CGFloat dataViewWidth = 290.0f;
 
-    CGRect cellViewFrame = CGRectMake(0.0f, 0.0f, CGRectGetWidth(self.view.bounds), 64.0f);
+    CGRect cellViewFrame =
+    CGRectMake(0.0f,
+               0.0f,
+               CGRectGetWidth(self.view.bounds),
+               64.0f);
 
     UIView *cellView = [[UIView alloc] init];
     [cellView setFrame:cellViewFrame];
     [cellView setBackgroundColor:[UIColor clearColor]];
 
-    CGRect dataViewFrame = CGRectMake((CGRectGetWidth(cellViewFrame) - dataViewWidth) / 2,
-                                      4.0f,
-                                      dataViewWidth,
-                                      CGRectGetHeight(cellViewFrame) - 8.0f);
+    CGRect dataViewFrame =
+    CGRectMake((CGRectGetWidth(cellViewFrame) - dataViewWidth) / 2,
+               4.0f,
+               dataViewWidth,
+               CGRectGetHeight(cellViewFrame) - 8.0f);
 
     UIView *dataView = [[UIView alloc] init];
     [dataView setFrame:dataViewFrame];
-    [dataView setBackgroundColor:[UIColor colorWithWhite:0.2f alpha:0.8f]];
+    [dataView setBackgroundColor:[UIColor colorWithWhite:0.2f
+                                                   alpha:0.8f]];
     [dataView.layer setCornerRadius:4.0f];
     [cellView addSubview:dataView];
 
     NSString *cancelButtonText = NSLocalizedString(@"PROFILE_FORM_CANCEL_BUTTON", nil);
     NSString *submitButtonText = NSLocalizedString(@"PROFILE_FORM_SUBMIT_BUTTON", nil);
 
-    CGRect cancelButtonRect = CGRectMake(0.0f,
-                                         0.0f,
-                                         100.0f,
-                                         CGRectGetHeight(dataViewFrame));
-    CGRect submitButtonRect = CGRectMake(CGRectGetWidth(dataViewFrame) - 100.0f,
-                                         0.0f,
-                                         100.0f,
-                                         CGRectGetHeight(dataViewFrame));
+    CGRect cancelButtonRect =
+    CGRectMake(0.0f,
+               0.0f,
+               120.0f,
+               CGRectGetHeight(dataViewFrame));
+
+    CGRect submitButtonRect =
+    CGRectMake(CGRectGetWidth(dataViewFrame) - 120.0f,
+               0.0f,
+               120.0f,
+               CGRectGetHeight(dataViewFrame));
 
     UIButton *cancelButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [cancelButton setFrame:cancelButtonRect];
@@ -216,20 +241,26 @@
 {
     CGFloat dataViewWidth = 290.0f;
 
-    CGRect cellViewFrame = CGRectMake(0.0f, 0.0f, CGRectGetWidth(self.view.bounds), 160.0f);
+    CGRect cellViewFrame =
+    CGRectMake(0.0f,
+               0.0f,
+               CGRectGetWidth(self.view.bounds),
+               160.0f);
 
     UIView *cellView = [[UIView alloc] init];
     [cellView setFrame:cellViewFrame];
     [cellView setBackgroundColor:[UIColor clearColor]];
 
-    CGRect dataViewFrame = CGRectMake((CGRectGetWidth(cellViewFrame) - dataViewWidth) / 2,
-                                      4.0f,
-                                      dataViewWidth,
-                                      CGRectGetHeight(cellViewFrame) - 8.0f);
+    CGRect dataViewFrame =
+    CGRectMake((CGRectGetWidth(cellViewFrame) - dataViewWidth) / 2,
+               4.0f,
+               dataViewWidth,
+               CGRectGetHeight(cellViewFrame) - 8.0f);
 
     UIView *dataView = [[UIView alloc] init];
     [dataView setFrame:dataViewFrame];
-    [dataView setBackgroundColor:[UIColor colorWithWhite:0.2f alpha:0.8f]];
+    [dataView setBackgroundColor:[UIColor colorWithWhite:0.2f
+                                                   alpha:0.8f]];
     [dataView.layer setCornerRadius:4.0f];
     [cellView addSubview:dataView];
 
@@ -251,26 +282,48 @@
     labelTextSize = CGSizeMake(ceilf(labelTextSize.width), ceilf(labelTextSize.height));
 
     labelTextSize.width += margin.width * 2;
-    CGRect validatorRect = CGRectMake(0.0f, 00.0f, CGRectGetWidth(cellViewFrame), 40.0f);
-    CGRect labelRect = CGRectMake(0.0f, 40.0f, labelTextSize.width, 32.0f);
-    CGRect fieldRect = CGRectMake(labelTextSize.width,
-                                  32.0f,
-                                  CGRectGetWidth(dataViewFrame) - CGRectGetMaxX(labelRect),
-                                  40.0f);
-    CGRect helpRect = CGRectMake(0.0f,
-                                 CGRectGetMaxY(labelRect),
-                                 CGRectGetWidth(dataViewFrame),
-                                 CGRectGetMaxY(dataViewFrame) - CGRectGetMaxY(labelRect));
-    NSLog(@"%@ %@ %@", NSStringFromCGRect(labelRect), NSStringFromCGRect(fieldRect), NSStringFromCGRect(helpRect));
 
-    UILabel *label = [[UILabel alloc] initWithFrame:CGRectInset(labelRect, margin.width, margin.height)];
+    CGRect validatorRect =
+    CGRectMake(0.0f,
+               0.0f,
+               CGRectGetWidth(cellViewFrame),
+               40.0f);
+
+    CGRect labelRect =
+    CGRectMake(0.0f,
+               40.0f,
+               labelTextSize.width,
+               32.0f);
+
+    CGRect fieldRect =
+    CGRectMake(labelTextSize.width,
+               32.0f,
+               CGRectGetWidth(dataViewFrame) - CGRectGetMaxX(labelRect),
+               40.0f);
+
+    CGRect helpRect =
+    CGRectMake(0.0f,
+               CGRectGetMaxY(labelRect),
+               CGRectGetWidth(dataViewFrame),
+               CGRectGetMaxY(dataViewFrame) - CGRectGetMaxY(labelRect));
+
+    NSLog(@"[ProfileViewController] %@ %@ %@",
+          NSStringFromCGRect(labelRect),
+          NSStringFromCGRect(fieldRect),
+          NSStringFromCGRect(helpRect));
+
+    UILabel *label = [[UILabel alloc] initWithFrame:CGRectInset(labelRect,
+                                                                margin.width,
+                                                                margin.height)];
     [label setBackgroundColor:[UIColor clearColor]];
     [label setTextColor:labelTextColor];
     [label setFont:labelFont];
     [label setText:profileNameLabelText];
     [dataView addSubview:label];
 
-    UITextField *field = [[UITextField alloc] initWithFrame:CGRectInset(fieldRect, margin.width, margin.height)];
+    UITextField *field = [[UITextField alloc] initWithFrame:CGRectInset(fieldRect,
+                                                                        margin.width,
+                                                                        margin.height)];
     [field setInputAccessoryView:self.inputView];
     [field setBorderStyle:UITextBorderStyleRoundedRect];
     [field setFont:fieldFont];
@@ -285,18 +338,25 @@
     forControlEvents:UIControlEventEditingChanged];
     [dataView addSubview:field];
 
-    UIActivityIndicatorView *indicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
-    [indicator setCenter:CGPointMake(CGRectGetMidX(dataViewFrame), CGRectGetMidY(dataViewFrame))];
+    UIActivityIndicatorView *indicator =
+    [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
+    [indicator setCenter:CGPointMake(CGRectGetMidX(dataViewFrame),
+                                     CGRectGetMidY(dataViewFrame))];
     [dataView addSubview:indicator];
 
-    UILabel *validationMessageLabel = [[UILabel alloc] initWithFrame:CGRectInset(validatorRect, margin.width, margin.height)];
+    UILabel *validationMessageLabel =
+    [[UILabel alloc] initWithFrame:CGRectInset(validatorRect,
+                                               margin.width,
+                                               margin.height)];
     [validationMessageLabel setBackgroundColor:[UIColor clearColor]];
     [validationMessageLabel setTextColor:labelTextColor];
     [validationMessageLabel setFont:validatorFont];
     [validationMessageLabel setText:@""];
     [dataView addSubview:validationMessageLabel];
 
-    UILabel *help = [[UILabel alloc] initWithFrame:CGRectInset(helpRect, margin.width, margin.height)];
+    UILabel *help = [[UILabel alloc] initWithFrame:CGRectInset(helpRect,
+                                                               margin.width,
+                                                               margin.height)];
     [help setBackgroundColor:[UIColor clearColor]];
     [help setTextColor:helpTextColor];
     [help setLineBreakMode:NSLineBreakByWordWrapping];
@@ -316,16 +376,21 @@
 {
     CGFloat dataViewWidth = 300.0f;
 
-    CGRect cellViewFrame = CGRectMake(0.0f, 0.0f, CGRectGetWidth(self.view.bounds), 120.0f);
+    CGRect cellViewFrame =
+    CGRectMake(0.0f,
+               0.0f,
+               CGRectGetWidth(self.view.bounds),
+               120.0f);
 
     UIView *cellView = [[UIView alloc] init];
     [cellView setFrame:cellViewFrame];
     [cellView setBackgroundColor:[UIColor clearColor]];
 
-    CGRect dataViewFrame = CGRectMake((CGRectGetWidth(cellViewFrame) - dataViewWidth) / 2,
-                                      4.0f,
-                                      dataViewWidth,
-                                      CGRectGetHeight(cellViewFrame) - 8.0f);
+    CGRect dataViewFrame =
+    CGRectMake((CGRectGetWidth(cellViewFrame) - dataViewWidth) / 2,
+               4.0f,
+               dataViewWidth,
+               CGRectGetHeight(cellViewFrame) - 8.0f);
 
     UIView *dataView = [[UIView alloc] init];
     [dataView setFrame:dataViewFrame];
@@ -343,25 +408,35 @@
     UIFont *labelFont = [UIFont systemFontOfSize:15.0f];
     UIFont *fieldFont = [UIFont systemFontOfSize:15.0f];
 
-    CGSize labelTextSize = [userFullNameLabelText sizeWithAttributes:
-                            @{NSFontAttributeName:labelFont}];
-    labelTextSize = CGSizeMake(ceilf(labelTextSize.width), ceilf(labelTextSize.height));
+    CGSize labelTextSize = [userFullNameLabelText sizeWithAttributes:@{NSFontAttributeName:labelFont}];
+    labelTextSize = CGSizeMake(ceilf(labelTextSize.width),
+                               ceilf(labelTextSize.height));
     labelTextSize.width += 8.0f;
 
-    CGRect labelRect = CGRectMake(8.0f, 8.0f, labelTextSize.width, 32.0f);
-    CGRect fieldRect = CGRectMake(labelTextSize.width,
-                                  8.0f,
-                                  CGRectGetWidth(dataViewFrame) - CGRectGetMaxX(labelRect),
-                                  32.0f);
+    CGRect labelRect =
+    CGRectMake(8.0f,
+               8.0f,
+               labelTextSize.width,
+               32.0f);
 
-    UILabel *label = [[UILabel alloc] initWithFrame:CGRectInset(labelRect, margin.width, margin.height)];
+    CGRect fieldRect =
+    CGRectMake(labelTextSize.width,
+               8.0f,
+               CGRectGetWidth(dataViewFrame) - CGRectGetMaxX(labelRect),
+               32.0f);
+
+    UILabel *label = [[UILabel alloc] initWithFrame:CGRectInset(labelRect,
+                                                                margin.width,
+                                                                margin.height)];
     [label setBackgroundColor:[UIColor clearColor]];
     [label setTextColor:labelTextColor];
     [label setFont:labelFont];
     [label setText:userFullNameLabelText];
     [dataView addSubview:label];
 
-    UITextField *field = [[UITextField alloc] initWithFrame:CGRectInset(fieldRect, 0, margin.height)];
+    UITextField *field = [[UITextField alloc] initWithFrame:CGRectInset(fieldRect,
+                                                                        0.0f,
+                                                                        margin.height)];
     [field setInputAccessoryView:self.inputView];
     [field setBorderStyle:UITextBorderStyleRoundedRect];
     [field setFont:fieldFont];
@@ -382,16 +457,21 @@
 {
     CGFloat dataViewWidth = 300.0f;
 
-    CGRect cellViewFrame = CGRectMake(0.0f, 0.0f, CGRectGetWidth(self.view.bounds), 120.0f);
+    CGRect cellViewFrame =
+    CGRectMake(0.0f,
+               0.0f,
+               CGRectGetWidth(self.view.bounds),
+               120.0f);
 
     UIView *cellView = [[UIView alloc] init];
     [cellView setFrame:cellViewFrame];
     [cellView setBackgroundColor:[UIColor clearColor]];
 
-    CGRect dataViewFrame = CGRectMake((CGRectGetWidth(cellViewFrame) - dataViewWidth) / 2,
-                                      4.0f,
-                                      dataViewWidth,
-                                      CGRectGetHeight(cellViewFrame) - 8.0f);
+    CGRect dataViewFrame =
+    CGRectMake((CGRectGetWidth(cellViewFrame) - dataViewWidth) / 2,
+               4.0f,
+               dataViewWidth,
+               CGRectGetHeight(cellViewFrame) - 8.0f);
 
     UIView *dataView = [[UIView alloc] init];
     [dataView setFrame:dataViewFrame];
@@ -409,25 +489,35 @@
     UIFont *labelFont = [UIFont systemFontOfSize:15.0f];
     UIFont *fieldFont = [UIFont systemFontOfSize:15.0f];
 
-    CGSize labelTextSize = [profileNameLabelText sizeWithAttributes:
-                            @{NSFontAttributeName:labelFont}];
-    labelTextSize = CGSizeMake(ceilf(labelTextSize.width), ceilf(labelTextSize.height));
+    CGSize labelTextSize = [profileNameLabelText sizeWithAttributes:@{NSFontAttributeName:labelFont}];
+    labelTextSize = CGSizeMake(ceilf(labelTextSize.width),
+                               ceilf(labelTextSize.height));
     labelTextSize.width += 8.0f;
 
-    CGRect labelRect = CGRectMake(8.0f, 8.0f, labelTextSize.width, 32.0f);
-    CGRect fieldRect = CGRectMake(labelTextSize.width,
-                                  8.0f,
-                                  CGRectGetWidth(dataViewFrame) - CGRectGetMaxX(labelRect),
-                                  32.0f);
+    CGRect labelRect =
+    CGRectMake(8.0f,
+               8.0f,
+               labelTextSize.width,
+               32.0f);
 
-    UILabel *label = [[UILabel alloc] initWithFrame:CGRectInset(labelRect, margin.width, margin.height)];
+    CGRect fieldRect =
+    CGRectMake(labelTextSize.width,
+               8.0f,
+               CGRectGetWidth(dataViewFrame) - CGRectGetMaxX(labelRect),
+               32.0f);
+
+    UILabel *label = [[UILabel alloc] initWithFrame:CGRectInset(labelRect,
+                                                                margin.width,
+                                                                margin.height)];
     [label setBackgroundColor:[UIColor clearColor]];
     [label setTextColor:labelTextColor];
     [label setFont:labelFont];
     [label setText:profileNameLabelText];
     [dataView addSubview:label];
 
-    UITextField *field = [[UITextField alloc] initWithFrame:CGRectInset(fieldRect, 0, margin.height)];
+    UITextField *field = [[UITextField alloc] initWithFrame:CGRectInset(fieldRect,
+                                                                        0.0f,
+                                                                        margin.height)];
     [field setInputAccessoryView:self.inputView];
     [field setBorderStyle:UITextBorderStyleRoundedRect];
     [field setFont:fieldFont];
@@ -450,7 +540,8 @@
 {
     BOOL cancelButtonEnabled = YES;
 
-    if (self.paquet != nil) {
+    if (self.paquet != nil)
+    {
         cancelButtonEnabled = NO;
     }
 
@@ -462,7 +553,9 @@
     [self.submitButton setEnabled:NO];
 
     if (self.profileNameValdateTimer != nil)
+    {
         [self.profileNameValdateTimer invalidate];
+    }
     
     self.profileNameValdateTimer =
     [NSTimer scheduledTimerWithTimeInterval:ProfileNameValidateInterval
@@ -475,15 +568,22 @@
 - (void)fireProfileNameValidation:(NSTimer *)timer
 {
     if ([self.profileNameValdateLock tryLock] == FALSE)
+    {
         return;
+    }
 
     NSString *currentProfileName = [self.profileNameField text];
-    if ([currentProfileName length] < API_MinimumProfileNameLength) {
+    if ([currentProfileName length] < API_MinimumProfileNameLength)
+    {
         [self.profileNameValidationMessage setText:@""];
         [self.profileNameValdateLock unlock];
-    } else if ([currentProfileName isEqualToString:self.previousProfileName] == YES) {
+    }
+    else if ([currentProfileName isEqualToString:self.previousProfileName] == YES)
+    {
         [self.profileNameValdateLock unlock];
-    } else {
+    }
+    else
+    {
         NSString *message = NSLocalizedString(@"PROFILE_FORM_PROFILE_NAME_VALIDATING_MESSAGE", nil);
         message = [NSString stringWithFormat:message, currentProfileName];
 
@@ -508,13 +608,16 @@
 
 - (void)paquetProfileNameValidation:(Paquet *)paquet
 {
-    if (paquet == nil) {
+    if (paquet == nil)
+    {
         NSString *message = NSLocalizedString(@"PROFILE_FORM_PROFILE_NAME_VALIDATION_ERROR_MESSAGE", nil);
 
         [self.profileNameValidationIndicator stopAnimating];
         [self.profileNameValidationMessage setText:message];
         [self.profileNameValidationMessage setTextColor:[UIColor redColor]];
-    } else {
+    }
+    else
+    {
         UInt32 statusCode = [paquet getUInt32];
 
         NSString *message;
@@ -522,6 +625,7 @@
         switch (statusCode)
         {
             case API_PaquetProfileNameAvailable:
+            {
                 message = NSLocalizedString(@"PROFILE_FORM_PROFILE_NAME_IS_AVAILABLE_MESSAGE", nil);
                 message = [NSString stringWithFormat:message, self.previousProfileName];
                 messageColor = [UIColor greenColor];
@@ -529,17 +633,24 @@
                 [self.submitButton setEnabled:YES];
 
                 break;
+            }
 
             case API_PaquetProfileNameAlreadyInUse:
+            {
                 message = NSLocalizedString(@"PROFILE_FORM_PROFILE_NAME_ALREADY_IN_USE_MESSAGE", nil);
                 message = [NSString stringWithFormat:message, self.previousProfileName];
                 messageColor = [UIColor redColor];
+
                 break;
+            }
 
             default:
+            {
                 message = @"";
                 messageColor = [UIColor clearColor];
+
                 break;
+            }
         }
 
         [self.profileNameValidationIndicator stopAnimating];
@@ -562,9 +673,13 @@
     emailAddress = @"";//[self.passwordField text];
 
     if ([[self.passwordField text] length] == 0)
+    {
         passwordMD5 = @"";
+    }
     else
+    {
         passwordMD5 = [passwordMD5 MD5];
+    }
 
     Paquet *paquet = [[Paquet alloc] initWithCommand:API_PaquetCreateProfile];
     self.paquet = paquet;
@@ -573,10 +688,13 @@
 
     [paquet putFixedString:profileName
                     length:API_BonjourProfileNameLength];
+
     [paquet putFixedString:userFullName
                     length:API_BonjourUserNameLength];
+
     [paquet putFixedString:passwordMD5
                     length:API_BonjourMD5Length];
+
     [paquet putFixedString:emailAddress
                     length:API_BonjourEmailAddressLength];
 
@@ -592,9 +710,12 @@
         case API_BonjourCreateSucceeded:
         {
             NSUUID *profileToken = [paquet getToken];
+
             [[Authentificator sharedAuthentificator] setProfileToken:profileToken];
+
             [self dismissViewControllerAnimated:YES
                                      completion:nil];
+
             break;
         }
 
@@ -602,12 +723,15 @@
         {
             NSString *message;
             UIColor *messageColor;
+
             message = NSLocalizedString(@"PROFILE_FORM_PROFILE_NAME_ALREADY_IN_USE_MESSAGE", nil);
             message = [NSString stringWithFormat:message, self.previousProfileName];
             messageColor = [UIColor redColor];
+
             [self.profileNameValidationIndicator stopAnimating];
             [self.profileNameValidationMessage setText:message];
             [self.profileNameValidationMessage setTextColor:messageColor];
+
             break;
         }
 
@@ -615,26 +739,39 @@
         {
             NSString *message;
             UIColor *messageColor;
+
             message = NSLocalizedString(@"PROFILE_FORM_PROFILE_NAME_CONSTRAINT_MESSAGE", nil);
             message = [NSString stringWithFormat:message, self.previousProfileName];
             messageColor = [UIColor redColor];
+
             [self.profileNameValidationIndicator stopAnimating];
             [self.profileNameValidationMessage setText:message];
             [self.profileNameValidationMessage setTextColor:messageColor];
+
             break;
         }
 
         case API_BonjourCreateProfileEmailAlreadyInUse:
-            NSLog(@"BonjourCreateProfileEmailAlreadyInUse");
+        {
+            NSLog(@"[ProfileViewController] BonjourCreateProfileEmailAlreadyInUse");
+
             break;
+        }
 
         case API_BonjourCreateProfileEmailConstraint:
-            NSLog(@"BonjourCreateProfileEmailConstraint");
+        {
+            NSLog(@"[ProfileViewController] BonjourCreateProfileEmailConstraint");
+
             break;
+        }
 
         default:
-            NSLog(@"Unknown bonjour status code: 0x%X", (unsigned int)paquetStatus);
+        {
+            NSLog(@"[ProfileViewController] Unknown bonjour status code: 0x%X",
+                  (unsigned int)paquetStatus);
+
             break;
+        }
     }
 }
 
@@ -646,7 +783,8 @@
 
 - (void)submitButtonPressed
 {
-    //if ([[Authentificator sharedAuthentificator] profileRegistered] == NO) {
+    //if ([[Authentificator sharedAuthentificator] profileRegistered] == NO)
+    //{
         [self createProfile];
     //}
 }
@@ -671,6 +809,7 @@
 
     UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
                                                    reuseIdentifier:nil];
+
     [cell.contentView setBackgroundColor:[UIColor clearColor]];
     [cell.contentView addSubview:cellView];
 
@@ -681,6 +820,7 @@
 heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     UIView *cellView = (UIView *)[self.cells objectAtIndex:indexPath.row];
+
     return CGRectGetHeight(cellView.bounds);
 }
 
@@ -695,7 +835,9 @@ shouldHighlightRowAtIndexPath:(NSIndexPath *)indexPath
 - (void)paquetComplete:(Paquet *)paquet
 {
     if (paquet == self.paquet)
+    {
         self.paquet = nil;
+    }
 
     switch (paquet.commandCode)
     {
@@ -717,7 +859,9 @@ shouldHighlightRowAtIndexPath:(NSIndexPath *)indexPath
 - (void)paquetFailed:(Paquet *)paquet
 {
     if (paquet == self.paquet)
+    {
         self.paquet = nil;
+    }
 
     switch (paquet.commandCode)
     {
@@ -742,14 +886,18 @@ shouldHighlightRowAtIndexPath:(NSIndexPath *)indexPath
 - (void)keyboardWillShow
 {
     CGSize contentSize = [self.tableView contentSize];
+
     contentSize.height += (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) ? 264 : 216;
+
     [self.tableView setContentSize:contentSize];
 }
 
 - (void)keyboardWillHide
 {
     CGSize contentSize = [self.tableView contentSize];
+
     contentSize.height -= (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) ? 264 : 216;
+
     [self.tableView setContentSize:contentSize];
 }
 */

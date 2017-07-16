@@ -1,7 +1,7 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import <CoreLocation/CoreLocation.h>
@@ -21,9 +21,9 @@
 @interface EditModeView ()
 
 @property (strong, nonatomic) CLLocationManager *locationManager;
-@property (strong, nonatomic) UIView *panelsView;
-@property (strong, nonatomic) Panel *selectorPanel;
-@property (strong, nonatomic) Panel *controlsPanel;
+@property (strong, nonatomic) UIView            *panelsView;
+@property (strong, nonatomic) Panel             *selectorPanel;
+@property (strong, nonatomic) Panel             *controlsPanel;
 
 @end
 
@@ -33,7 +33,9 @@
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
 
     [self initLocationManager];
 
@@ -65,14 +67,17 @@
 {
     [super didMoveToSuperview];
 
-    if (self.superview != nil) {
+    if (self.superview != nil)
+    {
         [self startLocationManager];
 
         self.selectorPanel = self.leftPanel;
         self.controlsPanel = self.rightPanel;
 
         [self prepareSelectorPanel];
-    } else {
+    }
+    else
+    {
         [self stopLocationManager];
 
         [[Plaques sharedPlaques] setPlaqueUnderEdit:nil];
@@ -140,10 +145,14 @@
     EditMode editMode = button.editMode;
 
     if (editMode != EditModeInscription)
+    {
         [self movePanelsLeft];
+    }
 
     for (UIView *controlsPanelSubview in self.controlsPanel.subviews)
+    {
         [controlsPanelSubview removeFromSuperview];
+    }
 
     CGRect controlsPanelSubviewFrame = self.controlsPanel.bounds;
 
@@ -151,10 +160,8 @@
     {
         case EditModeCoordinate:
         {
-            EditModeCoordinateSubview *subview = [[EditModeCoordinateSubview alloc] init];
-
-            subview.locationManager = self.locationManager;
-            [self.locationManager setDelegate:subview];
+            EditModeCoordinateSubview *subview =
+            [[EditModeCoordinateSubview alloc] initWithLocationManager:self.locationManager];
 
             [subview setFrame:controlsPanelSubviewFrame];
             [self.controlsPanel addSubview:subview];
@@ -164,10 +171,8 @@
 
         case EditModeAltitude:
         {
-            EditModeAltitudeSubview *subview = [[EditModeAltitudeSubview alloc] init];
-
-            subview.locationManager = self.locationManager;
-            [self.locationManager setDelegate:subview];
+            EditModeAltitudeSubview *subview =
+            [[EditModeAltitudeSubview alloc] initWithLocationManager:self.locationManager];
 
             [subview setFrame:controlsPanelSubviewFrame];
             [self.controlsPanel addSubview:subview];
@@ -177,10 +182,8 @@
 
         case EditModeDirection:
         {
-            EditModeDirectionSubview *subview = [[EditModeDirectionSubview alloc] init];
-
-            subview.locationManager = self.locationManager;
-            [self.locationManager setDelegate:subview];
+            EditModeDirectionSubview *subview =
+            [[EditModeDirectionSubview alloc] initWithLocationManager:self.locationManager];
 
             [subview setFrame:controlsPanelSubviewFrame];
             [self.controlsPanel addSubview:subview];
@@ -190,7 +193,8 @@
 
         case EditModeTilt:
         {
-            EditModeTiltSubview *subview = [[EditModeTiltSubview alloc] init];
+            EditModeTiltSubview *subview =
+            [[EditModeTiltSubview alloc] init];
 
             [subview setFrame:controlsPanelSubviewFrame];
             [self.controlsPanel addSubview:subview];
@@ -200,7 +204,8 @@
 
         case EditModeSize:
         {
-            EditModeSizeSubview *subview = [[EditModeSizeSubview alloc] init];
+            EditModeSizeSubview *subview =
+            [[EditModeSizeSubview alloc] init];
 
             [subview setFrame:controlsPanelSubviewFrame];
             [self.controlsPanel addSubview:subview];
@@ -210,8 +215,8 @@
 
         case EditModeBackgroundColor:
         {
-            EditModeColorSubview *subview = [[EditModeColorSubview alloc] init];
-            subview.editModeColor = EditModeColorBackground;
+            EditModeColorSubview *subview =
+            [[EditModeColorSubview alloc] initWithEditMode:EditModeColorBackground];
 
             [subview setFrame:controlsPanelSubviewFrame];
             [self.controlsPanel addSubview:subview];
@@ -221,8 +226,8 @@
 
         case EditModeForegroundColor:
         {
-            EditModeColorSubview *subview = [[EditModeColorSubview alloc] init];
-            subview.editModeColor = EditModeColorForeground;
+            EditModeColorSubview *subview =
+            [[EditModeColorSubview alloc] initWithEditMode:EditModeColorForeground];
 
             [subview setFrame:controlsPanelSubviewFrame];
             [self.controlsPanel addSubview:subview];
@@ -232,7 +237,8 @@
 
         case EditModeFont:
         {
-            EditModeFontSubview *subview = [[EditModeFontSubview alloc] init];
+            EditModeFontSubview *subview =
+            [[EditModeFontSubview alloc] init];
 
             [subview setFrame:controlsPanelSubviewFrame];
             [self.controlsPanel addSubview:subview];
@@ -242,7 +248,8 @@
 
         case EditModeInscription:
         {
-            EditModeInscriptionView *subview = [[EditModeInscriptionView alloc] init];
+            EditModeInscriptionView *subview =
+            [[EditModeInscriptionView alloc] init];
 
             [subview setFrame:self.bounds];
             [self addSubview:subview];

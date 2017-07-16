@@ -1,7 +1,7 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import "EditModeInscriptionView.h"
@@ -9,8 +9,8 @@
 
 @interface EditModeInscriptionView () /*<UINavigationControllerDelegate, UIImagePickerControllerDelegate>*/
 
-@property (weak, nonatomic) Plaque *plaque;
-@property (strong, nonatomic) UITextField *inscriptionField;
+@property (weak,   nonatomic) Plaque        *plaque;
+@property (strong, nonatomic) UITextField   *inscriptionField;
 
 @end
 
@@ -20,7 +20,9 @@
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
 
     self.plaque = [[Plaques sharedPlaques] plaqueUnderEdit];
 
@@ -31,39 +33,56 @@
 {
     [super didMoveToSuperview];
 
-    if (self.superview == nil)
-        return;
+    if (self.superview != nil)
+    {
+        [self preparePanel];
+    }
+}
+
+- (void)preparePanel
+{
 
     [self setBackgroundColor:[UIColor clearColor]];
 
     CGFloat keyboardHeight;
     CGSize panelSize;
 
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+    {
         keyboardHeight = 264;
+
         panelSize = CGSizeMake(320.0f, 320.0f);
-    } else {
+    }
+    else
+    {
         keyboardHeight = 216;
+
         panelSize = CGSizeMake(CGRectGetWidth(self.bounds) * 0.8f,
                                (CGRectGetHeight(self.bounds) - keyboardHeight) * 0.5f);
     }
 
-    CGRect panelFrame = CGRectMake((CGRectGetWidth(self.bounds) - panelSize.width) / 2,
-                                   (CGRectGetMaxY(self.bounds) - keyboardHeight - panelSize.height) / 2,
-                                   panelSize.width,
-                                   panelSize.height);
+    CGRect panelFrame =
+    CGRectMake((CGRectGetWidth(self.bounds) - panelSize.width) / 2,
+               (CGRectGetMaxY(self.bounds) - keyboardHeight - panelSize.height) / 2,
+               panelSize.width,
+               panelSize.height);
 
     UIColor *backgroundColor = [self.plaque backgroundColor];
     UIColor *foregroundColor = [self.plaque foregroundColor];
 
     UInt32 backgroundARGB = [backgroundColor argb];
     UInt32 foregroundARGB = [foregroundColor argb];
-    if (backgroundARGB == foregroundARGB) {
+    if (backgroundARGB == foregroundARGB)
+    {
         UIColor *blackColor = [UIColor blackColor];
         UIColor *whiteColor = [UIColor whiteColor];
-        if (foregroundARGB == [whiteColor argb]) {
+        
+        if (foregroundARGB == [whiteColor argb])
+        {
             foregroundColor = blackColor;
-        } else {
+        }
+        else
+        {
             foregroundColor = whiteColor;
         }
     }

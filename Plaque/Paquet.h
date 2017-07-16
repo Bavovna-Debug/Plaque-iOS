@@ -1,7 +1,7 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -14,14 +14,14 @@
 
 @property (strong, nonatomic, readwrite) id<PaquetSenderDelegate> senderDelegate;
 
-@property (assign, nonatomic) UInt32            paquetId;
-@property (assign, nonatomic) UInt32            commandCode;
-@property (assign, nonatomic) UInt32            commandSubcode;
-@property (strong, nonatomic) NSMutableData     *payload;
-@property (assign, nonatomic) Boolean           inTheAir;
-@property (assign, nonatomic) Boolean           cancelWhenPossible;
-@property (assign, nonatomic) Boolean           rejectedByCloud;
-@property (strong, nonatomic) NSData            *userInfo;
+@property (assign, nonatomic, readwrite) UInt32         paquetId;
+@property (assign, nonatomic, readwrite) UInt32         commandCode;
+@property (assign, nonatomic, readwrite) UInt32         commandSubcode;
+@property (strong, nonatomic, readonly)  NSMutableData  *payload;
+@property (assign, atomic,    readwrite) Boolean        inTheAir;
+@property (assign, atomic,    readwrite) Boolean        cancelWhenPossible;
+@property (assign, atomic,    readonly)  Boolean        rejectedByCloud;
+@property (strong, atomic,    readwrite) NSData         *userInfo;
 
 + (void)report:(NSString *)message;
 

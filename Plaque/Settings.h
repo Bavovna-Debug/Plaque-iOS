@@ -1,15 +1,16 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 
 @interface Settings : NSObject
 
-@property (assign, nonatomic) Boolean       tapMenuOnlyIcons;
-@property (assign, nonatomic) NSUInteger    lastOwnObjectId;
+@property (assign, nonatomic, readwrite) Boolean    tapMenuOnlyIcons;
+@property (assign, atomic,    readonly)  NSUInteger lastOwnObjectId;
+
 /*
 @property (assign, nonatomic) UInt32        radarOnRadarRevision;
 @property (assign, nonatomic) UInt32        radarInSightRevision;

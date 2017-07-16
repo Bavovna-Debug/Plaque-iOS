@@ -1,7 +1,7 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import "Profile.h"
@@ -21,20 +21,27 @@
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
 
     SQLiteDatabase *database = [Database mainDatabase];
 
-    NSString *query = [NSString stringWithFormat:@"SELECT rowid, profile_revision, profile_name, user_name FROM profiles WHERE profile_token = '%@'",
-                       [profileToken UUIDString]];
+    NSString *query =
+    [NSString stringWithFormat:@"SELECT rowid, profile_revision, profile_name, user_name FROM profiles WHERE profile_token = '%@'",
+     [profileToken UUIDString]];
 
     SQLiteDataReader *reader = [[SQLiteDataReader alloc] initWithDatabase:database
                                                                     query:query];
     if (reader == nil)
+    {
         return nil;
+    }
 
     if ([reader next] == FALSE)
+    {
         return nil;
+    }
 
     int rowId               = [reader getInt:0];
     int profileRevision     = [reader getInt:1];
@@ -53,7 +60,9 @@
     storedInDatabase = YES;
 
 #ifdef VERBOSE_PROFILES_DB_SELECT
-    NSLog(@"Loaded profile: %llu <%@>", self.rowId, self.profileName);
+    NSLog(@"[Profile] Loaded %llu '%@'",
+          self.rowId,
+          self.profileName);
 #endif
 
     return self;
@@ -63,15 +72,17 @@
 {
     SQLiteDatabase *database = [Database mainDatabase];
 
-    NSString *query = [NSString stringWithFormat:@"INSERT INTO profiles (profile_token, profile_revision, profile_name, user_name) VALUES ('%@', %d, '%@', '%@')",
-                       [self.profileToken UUIDString],
-                       self.profileRevision,
-                       self.profileName,
-                       self.userName];
+    NSString *query =
+    [NSString stringWithFormat:@"INSERT INTO profiles (profile_token, profile_revision, profile_name, user_name) VALUES ('%@', %d, '%@', '%@')",
+     [self.profileToken UUIDString],
+     self.profileRevision,
+     self.profileName,
+     self.userName];
+
     self.rowId = [database executeINSERT:query ignoreConstraints:YES];
 
-    if (self.rowId != 0) {
-        //
+    if (self.rowId != 0)
+    {
         // Should be set to 'yes' only if record been successfully saved in local database.
         // Otherwise setter methods of properties would cause writing to database.
         //
@@ -79,7 +90,9 @@
     }
 
 #ifdef VERBOSE_PROFILES_DB_INSERT
-    NSLog(@"Saved profile: %llu %@", self.rowId, self.profileName);
+    NSLog(@"[Profile] Saved %llu '%@'",
+          self.rowId,
+          self.profileName);
 #endif
 }
 

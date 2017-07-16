@@ -1,7 +1,7 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
 #import "EditModeTiltSubview.h"
@@ -10,11 +10,11 @@
 
 @interface EditModeTiltSubview ()
 
-@property (weak,   nonatomic) Plaque *plaque;
-@property (strong, nonatomic) CALayer *plaqueLayer;
-@property (strong, nonatomic) UIView *touchPad;
-@property (assign, nonatomic) Boolean moving;
-@property (strong, nonatomic) NSTimer *touchPadTimer;
+@property (weak,   nonatomic) Plaque    *plaque;
+@property (strong, nonatomic) CALayer   *plaqueLayer;
+@property (strong, nonatomic) UIView    *touchPad;
+@property (assign, nonatomic) Boolean   moving;
+@property (strong, nonatomic) NSTimer   *touchPadTimer;
 
 @end
 
@@ -27,9 +27,13 @@
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
 
     self.plaque = [[Plaques sharedPlaques] plaqueUnderEdit];
+
+    self.moving = NO;
 
     return self;
 }
@@ -38,9 +42,12 @@
 {
     [super didMoveToSuperview];
 
-    if (self.superview != nil) {
+    if (self.superview != nil)
+    {
         [self preparePanel];
-    } else {
+    }
+    else
+    {
         [self destroyPanel];
     }
 }
@@ -53,10 +60,11 @@
     [self addSubview:backgroundView];
 
     CGRect bounds = self.bounds;
-    CGRect touchPadFrame = CGRectMake(CGRectGetMaxX(bounds) - 120.0f,
-                                      CGRectGetMinY(bounds),
-                                      120.0f,
-                                      CGRectGetHeight(bounds));
+    CGRect touchPadFrame =
+    CGRectMake(CGRectGetMaxX(bounds) - 120.0f,
+               CGRectGetMinY(bounds),
+               120.0f,
+               CGRectGetHeight(bounds));
 
 
     UIView *touchPad = [[UIView alloc] initWithFrame:touchPadFrame];
@@ -86,7 +94,9 @@
 {
     NSTimer *touchPadTimer = self.touchPadTimer;
     if (touchPadTimer != nil)
+    {
         [touchPadTimer invalidate];
+    }
 }
 
 - (void)recalculateTiltParameters:(CGPoint)fingerPoint
@@ -110,10 +120,14 @@
         plaqueTilt = nearbyintf(plaqueTilt);
 
         if (plaqueTilt < -90.0f)
+        {
             plaqueTilt = -90.0f;
+        }
 
         if (plaqueTilt > 90.0f)
+        {
             plaqueTilt = 90.0f;
+        }
 
         [self.plaque setTilt:plaqueTilt];
 
@@ -125,12 +139,19 @@
            withEvent:(UIEvent *)event
 {
     UITouch *touch = [touches anyObject];
+
     CGPoint point = [touch locationInView:[touch view]];
+
     point = [[touch view] convertPoint:point toView:self];
-    if (CGRectContainsPoint(self.touchPad.frame, point) == YES) {
+
+    if (CGRectContainsPoint(self.touchPad.frame, point) == YES)
+    {
         point = [touch locationInView:self.touchPad];
+
         [self recalculateTiltParameters:point];
+
         self.moving = YES;
+
         [self.touchPadTimer fire];
     }
 }
@@ -151,12 +172,19 @@
            withEvent:(UIEvent *)event
 {
     UITouch *touch = [touches anyObject];
+
     CGPoint point = [touch locationInView:[touch view]];
+
     point = [[touch view] convertPoint:point toView:self];
-    if (CGRectContainsPoint(self.touchPad.frame, point) == YES) {
+
+    if (CGRectContainsPoint(self.touchPad.frame, point) == YES)
+    {
         point = [touch locationInView:self.touchPad];
+
         [self recalculateTiltParameters:point];
-    } else {
+    }
+    else
+    {
         self.moving = NO;
     }
 }
@@ -167,8 +195,8 @@
 
     CATransform3D transform = CATransform3DIdentity;
     transform.m34 = -1.0f / 500.0f;
-    transform = CATransform3DRotate(transform, degreesToRadians(65.0f), 0, 1, 0);
-    transform = CATransform3DRotate(transform, degreesToRadians(tilt), 1, 0, 0);
+    transform = CATransform3DRotate(transform, DegreesToRadians(65.0f), 0, 1, 0);
+    transform = CATransform3DRotate(transform, DegreesToRadians(tilt), 1, 0, 0);
 
     [self.plaqueLayer setTransform:transform];
 }

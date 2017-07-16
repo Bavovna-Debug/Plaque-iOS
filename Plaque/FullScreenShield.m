@@ -1,12 +1,12 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright (c) 2015 Meine Werke. All rights reserved.
+//  Copyright © 2015 Meine Werke. All rights reserved.
 //
 
 #import "FullScreenShield.h"
 
-#define DisappearDuration 0.2f
+#include "Definitions.h"
 
 @implementation FullScreenShield
 {
@@ -19,14 +19,19 @@
     if (self == nil)
         return nil;
 
-    if (closeOnTouch == NO) {
+    if (closeOnTouch == NO)
+    {
         [self setBackgroundColor:[UIColor clearColor]];
-    } else {
-        [self setBackgroundColor:[UIColor colorWithWhite:0.1f alpha:0.5f]];
+    }
+    else
+    {
+        [self setBackgroundColor:[UIColor colorWithWhite:0.1f
+                                                   alpha:0.5f]];
 
         UITapGestureRecognizer *tapRecognizer =
         [[UITapGestureRecognizer alloc] initWithTarget:self
                                                 action:@selector(tapped:)];
+
         [self addGestureRecognizer:tapRecognizer];
     }
 
@@ -36,21 +41,28 @@
 - (void)tapped:(UITapGestureRecognizer *)recognizer
 {
     if (recognizer.state == UIGestureRecognizerStateEnded)
+    {
         [self remove];
+    }
 }
 
 - (void)remove
 {
     id<FullScreenSchieldDelegate> delegate = self.delegate;
     if ((delegate != nil) && [delegate respondsToSelector:@selector(shieldWillDisappear)])
+    {
         [delegate shieldWillDisappear];
+    }
 
     [UIView beginAnimations:nil
                     context:nil];
+    
     [UIView setAnimationDuration:DisappearDuration];
 
     for (UIView *subview in self.subviews)
+    {
         [subview setAlpha:0.0f];
+    }
 
     [UIView commitAnimations];
 
