@@ -44,6 +44,21 @@
 @property (strong, nonatomic)            CLLocationManager  *locationManager;
 @property (strong, nonatomic)            CLLocation         *locationOfLastDisplacement;
 
+@property (strong, nonatomic)            NSLock             *displacementLock;
+@property (strong, nonatomic)            NSTimer            *displacementOnRadarTimer;
+@property (strong, nonatomic)            NSTimer            *displacementInSightTimer;
+@property (strong, nonatomic)            NSTimer            *displacementOnMapTimer;
+
+@property (strong, nonatomic)            NSDate             *lastDisplacementOnRadarTimestamp;
+@property (strong, nonatomic)            CLLocation         *lastDisplacementOnRadarLocation;
+@property (assign, nonatomic)            CLLocationDistance lastDisplacementOnRadarRange;
+@property (strong, nonatomic)            NSDate             *lastDisplacementInSightTimestamp;
+@property (strong, nonatomic)            CLLocation         *lastDisplacementInSightLocation;
+@property (assign, nonatomic)            CLLocationDistance lastDisplacementInSightRange;
+@property (strong, nonatomic)            NSDate             *lastDisplacementOnMapTimestamp;
+@property (strong, nonatomic)            CLLocation         *lastDisplacementOnMapLocation;
+@property (assign, nonatomic)            CLLocationDistance lastDisplacementOnMapRange;
+
 @end
 
 @implementation Plaques
@@ -54,7 +69,7 @@
 }
 
 @synthesize plaqueUnderEdit = _plaqueUnderEdit;
-@synthesize capturedPlaque = _capturedPlaque;
+@synthesize capturedPlaque  = _capturedPlaque;
 
 + (Plaques *)sharedPlaques
 {
@@ -93,6 +108,7 @@
     self.plaquesAwaitingDownload        = [NSMutableArray array];
     self.plaquesAwaitingDatabase        = [NSMutableArray array];
     self.plaquesAwaitingDatabaseLock    = [[NSLock alloc] init];
+    self.displacementLock               = [[NSLock alloc] init];
 
     [self prepareLocationManager];
 
@@ -109,14 +125,16 @@
     [self.locationManager setHeadingFilter:1.0f];
     [self.locationManager setDelegate:self];
 
-    if ([self.locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)])
-    {
-        [self.locationManager requestWhenInUseAuthorization];
-    }
-
+#if 0
     if ([self.locationManager respondsToSelector:@selector(requestAlwaysAuthorization)])
     {
         [self.locationManager requestAlwaysAuthorization];
+    }
+#endif
+
+    if ([self.locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)])
+    {
+        [self.locationManager requestWhenInUseAuthorization];
     }
 }
 
@@ -130,16 +148,54 @@
     [self.locationManager setDesiredAccuracy:kCLLocationAccuracyHundredMeters];
     [self.locationManager startUpdatingLocation];
 
-    NSTimer *databaseTimer = self.databaseTimer;
-    if (databaseTimer != nil)
     {
-        [databaseTimer invalidate];
+        NSTimer *databaseTimer = self.databaseTimer;
+        if (databaseTimer != nil)
+        {
+            [databaseTimer invalidate];
+
+            self.databaseTimer = nil;
+        }
     }
 
-    NSTimer *workdeskTimer = self.workdeskTimer;
-    if (workdeskTimer != nil)
     {
-        [workdeskTimer invalidate];
+        NSTimer *workdeskTimer = self.workdeskTimer;
+        if (workdeskTimer != nil)
+        {
+            [workdeskTimer invalidate];
+
+            self.workdeskTimer = nil;
+        }
+    }
+
+    {
+        NSTimer *displacementOnRadarTimer = self.displacementOnRadarTimer;
+        if (displacementOnRadarTimer != nil)
+        {
+            [displacementOnRadarTimer invalidate];
+
+            self.displacementOnRadarTimer = nil;
+        }
+    }
+
+    {
+        NSTimer *displacementInSightTimer = self.displacementInSightTimer;
+        if (displacementInSightTimer != nil)
+        {
+            [displacementInSightTimer invalidate];
+
+            self.displacementInSightTimer = nil;
+        }
+    }
+
+    {
+        NSTimer *displacementOnMapTimer = self.displacementOnMapTimer;
+        if (displacementOnMapTimer != nil)
+        {
+            [displacementOnMapTimer invalidate];
+
+            self.displacementOnMapTimer = nil;
+        }
     }
 }
 
@@ -531,8 +587,6 @@
 
         if (previousCapturedPlaque != nil)
         {
-            [previousCapturedPlaque setCaptured:NO];
-
             if (delegate != nil)
             {
                 [delegate plaqueDidReleaseCaptured:previousCapturedPlaque];
@@ -541,8 +595,6 @@
 
         if (capturedPlaque != nil)
         {
-            [capturedPlaque setCaptured:YES];
-
             if (delegate != nil)
             {
                 [delegate plaqueDidBecomeCaptured:capturedPlaque];
@@ -1270,87 +1322,213 @@
                      range:(CLLocationDistance)range
                destination:(PlaqueDestination)destination
 {
+    Boolean needToSendPaquet;
+
     if ([[Authentificator sharedAuthentificator] deviceRegistered] == NO)
     {
         return;
     }
 
-    if (CLLocationCoordinate2DIsValid(location.coordinate) == NO)
+    // Preliminary checks whether provided coordinate is valid.
+    //
     {
-        return;
-    }
-
-    if (location.coordinate.latitude == 0.0f)
-    {
-        return;
-    }
-
-    if (location.coordinate.longitude == 0.0f)
-    {
-        return;
-    }
-
-    UInt32 paquetCommand;
-    NSUInteger radarRevision;
-
-    switch (destination)
-    {
-        case OnRadar:
+        if (CLLocationCoordinate2DIsValid(location.coordinate) == NO)
         {
-            paquetCommand = API_PaquetDisplacementOnRadar;
-            radarRevision = self.onRadarRevision;
-
-            NSLog(@"[Plaques] Displacement for 'on radar' revision %lu",
-                  (unsigned long)radarRevision);
-
-            break;
-        }
-
-        case InSight:
-        {
-            paquetCommand = API_PaquetDisplacementInSight;
-            radarRevision = self.inSightRevision;
-
-            NSLog(@"[Plaques] Displacement for 'in sight' revision %lu",
-                  (unsigned long) radarRevision);
-
-            break;
-        }
-
-        case OnMap:
-        {
-            paquetCommand = API_PaquetDisplacementOnMap;
-            radarRevision = self.onMapRevision;
-
-            NSLog(@"[Plaques] Displacement for 'on map' revision %lu",
-                  (unsigned long) radarRevision);
-
-            break;
-        }
-
-        default:
             return;
+        }
+
+        if (location.coordinate.latitude == 0.0f)
+        {
+            return;
+        }
+
+        if (location.coordinate.longitude == 0.0f)
+        {
+            return;
+        }
     }
 
-    Paquet *paquet = [[Paquet alloc] initWithCommand:paquetCommand];
+#if 0
+    // Quit if any art of disposition is already updating.
+    //
+    if ([self.displacementLock tryLock] == NO)
+    {
+        return;
+    }
+#endif
 
-    [paquet setSenderDelegate:self];
+    // Check the time of last displacement. Ignore this request if interval is too short.
+    //
+    {
+        switch (destination)
+        {
+            case OnRadar:
+            {
+                NSDate *now = [NSDate date];
+                NSTimeInterval sinceLastDisposition =
+                [now timeIntervalSinceDate:self.lastDisplacementOnRadarTimestamp];
 
-    CLLocationCoordinate2D coordinate = location.coordinate;
-    CLLocationDistance altitude = location.altitude;
-    CLLocationDirection course = location.course;
-    NSInteger floorlevel = [location floorlevel];
+                if (sinceLastDisposition < MinimalIntervalBetweenDisplacementsOnRadar)
+                {
+                    // Too early for displacement paquet. Just notice the current location.
 
-    [paquet putDouble:coordinate.latitude];
-    [paquet putDouble:coordinate.longitude];
-    [paquet putFloat:altitude];
-    [paquet putBoolean:(course == -1.0f) ? FALSE : TRUE];
-    [paquet putFloat:course];
-    [paquet putBoolean:(floorlevel == NSIntegerMax) ? FALSE : TRUE];
-    [paquet putUInt32:(UInt32)floorlevel];
-    [paquet putFloat:range];
-    
-    [paquet send];
+                    needToSendPaquet = NO;
+
+                    self.lastDisplacementOnRadarLocation = [location copy];
+                    self.lastDisplacementOnRadarRange = range;
+                }
+                else
+                {
+                    // It is time to send next displacement paquet.
+                    // Reschedule displacement paquet timer so that it does not fire too early.
+
+                    self.lastDisplacementOnRadarTimestamp = [NSDate date];
+
+                    needToSendPaquet = YES;
+                }
+
+                break;
+            }
+
+            case InSight:
+            {
+                NSDate *now = [NSDate date];
+                NSTimeInterval sinceLastDisposition =
+                [now timeIntervalSinceDate:self.lastDisplacementInSightTimestamp];
+
+                if (sinceLastDisposition < MinimalIntervalBetweenDisplacementsInSight)
+                {
+                    // Too early for displacement paquet. Just notice the current location.
+
+                    needToSendPaquet = NO;
+
+                    self.lastDisplacementInSightLocation = [location copy];
+                    self.lastDisplacementInSightRange = range;
+                }
+                else
+                {
+                    // It is time to send next displacement paquet.
+                    // Reschedule displacement paquet timer so that it does not fire too early.
+
+                    self.lastDisplacementInSightTimestamp = [NSDate date];
+
+                    needToSendPaquet = YES;
+                }
+                
+                break;
+            }
+
+            case OnMap:
+            {
+                NSDate *now = [NSDate date];
+                NSTimeInterval sinceLastDisposition =
+                [now timeIntervalSinceDate:self.lastDisplacementOnMapTimestamp];
+
+                if (sinceLastDisposition < MinimalIntervalBetweenDisplacementsOnMap)
+                {
+                    // Too early for displacement paquet. Just notice the current location.
+
+                    needToSendPaquet = NO;
+
+                    self.lastDisplacementOnMapLocation = [location copy];
+                    self.lastDisplacementOnMapRange = range;
+                }
+                else
+                {
+                    // It is time to send next displacement paquet.
+                    // Reschedule displacement paquet timer so that it does not fire too early.
+
+                    self.lastDisplacementOnMapTimestamp = [NSDate date];
+
+                    needToSendPaquet = YES;
+                }
+                
+                break;
+            }
+                
+            default:
+            {
+                // No other values are expected.
+
+                return;
+            }
+        }
+    }
+
+    // Send displacement paquet if necessary.
+    //
+    if (needToSendPaquet == YES)
+    {
+        UInt32 paquetCommand;
+        NSUInteger radarRevision;
+
+        switch (destination)
+        {
+            case OnRadar:
+            {
+                paquetCommand = API_PaquetDisplacementOnRadar;
+                radarRevision = self.onRadarRevision;
+
+                NSLog(@"[Plaques] Displacement for 'on radar' revision %lu",
+                      (unsigned long) radarRevision);
+
+                break;
+            }
+
+            case InSight:
+            {
+                paquetCommand = API_PaquetDisplacementInSight;
+                radarRevision = self.inSightRevision;
+
+                NSLog(@"[Plaques] Displacement for 'in sight' revision %lu",
+                      (unsigned long) radarRevision);
+
+                break;
+            }
+
+            case OnMap:
+            {
+                paquetCommand = API_PaquetDisplacementOnMap;
+                radarRevision = self.onMapRevision;
+
+                NSLog(@"[Plaques] Displacement for 'on map' revision %lu",
+                      (unsigned long) radarRevision);
+
+                break;
+            }
+
+            default:
+            {
+                // No other values are expected.
+
+                return;
+            }
+        }
+
+        Paquet *paquet = [[Paquet alloc] initWithCommand:paquetCommand];
+
+        [paquet setSenderDelegate:self];
+
+        CLLocationCoordinate2D coordinate = location.coordinate;
+        CLLocationDistance altitude = location.altitude;
+        CLLocationDirection course = location.course;
+        NSInteger floorlevel = [location floorlevel];
+
+        [paquet putDouble:coordinate.latitude];
+        [paquet putDouble:coordinate.longitude];
+        [paquet putFloat:altitude];
+        [paquet putBoolean:(course == -1.0f) ? FALSE : TRUE];
+        [paquet putFloat:course];
+        [paquet putBoolean:(floorlevel == NSIntegerMax) ? FALSE : TRUE];
+        [paquet putUInt32:(UInt32)floorlevel];
+        [paquet putFloat:range];
+        
+        [paquet send];
+    }
+
+#if 0
+    [self.displacementLock unlock];
+#endif
 }
 
 /*
@@ -1781,6 +1959,7 @@
             NSUUID *plaqueToken = [paquet getToken];
             UInt32 revision = [paquet getUInt32];
             NSUUID *profileToken = [paquet getToken];
+            Boolean fortified = [paquet getBoolean];
             NSString *dimension = [paquet getFixedString:2];
             double latitude = [paquet getDouble];
             double longitude = [paquet getDouble];
@@ -1835,6 +2014,7 @@
                     [plaque setPlaqueToken:plaqueToken];
                     [plaque setPlaqueRevision:revision];
                     [plaque setProfileToken:profileToken];
+                    [plaque setFortified:fortified];
                     [plaque setCoordinate:CLLocationCoordinate2DMake(latitude, longitude)];
                     [plaque setAltitude:altitude];
                     [plaque setDirected:directed];
@@ -1879,6 +2059,7 @@
                 //
                 [plaque setProfileToken:profileToken];
                 [plaque setPlaqueRevision:revision];
+                [plaque setFortified:fortified];
                 [plaque setCoordinate:CLLocationCoordinate2DMake(latitude, longitude)];
                 [plaque setAltitude:altitude];
                 [plaque setDirected:directed];

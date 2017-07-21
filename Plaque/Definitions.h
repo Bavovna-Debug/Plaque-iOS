@@ -7,6 +7,11 @@
 #ifndef Definitions_h
 #define Definitions_h
 
+#define ApplicationVersion  170721u
+#define DatabaseVersion     170719u
+
+#define CameraAlphaLevel    0.6f
+
 #define INSIGHTVIEW_TILT_BY_ACCURACY
 #define INSIGHTVIEW_TURN_BY_ACCURACY
 
@@ -56,11 +61,14 @@
 // ApplicationDelegate
 //
 #define MinimumBackgroundFetchInterval      120.0f
+#define AlertDoYouWantToEnableGPS           10
+#define AlertDoYouWantToEnableCamera        11
+#define AlertDoYouWantToEnableNotifications 12
 #define AlertDoYouWantToCreateProfile       15
 
 // AppStore
 //
-//#define RemoveAdsProductIdentifier          @"Zeppelinium.Plaque.Unlock"
+#define ProductIdentifier1DMAQ              @"Zeppelinium.VP.DMAQ1"
 
 // Authentificator
 //
@@ -78,12 +86,15 @@
 
 // Communicator
 //
+#define ReconnectIntervalIfConnectionFailed 1.0f
 #define ReconnectIntervalIfHandshakeFailed  1.0f
+#define ReconnectIntervalAfterConnectionLost 1.0f
+#define ReconnectIntervalIfConnectionMissing 1.0f
 
 #define BytesPerSendFragment                512
 
 #define FlushQueueBackgroundInterval        1800.0f
-#define FlushQueueForegroundInterval        5.0f
+#define FlushQueueForegroundInterval        3.0f
 
 #define TimeoutOnDialogueTransmit           5.0f
 #define TimeoutOnAnticipantTransmit         5.0f
@@ -204,17 +215,17 @@
 
 // Settings
 //
-#ifdef DEBUG
+#define LastApplicationVersionKey           @"LastApplicationVersion"
+#define LastDatabaseVersionKey              @"LastDatabaseVersion"
 #define TapMenuOnlyIconsKey                 @"TapMenuOnlyIcons"
 #define LastOwnObjectIdKey                  @"LastOwnObjectId"
+#ifdef DEBUG
 /*
  #define OnRadarRevisionKey                  @"OnRadarRevision2"
  #define InSightRevisionKey                  @"InSightRevision2"
  #define OnMapRevisionKey                    @"OnMapRevision2"
  */
 #else
-#define TapMenuOnlyIconsKey                 @"TapMenuOnlyIcons"
-#define LastOwnObjectIdKey                  @"LastOwnObjectId"
 /*
  #define OnRadarRevisionKey                  @"OnRadarRevision"
  #define InSightRevisionKey                  @"InSightRevision"

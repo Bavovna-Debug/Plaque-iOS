@@ -12,8 +12,8 @@
 
 + (SQLiteDatabase *)mainDatabase
 {
-    static dispatch_once_t onceToken;
-    static SQLiteDatabase *database;
+    static dispatch_once_t  onceToken;
+    static SQLiteDatabase   *database;
 
     dispatch_once(&onceToken, ^
     {
@@ -26,6 +26,14 @@
     });
 
     return database;
+}
+
++ (void)upgradeDatabase
+{
+    SQLiteDatabase *database = [Database mainDatabase];
+
+    [database executeSQL:@"ALTER TABLE plaques ADD COLUMN fortified INTEGER NOT NULL DEFAULT 0"
+       ignoreConstraints:YES];
 }
 
 @end

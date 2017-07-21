@@ -93,6 +93,11 @@
             logoName = @"EditModeInscription";
             labelText = NSLocalizedString(@"EDIT_MODE_INSCRIPTION_BUTTON", nil);
             break;
+
+        case EditModeFortify:
+            logoName = @"EditModeFortify";
+            labelText = NSLocalizedString(@"EDIT_MODE_FORTIFY_BUTTON", nil);
+            break;
     }
 
     [self setBackgroundImage:[UIImage imageNamed:logoName] forState:UIControlStateNormal];

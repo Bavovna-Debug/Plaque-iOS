@@ -6,6 +6,7 @@
 
 #import <CoreLocation/CoreLocation.h>
 
+#import "AppStore.h"
 #import "EditModeView.h"
 #import "EditModeSelectButton.h"
 #import "EditModeCoordinateSubview.h"
@@ -17,6 +18,8 @@
 #import "EditModeFontSubview.h"
 #import "EditModeInscriptionView.h"
 #import "Plaques.h"
+
+#undef FORTIFICATION
 
 @interface EditModeView ()
 
@@ -89,15 +92,18 @@
     //CGSize buttonSize = [EditModeSelectButton buttonSize];
     //CGRect buttonFrame = CGRectMake(0.0f, 0.0f, buttonSize.width, buttonSize.height);
 
-    EditModeSelectButton *coordinateButton = [EditModeSelectButton button:EditModeCoordinate];
-    EditModeSelectButton *altitudeButton = [EditModeSelectButton button:EditModeAltitude];
-    EditModeSelectButton *directionButton = [EditModeSelectButton button:EditModeDirection];
-    EditModeSelectButton *tiltButton = [EditModeSelectButton button:EditModeTilt];
-    EditModeSelectButton *sizeButton = [EditModeSelectButton button:EditModeSize];
+    EditModeSelectButton *coordinateButton      = [EditModeSelectButton button:EditModeCoordinate];
+    EditModeSelectButton *altitudeButton        = [EditModeSelectButton button:EditModeAltitude];
+    EditModeSelectButton *directionButton       = [EditModeSelectButton button:EditModeDirection];
+    EditModeSelectButton *tiltButton            = [EditModeSelectButton button:EditModeTilt];
+    EditModeSelectButton *sizeButton            = [EditModeSelectButton button:EditModeSize];
     EditModeSelectButton *backgroundColorButton = [EditModeSelectButton button:EditModeBackgroundColor];
     EditModeSelectButton *foregroundColorButton = [EditModeSelectButton button:EditModeForegroundColor];
-    EditModeSelectButton *fontButton = [EditModeSelectButton button:EditModeFont];
-    EditModeSelectButton *inscriptionButton = [EditModeSelectButton button:EditModeInscription];
+    EditModeSelectButton *fontButton            = [EditModeSelectButton button:EditModeFont];
+    EditModeSelectButton *inscriptionButton     = [EditModeSelectButton button:EditModeInscription];
+#ifdef FORTIFICATION
+    EditModeSelectButton *fortifyButton         = [EditModeSelectButton button:EditModeFortify];
+#endif
 
     [self.selectorPanel addSubview:coordinateButton];
     [self.selectorPanel addSubview:altitudeButton];
@@ -108,16 +114,27 @@
     [self.selectorPanel addSubview:foregroundColorButton];
     [self.selectorPanel addSubview:fontButton];
     [self.selectorPanel addSubview:inscriptionButton];
+#ifdef FORTIFICATION
+    [self.selectorPanel addSubview:fortifyButton];
+#endif
 
-    [coordinateButton setCenter:CGPointMake(32.0f, 48.0f)];
-    [altitudeButton setCenter:CGPointMake(96.0f, 48.0f)];
-    [directionButton setCenter:CGPointMake(160.0f, 48.0f)];
-    [tiltButton setCenter:CGPointMake(224.0f, 48.0f)];
-    [sizeButton setCenter:CGPointMake(288.0f, 48.0f)];
-    [backgroundColorButton setCenter:CGPointMake(64.0f, 144.0f)];
-    [foregroundColorButton setCenter:CGPointMake(128.0f, 144.0f)];
-    [fontButton setCenter:CGPointMake(192.0f, 144.0f)];
-    [inscriptionButton setCenter:CGPointMake(256.0f, 144.0f)];
+    [coordinateButton       setCenter:CGPointMake(32.0f, 48.0f)];
+    [altitudeButton         setCenter:CGPointMake(96.0f, 48.0f)];
+    [directionButton        setCenter:CGPointMake(160.0f, 48.0f)];
+    [tiltButton             setCenter:CGPointMake(224.0f, 48.0f)];
+    [sizeButton             setCenter:CGPointMake(288.0f, 48.0f)];
+#ifdef FORTIFICATION
+    [backgroundColorButton  setCenter:CGPointMake(32.0f, 144.0f)];
+    [foregroundColorButton  setCenter:CGPointMake(96.0f, 144.0f)];
+    [fontButton             setCenter:CGPointMake(160.0f, 144.0f)];
+    [inscriptionButton      setCenter:CGPointMake(224.0f, 144.0f)];
+    [fortifyButton          setCenter:CGPointMake(288.0f, 144.0f)];
+#else
+    [backgroundColorButton  setCenter:CGPointMake(64.0f, 144.0f)];
+    [foregroundColorButton  setCenter:CGPointMake(128.0f, 144.0f)];
+    [fontButton             setCenter:CGPointMake(192.0f, 144.0f)];
+    [inscriptionButton      setCenter:CGPointMake(256.0f, 144.0f)];
+#endif
 
     NSArray *buttons = [NSArray arrayWithObjects:coordinateButton,
                         altitudeButton,
@@ -128,6 +145,9 @@
                         foregroundColorButton,
                         fontButton,
                         inscriptionButton,
+#ifdef FORTIFICATION
+                        fortifyButton,
+#endif
                         nil];
 
     for (EditModeSelectButton *button in buttons)
@@ -142,21 +162,11 @@
 {
     EditModeSelectButton *button = sender;
 
-    EditMode editMode = button.editMode;
-
-    if (editMode != EditModeInscription)
-    {
-        [self movePanelsLeft];
-    }
-
-    for (UIView *controlsPanelSubview in self.controlsPanel.subviews)
-    {
-        [controlsPanelSubview removeFromSuperview];
-    }
+    [self.controlsPanel removeSubviews];
 
     CGRect controlsPanelSubviewFrame = self.controlsPanel.bounds;
 
-    switch (editMode)
+    switch (button.editMode)
     {
         case EditModeCoordinate:
         {
@@ -165,6 +175,8 @@
 
             [subview setFrame:controlsPanelSubviewFrame];
             [self.controlsPanel addSubview:subview];
+
+            [self movePanelsLeft];
 
             break;
         }
@@ -177,6 +189,8 @@
             [subview setFrame:controlsPanelSubviewFrame];
             [self.controlsPanel addSubview:subview];
 
+            [self movePanelsLeft];
+
             break;
         }
 
@@ -187,6 +201,8 @@
 
             [subview setFrame:controlsPanelSubviewFrame];
             [self.controlsPanel addSubview:subview];
+
+            [self movePanelsLeft];
 
             break;
         }
@@ -199,6 +215,8 @@
             [subview setFrame:controlsPanelSubviewFrame];
             [self.controlsPanel addSubview:subview];
 
+            [self movePanelsLeft];
+
             break;
         }
 
@@ -209,6 +227,8 @@
 
             [subview setFrame:controlsPanelSubviewFrame];
             [self.controlsPanel addSubview:subview];
+
+            [self movePanelsLeft];
 
             break;
         }
@@ -221,6 +241,8 @@
             [subview setFrame:controlsPanelSubviewFrame];
             [self.controlsPanel addSubview:subview];
 
+            [self movePanelsLeft];
+
             break;
         }
 
@@ -231,6 +253,8 @@
 
             [subview setFrame:controlsPanelSubviewFrame];
             [self.controlsPanel addSubview:subview];
+
+            [self movePanelsLeft];
 
             break;
         }
@@ -243,6 +267,8 @@
             [subview setFrame:controlsPanelSubviewFrame];
             [self.controlsPanel addSubview:subview];
 
+            [self movePanelsLeft];
+
             break;
         }
 
@@ -253,6 +279,36 @@
 
             [subview setFrame:self.bounds];
             [self addSubview:subview];
+
+            break;
+        }
+
+        case EditModeFortify:
+        {
+#if 0
+            Plaques *plaques = [Plaques sharedPlaques];
+            if ([plaques plaqueUnderFortification] != nil)
+            {
+                NSString *message = NSLocalizedString(@"MESSAGE_FORTIFICATION_IN_PROCESS", nil);
+                NSString *okButton = NSLocalizedString(@"ALERT_BUTTON_OK", nil);
+
+                UIAlertView *alertView =
+                [[UIAlertView alloc] initWithTitle:nil
+                                           message:message
+                                          delegate:nil
+                                 cancelButtonTitle:okButton
+                                 otherButtonTitles:nil];
+                
+                [alertView setAlertViewStyle:UIAlertViewStyleDefault];
+                [alertView show];
+            }
+            else
+            {
+                [plaques setPlaqueUnderFortification:self.plaque];
+
+                [[AppStore sharedAppStore] purchaseFortification];
+            }
+#endif
 
             break;
         }

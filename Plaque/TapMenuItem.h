@@ -7,7 +7,8 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-typedef enum {
+typedef enum
+{
     TapMenuMainCreateNewPlaque,
     TapMenuMainProfile,
 
@@ -30,7 +31,8 @@ typedef enum {
     TapMenuPlaqueEditModeBackgroundColor,
     TapMenuPlaqueEditModeForegroundColor,
     TapMenuPlaqueEditModeRemove
-} TapMenuCommand;
+}
+TapMenuCommand;
 
 @interface TapMenuItemView : UIButton
 

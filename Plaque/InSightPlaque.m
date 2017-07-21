@@ -24,16 +24,18 @@
     CGFloat scaleFactor;
 }
 
-@synthesize directionFromUser = _directionFromUser;
-@synthesize distanceToUser = _distanceToUser;
-@synthesize altitudeOverUser = _altitudeOverUser;
-@synthesize inSight = _inSight;
+@synthesize directionFromUser   = _directionFromUser;
+@synthesize distanceToUser      = _distanceToUser;
+@synthesize altitudeOverUser    = _altitudeOverUser;
+@synthesize inSight             = _inSight;
 
 - (id)initWithParentView:(UIView *)parentView
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
 
     self.parentView = (InSightView *)parentView;
     self.needRedraw = YES;
@@ -60,6 +62,7 @@
     if (distanceToUser != _distanceToUser)
     {
         _distanceToUser = distanceToUser;
+
         [self setNeedRedraw:YES];
     }
 }
@@ -69,17 +72,23 @@
     if (altitudeOverUser != _altitudeOverUser)
     {
         _altitudeOverUser = altitudeOverUser;
+
         [self setNeedRedraw:YES];
     }
 }
 
 - (void)setInSight:(Boolean)inSight
 {
-    if (inSight != _inSight) {
+    if (inSight != _inSight)
+    {
         _inSight = inSight;
-        if (inSight == NO) {
+
+        if (inSight == NO)
+        {
             [self destroyLayer];
-        } else {
+        }
+        else
+        {
             [self createLayer];
         }
     }
@@ -87,9 +96,12 @@
 
 - (CGFloat)distanceToAimWithTiltOffset:(CGFloat)tiltOffset
 {
-    if ([self inSight] == NO) {
+    if ([self inSight] == NO)
+    {
         return CGFLOAT_MAX;
-    } else {
+    }
+    else
+    {
         return roundf(sqrtf(powf(transX, 2.0f) + powf(transY - tiltOffset, 2.0f)));
     }
 }
@@ -117,18 +129,25 @@
 {
     CALayer *plaqueLayer = self.plaqueLayer;
     if (plaqueLayer != nil)
+    {
         [plaqueLayer removeFromSuperlayer];
+    }
 }
 
 - (CGRect)plaqueLayerFrame
 {
     Plaque *plaque = self.plaque;
-    CGSize plaqueViewSize = CGSizeMake(plaque.size.width * self.parentView.fullScreenWidth,
-                                       plaque.size.height * self.parentView.fullScreenWidth);
-    CGRect frame = CGRectMake(CGRectGetMidX(self.parentView.container.bounds) - plaqueViewSize.width / 2,
-                              CGRectGetMidY(self.parentView.container.bounds) - plaqueViewSize.height / 2,
-                              plaqueViewSize.width,
-                              plaqueViewSize.height);
+
+    CGSize plaqueViewSize =
+    CGSizeMake(plaque.size.width * self.parentView.fullScreenWidth,
+               plaque.size.height * self.parentView.fullScreenWidth);
+
+    CGRect frame =
+    CGRectMake(CGRectGetMidX(self.parentView.container.bounds) - plaqueViewSize.width / 2,
+               CGRectGetMidY(self.parentView.container.bounds) - plaqueViewSize.height / 2,
+               plaqueViewSize.width,
+               plaqueViewSize.height);
+
     return frame;
 }
 
@@ -149,9 +168,12 @@
     transY *= 10.0f;
     scaleFactor *= 10.0f;
 
-    if ((self.plaque.cloneChain != nil) && (self.plaque.rowId != 0)) {
+    if ((self.plaque.cloneChain != nil) && (self.plaque.rowId != 0))
+    {
         [plaqueLayer setOpacity:0.2f];
-    } else {
+    }
+    else
+    {
         [plaqueLayer setOpacity:0.8f];
     }
 
@@ -161,16 +183,20 @@
     transform = CATransform3DScale(transform, scaleFactor, scaleFactor, scaleFactor);
 
     if (self.rotationOnScreen != 0.0f)
+    {
         transform = CATransform3DRotate(transform, DegreesToRadians(self.rotationOnScreen), 0, -1, 0);
+    }
 
     if (self.plaque.tilt != 0.0f)
+    {
         transform = CATransform3DRotate(transform, DegreesToRadians(self.plaque.tilt), 1, 0, 0);
+    }
 
     [plaqueLayer setZPosition:roundf(self.parentView.rangeInSight - self.distanceToUser)];
     [plaqueLayer setTransform:transform];
 
 #ifdef VerboseInSightPlaqueRedraw
-    NSLog(@"Redraw plaque in sight %@ (%@)",
+    NSLog(@"[InSightPlaque] Redraw plaque in sight %@ '%@'",
           [self.plaque.plaqueToken UUIDString],
           self.plaque.inscription);
 #endif
@@ -201,8 +227,11 @@
     if ((plaqueLayer != nil) && (inscriptionLayer != nil))
     {
         CGRect plaqueLayerFrame = [self plaqueLayerFrame];
+
         [self.plaqueLayer setFrame:plaqueLayerFrame];
+
         //[self.plaqueTextLayer setFrame:CGRectInset(self.plaqueLayer.bounds, 2.0f, 2.0f)];
+
         [self.plaque resizeInscriptionLayer:inscriptionLayer
                                    forLayer:plaqueLayer];
     }
@@ -210,16 +239,21 @@
 
 - (void)didChangeColor
 {
-    if (CGColorEqualToColor([self.plaque.backgroundColor CGColor], [[UIColor clearColor] CGColor]) == NO) {
+    if (CGColorEqualToColor([self.plaque.backgroundColor CGColor], [[UIColor clearColor] CGColor]) == NO)
+    {
         [self.plaqueLayer setBackgroundColor:[self.plaque.backgroundColor CGColor]];
         [self.plaqueLayer setBorderWidth:PlaqueBorderWidth];
-    } else {
+    }
+    else
+    {
         [self.plaqueLayer setBackgroundColor:nil];
         [self.plaqueLayer setBorderWidth:0.0f];
     }
 
-    if (self.plaque.image == nil) {
+    if (self.plaque.image == nil)
+    {
         CATextLayer *textLayer = (CATextLayer *)self.inscriptionLayer;
+
         [textLayer setForegroundColor:[self.plaque.foregroundColor CGColor]];
     }
 }
@@ -229,11 +263,14 @@
     if (self.plaque.image == nil)
     {
         CALayer *plaqueLayer = self.plaqueLayer;
+
         CATextLayer *textLayer = (CATextLayer *)self.inscriptionLayer;
 
         if ((plaqueLayer != nil) && (textLayer != nil))
+        {
             [self.plaque resizeInscriptionLayer:textLayer
                                        forLayer:plaqueLayer];
+        }
 
         [self setNeedRedraw:YES];
     }
@@ -246,7 +283,9 @@
         CATextLayer *textLayer = (CATextLayer *)self.inscriptionLayer;
 
         if (textLayer != nil)
+        {
             [textLayer setString:[self.plaque inscription]];
+        }
     }
 }
 
@@ -261,9 +300,10 @@
     [capturedLayer setBorderWidth:self.parentView.fullScreenWidth * 0.6f];
     [capturedLayer setCornerRadius:self.parentView.fullScreenWidth * 0.6f];
 
-    CGRect capturedLayerFrame = CGRectInset(plaqueLayer.bounds,
-                                            -self.parentView.fullScreenWidth,
-                                            -self.parentView.fullScreenWidth);
+    CGRect capturedLayerFrame =
+    CGRectInset(plaqueLayer.bounds,
+                -self.parentView.fullScreenWidth,
+                -self.parentView.fullScreenWidth);
 
     [capturedLayer setFrame:capturedLayerFrame];
 

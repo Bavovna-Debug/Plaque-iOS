@@ -11,12 +11,12 @@
 
 @interface InSightView : SurroundingSubview
 
-@property (assign, nonatomic) CGFloat fullScreenWidth;
-@property (assign, nonatomic) CGFloat fullScreenMeterDistance;
-@property (assign, nonatomic) CGFloat fullScreenAngle;
-@property (assign, nonatomic) CGFloat rangeInSight;
+@property (assign, nonatomic, readwrite) CGFloat fullScreenWidth;
+@property (assign, nonatomic, readwrite) CGFloat fullScreenMeterDistance;
+@property (assign, nonatomic, readwrite) CGFloat fullScreenAngle;
+@property (assign, nonatomic, readwrite) CGFloat rangeInSight;
 
-@property (strong, nonatomic) CALayer *container;
+@property (strong, nonatomic, readwrite) CALayer *container;
 
 - (id)initWithController:(UIViewController *)controller;
 

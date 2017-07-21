@@ -7,6 +7,7 @@
 #import <CoreLocation/CoreLocation.h>
 
 #import "ApplicationDelegate.h"
+#import "ApplicationSetup.h"
 #import "Authentificator.h"
 #import "Database.h"
 #import "Navigator.h"
@@ -16,6 +17,7 @@
 #import "TapMenu.h"
 #import "Communicator.h"
 #import "Servers.h"
+#import "Settings.h"
 #import "SQLite.h"
 #import "StatusBar.h"
 
@@ -37,6 +39,8 @@
 - (BOOL)application:(UIApplication *)application
 didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    [self upgradeIfNecessary];
+
     [application setIdleTimerDisabled:YES];
 
     [application setMinimumBackgroundFetchInterval:MinimumBackgroundFetchInterval];
@@ -51,7 +55,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 
     [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
 
-    [[UIApplication sharedApplication] registerForRemoteNotifications];
+    [[ApplicationSetup sharedApplicationSetup] goThroughQuestionsAndAnswers];
 
     NSDictionary *remoteNotif =
     [launchOptions objectForKey:UIApplicationLaunchOptionsRemoteNotificationKey];
@@ -90,6 +94,47 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
     return YES;
 }
 
+- (void)upgradeIfNecessary
+{
+    Settings *sharedSettings = [Settings sharedSettings];
+
+    // Validate application version.
+    //
+    {
+        NSUInteger lastApplicationVersion = [sharedSettings lastApplicationVersion];
+
+        if (lastApplicationVersion < ApplicationVersion)
+        {
+            NSLog(@"Application resources need to be upgraded from version %lu",
+                  (unsigned long) lastApplicationVersion);
+
+            [sharedSettings setLastApplicationVersion:ApplicationVersion];
+
+            NSLog(@"Application resources have been upgraded to version %u",
+                  ApplicationVersion);
+        }
+    }
+
+    // Validate database version.
+    //
+    {
+        NSUInteger lastDatabaseVersion = [sharedSettings lastDatabaseVersion];
+
+        if (lastDatabaseVersion < DatabaseVersion)
+        {
+            NSLog(@"Database resources need to be upgraded from version %lu",
+                  (unsigned long) lastDatabaseVersion);
+
+            [Database upgradeDatabase];
+
+            [sharedSettings setLastDatabaseVersion:DatabaseVersion];
+
+            NSLog(@"Database resources have been upgraded to version %u",
+                  DatabaseVersion);
+        }
+    }
+}
+
 - (void)applicationDidReceiveMemoryWarning:(UIApplication *)application
 {
 #ifdef VERBOSE
@@ -102,6 +147,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 #ifdef VERBOSE
     NSLog(@"[ApplicationDelegate] Application will resign active");
 #endif
+
     inBackground = TRUE;
     [self.controller switchToBackground];
 
@@ -110,8 +156,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
     [plaques savePlaquesCache];
     [plaques saveWorkdesk];
 
-    Communicator *communicator = [Communicator sharedCommunicator];
-    [communicator switchToBackground];
+    [[Communicator sharedCommunicator] switchToBackground];
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application
@@ -119,6 +164,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 #ifdef VERBOSE
     NSLog(@"[ApplicationDelegate] Application will enter foreground");
 #endif
+
     [[Communicator sharedCommunicator] switchToForeground];
 
     [[Plaques sharedPlaques] switchToForeground];

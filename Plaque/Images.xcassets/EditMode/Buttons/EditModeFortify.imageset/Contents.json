@@ -2,18 +2,18 @@
   "images" : [
     {
       "idiom" : "universal",
-      "scale" : "1x",
-      "filename" : "Network-StartGaging.png"
+      "filename" : "EditModeFortify.png",
+      "scale" : "1x"
     },
     {
       "idiom" : "universal",
-      "scale" : "2x",
-      "filename" : "Network-StartGaging@2x.png"
+      "filename" : "EditModeFortify@2x.png",
+      "scale" : "2x"
     },
     {
       "idiom" : "universal",
-      "scale" : "3x",
-      "filename" : "Network-StartGaging@3x.png"
+      "filename" : "EditModeFortify@3x.png",
+      "scale" : "3x"
     }
   ],
   "info" : {

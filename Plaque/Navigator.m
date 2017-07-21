@@ -56,11 +56,13 @@
     [self.locationManager setHeadingFilter:1.0f];
     [self.locationManager setDelegate:self];
 
+#if 0
     if ([self.locationManager respondsToSelector:@selector(requestAlwaysAuthorization)])
     {
         [self.locationManager requestAlwaysAuthorization];
     }
-
+#endif
+    
     if ([self.locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)])
     {
         [self.locationManager requestWhenInUseAuthorization];

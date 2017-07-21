@@ -8,28 +8,62 @@
 #import "Panel.h"
 
 @implementation Panel
+{
+    UIImageView *backgroundImage;
+}
 
 - (void)didMoveToSuperview
 {
     [super didMoveToSuperview];
 
-    if (self.superview != nil) {
+    if (self.superview != nil)
+    {
         [self didOpenPanel];
-    } else {
+    }
+    else
+    {
         [self didClosePanel];
     }
 }
 
 - (void)didOpenPanel
 {
-    [self setBackgroundColor:[UIColor colorWithRed:0.784f green:0.784f blue:0.784f alpha:0.750f]];
+    //[self setBackgroundColor:[UIColor colorWithRed:0.784f green:0.784f blue:0.784f alpha:0.750f]];
+    [self setBackgroundColor:[UIColor clearColor]];
     [self.layer setBorderWidth:2.0f];
-    [self.layer setBorderColor:[[UIColor colorWithRed:0.416f green:0.416f blue:0.416f alpha:1.0f] CGColor]];
+    [self.layer setBorderColor:[[UIColor colorWithRed:0.416f green:0.416f blue:0.416f alpha:0.8f] CGColor]];
     [self.layer setCornerRadius:4.0f];
 }
 
 - (void)didClosePanel
 {
+}
+
+- (void)setBackground:(NSString *)backgroundImageName
+{
+    if (backgroundImage != nil)
+    {
+        [backgroundImage removeFromSuperview];
+    }
+
+    backgroundImage =
+    [[UIImageView alloc] initWithImage:[UIImage imageNamed:backgroundImageName]];
+
+    [backgroundImage setFrame:CGRectInset(self.bounds, 2.0f, 2.0f)];
+    [backgroundImage setAlpha:0.8f];
+
+    [self insertSubview:backgroundImage atIndex:0];
+}
+
+- (void)removeSubviews
+{
+    for (UIView *subview in self.subviews)
+    {
+        if (subview != backgroundImage)
+        {
+            [subview removeFromSuperview];
+        }
+    }
 }
 
 - (void)translate:(CGFloat)direction

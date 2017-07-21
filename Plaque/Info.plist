@@ -19,18 +19,17 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>170715</string>
+	<string>170721</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>Augmented reality app requires access to camera.</string>
-	<key>NSLocationAlwaysUsageDescription</key>
+	<key>NSLocationUsageDescription</key>
 	<string>Augmented reality app requires access to GPS.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Augmented reality app requires access to camera.</string>
 	<key>UIBackgroundModes</key>
 	<array>
-		<string>location</string>
 		<string>remote-notification</string>
 	</array>
 	<key>UILaunchStoryboardName</key>

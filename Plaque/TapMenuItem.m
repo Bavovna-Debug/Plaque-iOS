@@ -20,7 +20,9 @@
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
 
     self.iconName = iconName;
     self.command = command;
@@ -32,8 +34,11 @@
 - (TapMenuItemView *)prepareViewFor:(UIView *)superview
 {
     TapMenuItemView *view = [[TapMenuItemView alloc] initWithOwner:self];
+
     [view setFrame:CGRectMake(0.0f, CGRectGetMaxY(superview.bounds), 1.0f, 1.0f)];
+
     self.view = view;
+
     return view;
 }
 
@@ -51,11 +56,15 @@
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
 
     self.owner = owner;
 
-    [self setBackgroundColor:[UIColor colorWithWhite:1.0f alpha:0.4f]];
+    [self setBackgroundColor:[UIColor colorWithWhite:1.0f
+                                               alpha:0.4f]];
+    
     [self setAlpha:0.0f];
 
     TapMenuItem *item = (TapMenuItem *)owner;
@@ -64,17 +73,21 @@
     [self.icon setTranslatesAutoresizingMaskIntoConstraints:NO];
     [self addSubview:self.icon];
 
-    NSDictionary *viewsDictionary = @{@"icon":self.icon};
-    [self addConstraints:[NSLayoutConstraint
-                          constraintsWithVisualFormat:@"H:|-0-[icon]-0-|"
-                          options:NSLayoutFormatAlignAllBaseline
-                          metrics:nil
-                          views:viewsDictionary]];
-    [self addConstraints:[NSLayoutConstraint
-                          constraintsWithVisualFormat:@"V:|-0-[icon]-0-|"
-                          options:NSLayoutFormatAlignAllBaseline
-                          metrics:nil
-                          views:viewsDictionary]];
+    {
+        NSDictionary *viewsDictionary = @{@"icon":self.icon};
+
+        [self addConstraints:[NSLayoutConstraint
+                              constraintsWithVisualFormat:@"H:|-0-[icon]-0-|"
+                              options:NSLayoutFormatAlignAllBaseline
+                              metrics:nil
+                              views:viewsDictionary]];
+
+        [self addConstraints:[NSLayoutConstraint
+                              constraintsWithVisualFormat:@"V:|-0-[icon]-0-|"
+                              options:NSLayoutFormatAlignAllBaseline
+                              metrics:nil
+                              views:viewsDictionary]];
+    }
 
     [self.layer setBorderColor:[[UIColor blackColor] CGColor]];
     [self.layer setBorderWidth:2.0f];

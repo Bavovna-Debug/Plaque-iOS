@@ -19,7 +19,11 @@
 
 #include "Definitions.h"
 
-@interface InSightView () <CLLocationManagerDelegate, PlaquesDelegate>
+@interface InSightView () <
+    CLLocationManagerDelegate,
+    PlaquesDelegate,
+    UIImagePickerControllerDelegate,
+    UINavigationControllerDelegate>
 
 @property (weak,   nonatomic) MainController            *controller;
 @property (strong, nonatomic) UIImagePickerController   *cameraController;
@@ -42,6 +46,7 @@
 @property (assign, nonatomic) CGFloat                   turn;
 
 @property (strong, nonatomic) NSTimer                   *captureTimer;
+@property (strong, nonatomic) NSTimer                   *cameraWorkaroundTimer;
 
 @end
 
@@ -57,7 +62,9 @@
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
 
     self.controller = (MainController *)controller;
 
@@ -130,7 +137,9 @@
         containterFrame.size.height *= 3.0f;
 
         if (CGRectEqualToRect(self.container.frame, containterFrame) == NO)
+        {
             [self.container setFrame:containterFrame];
+        }
 
         self.fullScreenWidth = floorf(CGRectGetWidth(self.bounds) / 10.0f);
         self.fullScreenMeterDistance = 1.5f;
@@ -143,7 +152,9 @@
     [super pause];
 
     if (running == NO)
+    {
         return;
+    }
 
     [self stopCapturer];
 
@@ -162,7 +173,9 @@
     [super resume];
     
     if (running == YES)
+    {
         return;
+    }
 
     [self switchCameraOn];
 
@@ -213,10 +226,13 @@
          if (round(tilt / TiltAccuracy) != round(self.tilt / TiltAccuracy))
          {
              self.tilt = tilt;
+
              [self tiltUp];
          }
 #else
+
         self.tilt = tilt;
+
         [self tiltUp];
 #endif
 
@@ -226,11 +242,14 @@
              self.turn = turn;
          }
 #else
+
         self.turn = turn;
 #endif
 
-         if (error)
-             NSLog(@"%@", error);
+        if (error)
+        {
+             NSLog(@"[InSightView] %@", error);
+        }
      }];
 }
 
@@ -255,6 +274,7 @@
     if (captureTimer != nil)
     {
         self.captureTimer = nil;
+
         [captureTimer invalidate];
     }
 }
@@ -302,11 +322,14 @@
 - (void)tiltUp
 {
     if ([self.tiltLock tryLock] == FALSE)
+    {
         return;
+    }
 
     if ((self.tilt < -(M_PI_2 / 90.0f * 50.0f)) || (self.tilt > (M_PI_2 / 90.0f * 40.0f)))
     {
         [self.tiltLock unlock];
+
         return;
     }
 
@@ -360,6 +383,7 @@
             if (inSightPlaque.plaque == plaque)
             {
                 existingInSightPlaque = inSightPlaque;
+
                 break;
             }
         }
@@ -511,7 +535,9 @@
         {
             layer = layer.superlayer;
             if (layer == nil)
+            {
                 break;
+            }
         }
 
         // If a layer under touch belongs to some InSightPlaque then capture it
@@ -555,8 +581,12 @@
 - (InSightPlaque *)inSightPlaqueByPlaque:(Plaque *)plaque
 {
     for (InSightPlaque *inSightPlaque in self.inSightPlaques)
+    {
         if (inSightPlaque.plaque == plaque)
+        {
             return inSightPlaque;
+        }
+    }
 
     return nil;
 }
@@ -570,6 +600,7 @@
 
     [self recalculateInSightPlaque:inSightPlaque
                        forLocation:self.location];
+
     [self recalculateInSightPlaque:inSightPlaque
                         forHeading:self.heading];
 
@@ -578,7 +609,7 @@
     [self.inSightPlaques addObject:inSightPlaque];
 
 #ifdef VerboseInSightViewPlaqueDidAppear
-    NSLog(@"Plaque did appear in sight %@",
+    NSLog(@"[InSightView] Plaque did appear in sight %@",
           [inSightPlaque.plaque.plaqueToken UUIDString]);
 #endif
 }
@@ -589,8 +620,11 @@
     if (inSightPlaque != nil)
     {
         [self.refreshLock lock];
+
         [inSightPlaque didDisappear];
+
         [self.inSightPlaques removeObject:inSightPlaque];
+
         [self.refreshLock unlock];
     }
 }
@@ -602,6 +636,7 @@
 
     [self recalculateInSightPlaque:inSightPlaque
                        forLocation:self.location];
+
     [self recalculateInSightPlaque:inSightPlaque
                         forHeading:self.heading];
 
@@ -616,8 +651,11 @@
     if (inSightPlaque != nil)
     {
         [self.refreshLock lock];
+
         [inSightPlaque didDisappear];
+
         [self.inSightPlaques removeObject:inSightPlaque];
+
         [self.refreshLock unlock];
     }
 }
@@ -654,42 +692,54 @@
 {
     InSightPlaque *inSightPlaque = [self inSightPlaqueByPlaque:plaque];
     if (inSightPlaque != nil)
+    {
         [inSightPlaque didResize];
+    }
 }
 
 - (void)plaqueDidChangeColor:(Plaque *)plaque
 {
     InSightPlaque *inSightPlaque = [self inSightPlaqueByPlaque:plaque];
     if (inSightPlaque != nil)
+    {
         [inSightPlaque didChangeColor];
+    }
 }
 
 - (void)plaqueDidChangeFont:(Plaque *)plaque
 {
     InSightPlaque *inSightPlaque = [self inSightPlaqueByPlaque:plaque];
     if (inSightPlaque != nil)
+    {
         [inSightPlaque didChangeFont];
+    }
 }
 
 - (void)plaqueDidChangeInscription:(Plaque *)plaque
 {
     InSightPlaque *inSightPlaque = [self inSightPlaqueByPlaque:plaque];
     if (inSightPlaque != nil)
+    {
         [inSightPlaque didChangeInscription];
+    }
 }
 
 - (void)plaqueDidBecomeCaptured:(Plaque *)plaque
 {
     InSightPlaque *inSightPlaque = [self inSightPlaqueByPlaque:plaque];
     if (inSightPlaque != nil)
+    {
         [inSightPlaque didBecomeCaptured];
+    }
 }
 
 - (void)plaqueDidReleaseCaptured:(Plaque *)plaque
 {
     InSightPlaque *inSightPlaque = [self inSightPlaqueByPlaque:plaque];
     if (inSightPlaque != nil)
+    {
         [inSightPlaque didReleaseCaptured];
+    }
 }
 
 #pragma mark - Camera
@@ -698,46 +748,107 @@
 {
     NSString *mediaType = AVMediaTypeVideo;
 
-    if ([AVCaptureDevice respondsToSelector:@selector(requestAccessForMediaType:completionHandler:)])
+    AVAuthorizationStatus authorizationStatus =
+    [AVCaptureDevice authorizationStatusForMediaType:mediaType];
+
+    switch (authorizationStatus)
     {
-        [AVCaptureDevice requestAccessForMediaType:mediaType completionHandler:^(BOOL granted)
+        case AVAuthorizationStatusAuthorized:
+        case AVAuthorizationStatusRestricted:
         {
-            if (granted)
+            // Access granted.
+
+            break;
+        }
+
+        case AVAuthorizationStatusDenied:
+        {
+            // FIXME: Show a message.
+
+            break;
+        }
+
+        case AVAuthorizationStatusNotDetermined:
+        {
+            if ([AVCaptureDevice respondsToSelector:@selector(requestAccessForMediaType:completionHandler:)])
             {
-                self.cameraAuthorized = YES;
-            }
-            else
-            {
-                self.cameraAuthorized = NO;
-                dispatch_async(dispatch_get_main_queue(), ^
+                [AVCaptureDevice requestAccessForMediaType:mediaType
+                                         completionHandler:^(BOOL granted)
                 {
-                    [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"AVERROR_TITLE", nil)
-                                                message:NSLocalizedString(@"AVERROR_MESSAGE", nil)
-                                               delegate:self
-                                      cancelButtonTitle:NSLocalizedString(@"OK_BUTTON", nil)
-                                      otherButtonTitles:nil] show];
-                });
+                    if (granted)
+                    {
+                        self.cameraAuthorized = YES;
+                    }
+                    else
+                    {
+                        self.cameraAuthorized = NO;
+
+                        dispatch_async(dispatch_get_main_queue(), ^
+                        {
+                            [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"AVERROR_TITLE", nil)
+                                                        message:NSLocalizedString(@"AVERROR_MESSAGE", nil)
+                                                       delegate:self
+                                              cancelButtonTitle:NSLocalizedString(@"ALERT_BUTTON_OK", nil)
+                                              otherButtonTitles:nil] show];
+                        });
+                     }
+                 }];
             }
-        }];
+
+            [self startCameraWorkaround];
+
+            break;
+        }
+
+        default:
+            break;
     }
+}
+
+- (void)startCameraWorkaround
+{
+    self.cameraWorkaroundTimer =
+    [NSTimer scheduledTimerWithTimeInterval:3.0f
+                                     target:self
+                                   selector:@selector(fireCameraWorkaround:)
+                                   userInfo:nil
+                                    repeats:NO];
+}
+
+- (void)fireCameraWorkaround:(NSTimer *)timer
+{
+    [self switchCameraOff];
+    [self switchCameraOn];
 }
 
 - (void)switchCameraOn
 {
     if (self.cameraController != nil)
+    {
         return;
+    }
 
     @try
     {
         self.cameraController = [[UIImagePickerController alloc] init];
+
+        if (self.cameraController == nil)
+        {
+            NSLog(@"No camera available");
+
+            return;
+        }
+
+        [self.cameraController setDelegate:self];
         [self.cameraController setSourceType:UIImagePickerControllerSourceTypeCamera];
         [self.cameraController setCameraDevice:UIImagePickerControllerCameraDeviceRear];
         [self.cameraController setCameraCaptureMode:UIImagePickerControllerCameraCaptureModePhoto];
         [self.cameraController setShowsCameraControls:NO];
         [self.cameraController setToolbarHidden:YES];
         [self.cameraController setNavigationBarHidden:YES];
-        [self.cameraController setEdgesForExtendedLayout:UIRectEdgeAll];
-        [self.cameraController.view setAlpha:0.4f];
+        [self.cameraController setEdgesForExtendedLayout:UIRectEdgeNone];
+        [self.cameraController setAutomaticallyAdjustsScrollViewInsets:NO];
+        [self.cameraController.view setAlpha:CameraAlphaLevel];
 
         CGRect screenBounds = [[UIScreen mainScreen] bounds];
 
@@ -758,11 +869,13 @@
         [self insertSubview:self.cameraController.view atIndex:0];
 
         NSDictionary *viewsDictionary = @{@"cameraView":self.cameraController.view};
+
         [self addConstraints:[NSLayoutConstraint
                               constraintsWithVisualFormat:@"H:|-0-[cameraView]-0-|"
                               options:0
                               metrics:nil
                               views:viewsDictionary]];
+
         [self addConstraints:[NSLayoutConstraint
                               constraintsWithVisualFormat:@"V:|-0-[cameraView]-0-|"
                               options:0
@@ -770,12 +883,12 @@
                               views:viewsDictionary]];
 
 #ifdef VerboseInSightViewCamera
-        NSLog(@"Camera aspect ratio: %f", cameraAspectRatio);
+        NSLog(@"[InSightView] Camera aspect ratio %f", cameraAspectRatio);
 #endif
     }
     @catch (NSException *exception)
     {
-        NSLog(@"Camera exception: %@", exception);
+        NSLog(@"[InSightView] Camera exception: %@", exception);
     }
 }
 
@@ -784,6 +897,7 @@
     if (self.cameraController != nil)
     {
         [self.cameraController.view removeFromSuperview];
+
         self.cameraController = nil;
     }
 }

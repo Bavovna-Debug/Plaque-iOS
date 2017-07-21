@@ -19,10 +19,11 @@
 
 + (SurroundingSelector *)panel
 {
-    static dispatch_once_t onceToken;
-    static SurroundingSelector *viewModePanel;
+    static dispatch_once_t      onceToken;
+    static SurroundingSelector  *viewModePanel;
 
-    dispatch_once(&onceToken, ^{
+    dispatch_once(&onceToken, ^
+    {
         viewModePanel = [[SurroundingSelector alloc] init];
     });
 
@@ -33,7 +34,9 @@
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
 
     self.surroundingViewMode = SurroundingInSight;
 
@@ -74,13 +77,16 @@
     UIImage *onMapImage = [UIImage imageNamed:@"ViewModeOnMap"];
 
     self.inSightButton = [self buttonWithIcon:inSightImage];
+
     [self addSubview:self.inSightButton];
 
     self.onMapButton = [self buttonWithIcon:onMapImage];
+
     [self addSubview:self.onMapButton];
 
     [self.inSightButton setCenter:CGPointMake(round(CGRectGetWidth(self.bounds) / 3),
                                               CGRectGetMidY(self.bounds))];
+
     [self.onMapButton setCenter:CGPointMake(round(CGRectGetWidth(self.bounds) / 3 * 2),
                                             CGRectGetMidY(self.bounds))];
 
@@ -96,9 +102,11 @@
 - (UIButton *)buttonWithIcon:(UIImage *)buttonIcon
 {
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+
     [button setImage:buttonIcon
             forState:UIControlStateNormal];
-    [button setBounds:(CGRect){ CGPointZero, buttonIcon.size }];
+
+    [button setBounds:(CGRect) { CGPointZero, buttonIcon.size }];
 
     [button.layer setBackgroundColor:[[UIColor lightGrayColor] CGColor]];
     [button.layer setBorderColor:[[UIColor darkGrayColor] CGColor]];
@@ -116,12 +124,14 @@
 - (void)inSightButtonPressed:(id)sender
 {
     self.surroundingViewMode = SurroundingInSight;
+
     [self.delegate surroundingViewModeChanged:self.surroundingViewMode];
 }
 
 - (void)onMapButtonPressed:(id)sender
 {
     self.surroundingViewMode = SurroundingOnMap;
+    
     [self.delegate surroundingViewModeChanged:self.surroundingViewMode];
 }
 

@@ -6,9 +6,16 @@
 "AVERROR_TITLE"                             = "Kamera";
 "AVERROR_MESSAGE"                           = "Ohne Zugriff auf Kamera kann diese App die Inhalte der vpCloud in 3D nicht repräsentieren. Sie können Zugriff auf Kamera für diese App in den Systemeinstellungen Ihres Geräts aktivieren.";
 
-"CREATE_PLAQUE_LABEL"                       = "Plaque vor mir erstellen";
+"ALERT_BUTTON_OK"                           = "OK";
+"ALERT_BUTTON_NO"                           = "Nein";
+"ALERT_BUTTON_YES"                          = "Ja";
 
-"OK_BUTTON"                                 = "OK";
+"SETUP_QUESTION_ABOUT_GPS_TITLE"            = "Grundeinstellungen";
+"SETUP_QUESTION_ABOUT_GPS_MESSAGE"          = "";
+"SETUP_QUESTION_ABOUT_CAMERA_TITLE"         = "Grundeinstellungen";
+"SETUP_QUESTION_ABOUT_CAMERA_MESSAGE"       = "";
+"SETUP_QUESTION_ABOUT_NOTIFICATIONS_TITLE"  = "Grundeinstellungen";
+"SETUP_QUESTION_ABOUT_NOTIFICATIONS_MESSAGE" = "";
 
 "DO_YOU_WANT_TO_CREATE_PROFILE_TITLE"       = "Profil";
 "DO_YOU_WANT_TO_CREATE_PROFILE_MESSAGE"     = "Sie haben noch keinen Profil in vpCloud angelegt. Möchten Sie sich jetzt in vpCloud registrieren?";
@@ -32,13 +39,21 @@
 "PROFILE_FORM_PASSWORD_LABEL"               = "Passwort:";
 "PROFILE_FORM_PASSWORD_HELP"                = "";
 
+"CREATE_PLAQUE_LABEL"                       = "Plaque vor mir erstellen";
+
 "CREATE_PLAQUE_HELP_TEXT"                   = "Halte dein iPhone/iPad senkrecht. Richte es auf ein Objekt in deiner Nähe und drücke auf 'Platzieren'. Neuer Plaque erscheint in ca. 20 Meter vor dir.";
 "CREATE_PLAQUE_FIRE_BUTTON"                 = "Platzieren";
 "CREATE_PLAQUE_CANCEL_BUTTON"               = "Abbrechen";
 
 "DEFAULT_INSCRIPTION"                       = "Hier könnte Ihre Werbung sein";
 
-"EDIT_MODE_COORDINATE_BUTTON"               = "Ort";
+"APP_STORE_ERROR_MESSAGE"                   = "Ihre Bestellung kann in Moment nicht bearbeitet werden! Versuchen Sie es später.";
+
+"APP_STORE_NOT_YET"                         = "Nein, danke";
+"APP_STORE_BUY_NOW"                         = "Kaufen - %@";
+
+"EDIT_MODE_EDIT_BUTTON"                     = "Bearbeiten";
+"EDIT_MODE_COORDINATE_BUTTON"               = "Platzieren";
 "EDIT_MODE_ALTITUDE_BUTTON"                 = "Höhe";
 "EDIT_MODE_DIRECTION_BUTTON"                = "Richtung";
 "EDIT_MODE_TILT_BUTTON"                     = "Neigung";
@@ -47,10 +62,15 @@
 "EDIT_MODE_FOREGROUND_BUTTON"               = "Textfarbe";
 "EDIT_MODE_FONT_BUTTON"                     = "Schriftgröße";
 "EDIT_MODE_INSCRIPTION_BUTTON"              = "Aufschrift";
+"EDIT_MODE_FORTIFY_BUTTON"                  = "Absichern";
+
+"CAPTURED_PLAQUE_AUTHOR"                    = "Author: %@";
+
+"MESSAGE_FORTIFICATION_IN_PROCESS"          = "Absicherung einer Ihrer Plaques ist noch in Bearbeitung. Bitte warten Sie bis es fertig ist.";
 
 "STATUS_BAR_VPCLOUD_ESTABLISH_CONNECTION"   = "Verbinden mit vpCloud";
 "STATUS_BAR_VPCLOUD_CANNOT_CONNECT"         = "Kann nicht mit vpCloud verbinden";
-"STATUS_BAR_VPCLOUD_SCHEDULE_RECONNECT"     = "Versuche in %f Sekunden Verbindung mit vpCloud zu erstellen";
+"STATUS_BAR_VPCLOUD_SCHEDULE_RECONNECT"     = "Versuche in %.0f Sekunden Verbindung mit vpCloud zu erstellen";
 "STATUS_BAR_VPCLOUD_CONNECTION_ESTABLISHED" = "Verbunden mit vpCloud";
 "STATUS_BAR_VPCLOUD_LOST_CONNECTION"        = "Verbindung mit vpCloud verloren";
 

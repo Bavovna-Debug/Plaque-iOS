@@ -76,8 +76,8 @@
     [NSString stringWithFormat:@"INSERT INTO profiles (profile_token, profile_revision, profile_name, user_name) VALUES ('%@', %d, '%@', '%@')",
      [self.profileToken UUIDString],
      self.profileRevision,
-     self.profileName,
-     self.userName];
+     [self.profileName stringByReplacingOccurrencesOfString:@"'" withString:@"''"],
+     [self.userName stringByReplacingOccurrencesOfString:@"'" withString:@"''"]];
 
     self.rowId = [database executeINSERT:query ignoreConstraints:YES];
 

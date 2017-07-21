@@ -35,6 +35,7 @@
 
 @synthesize profileToken        = _profileToken;
 @synthesize plaqueRevision      = _plaqueRevision;
+@synthesize fortified           = _fortified;
 @synthesize directed            = _directed;
 @synthesize direction           = _direction;
 @synthesize width               = _width;
@@ -43,7 +44,6 @@
 @synthesize foregroundColor     = _foregroundColor;
 @synthesize fontSize            = _fontSize;
 @synthesize inscription         = _inscription;
-//@synthesize captured            = _captured;
 
 - (id)initForClone
 {
@@ -53,7 +53,7 @@
         return nil;
     }
 
-    self.ownPlaqueId = [[Settings defaultSettings] lastOwnObjectId];
+    self.ownPlaqueId = [[Settings sharedSettings] lastOwnObjectId];
 
     storedInDatabase = NO;
 
@@ -70,7 +70,7 @@
 
     SQLiteDatabase *database = [Database mainDatabase];
 
-    NSString *query = [NSString stringWithFormat:@"SELECT rowid, profile_token, revision, creation_stamp, latitude, longitude, altitude, direction, tilt, width, height, background_color, foreground_color, font_size, inscription FROM plaques WHERE plaque_token = '%@'",
+    NSString *query = [NSString stringWithFormat:@"SELECT rowid, profile_token, revision, creation_stamp, fortified, latitude, longitude, altitude, direction, tilt, width, height, background_color, foreground_color, font_size, inscription FROM plaques WHERE plaque_token = '%@'",
                        [plaqueToken UUIDString]];
 
     SQLiteDataReader *reader =
@@ -90,19 +90,20 @@
     NSString *profileToken  = [reader getString:1];
     int plaqueRevision      = [reader getInt:2];
     int creationStampInt    = [reader getInt:3];
-    double latitude         = [reader getDouble:4];
-    double longitude        = [reader getDouble:5];
-    double altitude         = [reader getDouble:6];
-    bool directed           = ([reader isNull:7] == TRUE) ? NO : YES;
-    double direction        = [reader getDouble:7];
-    bool tilted             = ([reader isNull:8] == TRUE) ? NO : YES;
-    double tilt             = [reader getDouble:8];
-    double width            = [reader getDouble:9];
-    double height           = [reader getDouble:10];
-    UInt32 backgroundColor  = [reader getInt:11];
-    UInt32 foregroundColor  = [reader getInt:12];
-    double fontSize         = [reader getDouble:13];
-    NSString *inscription   = [reader getString:14];
+    int fortified           = [reader getInt:4];
+    double latitude         = [reader getDouble:5];
+    double longitude        = [reader getDouble:6];
+    double altitude         = [reader getDouble:7];
+    bool directed           = ([reader isNull:8] == TRUE) ? NO : YES;
+    double direction        = [reader getDouble:8];
+    bool tilted             = ([reader isNull:9] == TRUE) ? NO : YES;
+    double tilt             = [reader getDouble:9];
+    double width            = [reader getDouble:10];
+    double height           = [reader getDouble:11];
+    UInt32 backgroundColor  = [reader getInt:12];
+    UInt32 foregroundColor  = [reader getInt:13];
+    double fontSize         = [reader getDouble:14];
+    NSString *inscription   = [reader getString:15];
 
     NSDate *creationStamp = [NSDate dateWithTimeIntervalSince1970:creationStampInt];
 
@@ -120,6 +121,7 @@
     self.profileToken       = [[NSUUID alloc] initWithUUIDString:profileToken];
     self.plaqueRevision     = plaqueRevision;
     self.creationStamp      = creationStamp;
+    self.fortified          = (fortified == 0) ? FALSE : TRUE;
     self.location           = location;
     self.directed           = directed;
     self.direction          = direction;
@@ -161,6 +163,7 @@
     self.profileToken       = [[[Authentificator sharedAuthentificator] profileToken] copy];
     self.plaqueRevision     = 0;
     self.creationStamp      = [NSDate date];
+    self.fortified          = FALSE;
     self.location           = location;
     self.directed           = YES;
     self.direction          = direction;
@@ -579,6 +582,7 @@
     clonedPlaque.profileToken       = (self.profileToken == nil) ? nil : [self.profileToken copy];
     clonedPlaque.plaqueRevision     = self.plaqueRevision;
     clonedPlaque.creationStamp      = [self.creationStamp copy];
+    clonedPlaque.fortified          = self.fortified;
     clonedPlaque.location           = [self.location copy];
     clonedPlaque.directed           = self.directed;
     clonedPlaque.direction          = self.direction;
@@ -607,6 +611,7 @@
     copy.plaqueToken        = self.plaqueToken;
     copy.profileToken       = self.profileToken;
     copy.plaqueRevision     = self.plaqueRevision;
+    copy.fortified          = self.fortified;
     copy.location           = [self.location copy];
     copy.directed           = self.directed;
     copy.direction          = self.direction;
@@ -625,11 +630,12 @@
 {
     SQLiteDatabase *database = [Database mainDatabase];
 
-    NSString *query = [NSString stringWithFormat:@"INSERT INTO plaques (plaque_token, profile_token, revision, creation_stamp, dimension, latitude, longitude, altitude, direction, tilt, width, height, background_color, foreground_color, font_size, inscription) VALUES ('%@', '%@', %d, %ld, %d, %f, %f, %f, %f, %f, %f, %f, %d, %d, %f, '%@')",
+    NSString *query = [NSString stringWithFormat:@"INSERT INTO plaques (plaque_token, profile_token, revision, creation_stamp, fortified, dimension, latitude, longitude, altitude, direction, tilt, width, height, background_color, foreground_color, font_size, inscription) VALUES ('%@', '%@', %d, %ld, %d, %d, %f, %f, %f, %f, %f, %f, %f, %u, %u, %f, '%@')",
                        [self.plaqueToken UUIDString],
                        [self.profileToken UUIDString],
                        self.plaqueRevision,
                        lround([self.creationStamp timeIntervalSince1970]),
+                       (self.fortified == FALSE) ? 0 : 1,
                        PlaqueDimension3D,
                        self.location.coordinate.latitude,
                        self.location.coordinate.longitude,
@@ -638,10 +644,10 @@
                        self.tilt,
                        self.size.width,
                        self.size.height,
-                       (unsigned int)[self.backgroundColor argb],
-                       (unsigned int)[self.foregroundColor argb],
+                       (unsigned int) [self.backgroundColor argb],
+                       (unsigned int) [self.foregroundColor argb],
                        self.fontSize,
-                       self.inscription];
+                       [self.inscription stringByReplacingOccurrencesOfString:@"'" withString:@"''"]];
 
     self.rowId = [database executeINSERT:query ignoreConstraints:YES];
 
@@ -709,6 +715,25 @@
 
             NSString *query = [NSString stringWithFormat:@"UPDATE plaques SET revision = %d WHERE rowid = %llu",
                                plaqueRevision,
+                               self.rowId];
+
+            [database executeUPDATE:query ignoreConstraints:YES];
+        }
+    }
+}
+
+- (void)setFortified:(Boolean)fortified
+{
+    if (fortified != _fortified)
+    {
+        _fortified = fortified;
+
+        if (storedInDatabase == YES)
+        {
+            SQLiteDatabase *database = [Database mainDatabase];
+
+            NSString *query = [NSString stringWithFormat:@"UPDATE plaques SET fortified = %d WHERE rowid = %llu",
+                               (self.fortified == FALSE) ? 0 : 1,
                                self.rowId];
 
             [database executeUPDATE:query ignoreConstraints:YES];
@@ -1033,7 +1058,7 @@
 
             NSString *query =
             [NSString stringWithFormat:@"UPDATE plaques SET inscription = '%@' WHERE rowid = %llu",
-             inscription,
+             [inscription stringByReplacingOccurrencesOfString:@"'" withString:@"''"],
              self.rowId];
 
             [database executeUPDATE:query ignoreConstraints:YES];
@@ -1443,10 +1468,10 @@
 
         NSMutableParagraphStyle *paragraphStyle = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
         [paragraphStyle setAlignment:NSTextAlignmentCenter];
+        [paragraphStyle setLineBreakMode:NSLineBreakByWordWrapping];
 
         NSDictionary *attributes = @{ NSFontAttributeName:[UIFont fontWithName:fontFamily size:fontSize],
                                       NSParagraphStyleAttributeName:paragraphStyle };
-
 
         CGRect textFrame;
         textFrame = [inscription boundingRectWithSize:maxTextSize

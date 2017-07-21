@@ -34,6 +34,7 @@
 		945F20F31A8350E900FA69C6 /* Communicator.m in Sources */ = {isa = PBXBuildFile; fileRef = 945F20F21A8350E900FA69C6 /* Communicator.m */; };
 		945F20F61A83598400FA69C6 /* Paquet.m in Sources */ = {isa = PBXBuildFile; fileRef = 945F20F51A83598400FA69C6 /* Paquet.m */; };
 		945F20F91A87E04700FA69C6 /* CapturedPlaquePanel.m in Sources */ = {isa = PBXBuildFile; fileRef = 945F20F81A87E04700FA69C6 /* CapturedPlaquePanel.m */; };
+		947694611F1F6EE200111D26 /* ApplicationSetup.m in Sources */ = {isa = PBXBuildFile; fileRef = 947694601F1F6EE200111D26 /* ApplicationSetup.m */; };
 		947B70451A8FF4540059C2CD /* CreatePlaquePanel.m in Sources */ = {isa = PBXBuildFile; fileRef = 947B70441A8FF4540059C2CD /* CreatePlaquePanel.m */; };
 		947B704B1A90E8890059C2CD /* EditModeView.m in Sources */ = {isa = PBXBuildFile; fileRef = 947B704A1A90E8890059C2CD /* EditModeView.m */; };
 		947B704D1A90E9780059C2CD /* EditModeSelectButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 94F169911A7A67FA006DAB9D /* EditModeSelectButton.m */; };
@@ -139,6 +140,10 @@
 		945F20F71A87E04700FA69C6 /* CapturedPlaquePanel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CapturedPlaquePanel.h; sourceTree = "<group>"; };
 		945F20F81A87E04700FA69C6 /* CapturedPlaquePanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CapturedPlaquePanel.m; sourceTree = "<group>"; };
 		946E6BB31DD88BCF00834739 /* Definitions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Definitions.h; sourceTree = "<group>"; };
+		9476945E1F1BF6A200111D26 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Main.strings; sourceTree = "<group>"; };
+		9476945F1F1BF6A200111D26 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
+		947694601F1F6EE200111D26 /* ApplicationSetup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ApplicationSetup.m; sourceTree = "<group>"; };
+		947694621F1F6F1100111D26 /* ApplicationSetup.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ApplicationSetup.h; sourceTree = "<group>"; };
 		947B70431A8FF4540059C2CD /* CreatePlaquePanel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CreatePlaquePanel.h; sourceTree = "<group>"; };
 		947B70441A8FF4540059C2CD /* CreatePlaquePanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CreatePlaquePanel.m; sourceTree = "<group>"; };
 		947B70491A90E8890059C2CD /* EditModeView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EditModeView.h; sourceTree = "<group>"; };
@@ -266,6 +271,8 @@
 				94E747141ED9B72C00AD68F2 /* Plaque.entitlements */,
 				940C1F151A5809D1003E5181 /* ApplicationDelegate.h */,
 				940C1F161A5809D1003E5181 /* ApplicationDelegate.m */,
+				947694621F1F6F1100111D26 /* ApplicationSetup.h */,
+				947694601F1F6EE200111D26 /* ApplicationSetup.m */,
 				94B2C8F41A7C27EA00F7942D /* FullScreenShield.h */,
 				94B2C8F51A7C27EA00F7942D /* FullScreenShield.m */,
 				94AD35A41A64089900879971 /* AppStore.h */,
@@ -635,6 +642,7 @@
 				en,
 				Base,
 				de,
+				fr,
 			);
 			mainGroup = 940C1F051A5809D1003E5181;
 			productRefGroup = 940C1F0F1A5809D1003E5181 /* Products */;
@@ -727,6 +735,7 @@
 				94DBA1551AA10CDC00190805 /* Panel.m in Sources */,
 				948535611A8908F10038E099 /* InSightPlaque.m in Sources */,
 				94AD359F1A5BFA8600879971 /* InSightView.m in Sources */,
+				947694611F1F6EE200111D26 /* ApplicationSetup.m in Sources */,
 				94F169981A7A777C006DAB9D /* EditModeAltitudeSubview.m in Sources */,
 				940C1F141A5809D1003E5181 /* main.m in Sources */,
 				94DBA14C1A9B9BC200190805 /* StatusBar.m in Sources */,
@@ -755,6 +764,7 @@
 			children = (
 				940C1F1C1A5809D1003E5181 /* Base */,
 				94254B241BB2C8150082CFF0 /* de */,
+				9476945E1F1BF6A200111D26 /* fr */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
@@ -765,6 +775,7 @@
 				94254B261BB2C8250082CFF0 /* Base */,
 				94254B281BB2C8280082CFF0 /* en */,
 				94254B291BB2C82A0082CFF0 /* de */,
+				9476945F1F1BF6A200111D26 /* fr */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";

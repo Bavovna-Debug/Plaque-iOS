@@ -23,7 +23,6 @@ PlaqueDimension;
 
 @property (assign, nonatomic, readwrite) UInt64                 rowId;
 @property (assign, nonatomic, readwrite) NSUInteger             ownPlaqueId;
-@property (assign, nonatomic, readwrite) Boolean                captured;
 
 @property (weak,   nonatomic, readwrite) Plaque                 *cloneChain;
 
@@ -31,6 +30,7 @@ PlaqueDimension;
 @property (strong, nonatomic, readwrite) NSUUID                 *profileToken;
 @property (assign, nonatomic, readwrite) int                    plaqueRevision;
 @property (strong, nonatomic, readwrite) NSDate                 *creationStamp;
+@property (assign, nonatomic, readwrite) Boolean                fortified;
 @property (strong, nonatomic, readwrite) CLLocation             *location;
 @property (assign, nonatomic, readwrite) CLLocationCoordinate2D coordinate;
 @property (assign, nonatomic, readwrite) CLLocationDistance     altitude;

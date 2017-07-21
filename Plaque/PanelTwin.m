@@ -46,6 +46,9 @@
         [self setBackgroundColor:[UIColor clearColor]];
 
         [self createPanels];
+
+        [self.leftPanel setBackground:@"PanelSelectorBackground"];
+        [self.rightPanel setBackground:@"PanelControlsBackground"];
     }
 }
 
@@ -90,8 +93,8 @@
     [leftPanel setFrame:selectorPanelRect];
     [rightPanel setFrame:controlsPanelRect];
 
-    [leftPanel translate:-1];
-    [rightPanel translate:+1];
+    [leftPanel translate:-1.0f];
+    [rightPanel translate:+1.0f];
 
     // Close button.
     //

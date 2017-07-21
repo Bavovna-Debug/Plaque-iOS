@@ -9,6 +9,10 @@
 #import "Paquet.h"
 #import "Plaque.h"
 
+#define MinimalIntervalBetweenDisplacementsOnRadar  3.0f
+#define MinimalIntervalBetweenDisplacementsInSight  3.0f
+#define MinimalIntervalBetweenDisplacementsOnMap    1.0f
+
 typedef enum
 {
     Workdesk,
@@ -36,6 +40,7 @@ typedef enum
 
 @property (weak,   atomic,    readwrite) Plaque             *plaqueUnderEdit;
 @property (weak,   atomic,    readwrite) Plaque             *capturedPlaque;
+@property (weak,   atomic,    readwrite) Plaque             *plaqueUnderFortification;
 
 + (Plaques *)sharedPlaques;
 

@@ -6,9 +6,16 @@
 "AVERROR_TITLE"                             = "Camera";
 "AVERROR_MESSAGE"                           = "Without access to camera this app could not represent contents of vpCloud in 3D. You can enable camera access for this app in system settings of your device.";
 
-"CREATE_PLAQUE_LABEL"                       = "Create a plaque over here";
+"ALERT_BUTTON_OK"                           = "OK";
+"ALERT_BUTTON_NO"                           = "No";
+"ALERT_BUTTON_YES"                          = "Yes";
 
-"OK_BUTTON"                                 = "OK";
+"SETUP_QUESTION_ABOUT_GPS_TITLE"            = "Setup";
+"SETUP_QUESTION_ABOUT_GPS_MESSAGE"          = "";
+"SETUP_QUESTION_ABOUT_CAMERA_TITLE"         = "Setup";
+"SETUP_QUESTION_ABOUT_CAMERA_MESSAGE"       = "";
+"SETUP_QUESTION_ABOUT_NOTIFICATIONS_TITLE"  = "Setup";
+"SETUP_QUESTION_ABOUT_NOTIFICATIONS_MESSAGE" = "";
 
 "DO_YOU_WANT_TO_CREATE_PROFILE_TITLE"       = "Profile";
 "DO_YOU_WANT_TO_CREATE_PROFILE_MESSAGE"     = "You don't have a vpCloud profile yet. Would you like to register yourself in vpCloud?";
@@ -32,12 +39,15 @@
 "PROFILE_FORM_PASSWORD_LABEL"               = "Login password:";
 "PROFILE_FORM_PASSWORD_HELP"                = "";
 
+"CREATE_PLAQUE_LABEL"                       = "Create a plaque over here";
+
 "CREATE_PLAQUE_HELP_TEXT"                   = "Keep your iPhone/iPad vertical. Point it at an object near you and press 'Fire'. New plaque appears in about 20 meters in front of you.";
 "CREATE_PLAQUE_FIRE_BUTTON"                 = "Fire";
 "CREATE_PLAQUE_CANCEL_BUTTON"               = "Cancel";
 
 "DEFAULT_INSCRIPTION"                       = "Here could be your advertising";
 
+"EDIT_MODE_EDIT_BUTTON"                     = "Edit";
 "EDIT_MODE_COORDINATE_BUTTON"               = "Location";
 "EDIT_MODE_ALTITUDE_BUTTON"                 = "Altitude";
 "EDIT_MODE_DIRECTION_BUTTON"                = "Direction";
@@ -47,10 +57,20 @@
 "EDIT_MODE_FOREGROUND_BUTTON"               = "Text color";
 "EDIT_MODE_FONT_BUTTON"                     = "Font size";
 "EDIT_MODE_INSCRIPTION_BUTTON"              = "Inscription";
+"EDIT_MODE_FORTIFY_BUTTON"                  = "Protect";
+
+"CAPTURED_PLAQUE_AUTHOR"                    = "Author: %@";
+
+"MESSAGE_FORTIFICATION_IN_PROCESS"          = "Protection of one of your plaques is still in process. Please, wait until it finishes.";
+
+"APP_STORE_ERROR_MESSAGE"                   = "Cannot proceed with your purchase right now! Try it later.";
+
+"APP_STORE_NOT_YET"                         = "No, thanks";
+"APP_STORE_BUY_NOW"                         = "Buy - %@";
 
 "STATUS_BAR_VPCLOUD_ESTABLISH_CONNECTION"   = "Connecting to vpCloud";
 "STATUS_BAR_VPCLOUD_CANNOT_CONNECT"         = "Cannot connect to vpCloud";
-"STATUS_BAR_VPCLOUD_SCHEDULE_RECONNECT"     = "Will retry to connect to vpCloud in %f seconds";
+"STATUS_BAR_VPCLOUD_SCHEDULE_RECONNECT"     = "Will retry to connect to vpCloud in %.0f seconds";
 "STATUS_BAR_VPCLOUD_CONNECTION_ESTABLISHED" = "Connection with vpCloud established";
 "STATUS_BAR_VPCLOUD_LOST_CONNECTION"        = "Connection to vpCloud lost";
 

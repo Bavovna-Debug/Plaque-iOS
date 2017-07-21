@@ -32,10 +32,11 @@
 
 + (TapMenu *)mainTapMenu
 {
-    static dispatch_once_t onceToken;
-    static TapMenu *tapMenu;
+    static dispatch_once_t  onceToken;
+    static TapMenu          *tapMenu;
 
-    dispatch_once(&onceToken, ^{
+    dispatch_once(&onceToken, ^
+    {
         tapMenu = [[TapMenu alloc] init];
     });
 
@@ -46,7 +47,9 @@
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
 
     [self setTranslatesAutoresizingMaskIntoConstraints:NO];
     [self setBackgroundColor:[UIColor clearColor]];
@@ -66,35 +69,45 @@
     [self.exitButton setHidden:YES];
     [self addSubview:self.exitButton];
 */
-    self.activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
-    [self.activityIndicator setFrame:CGRectMake(0.0f, CGRectGetMaxY(self.bounds) - 40.0f, 40.0f, 40.0f)];
-    [self addSubview:self.activityIndicator];
+    {
+        self.activityIndicator =
+        [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
 
-    NSDictionary *viewsDictionary = @{@"tapMenuMainButton":self.mainButton,
-                                      /*@"tapMenuExitButton":self.exitButton*/};
-    
-    [self addConstraints:[NSLayoutConstraint
-                          constraintsWithVisualFormat:@"H:|-[tapMenuMainButton]-|"
-                          options:NSLayoutFormatAlignAllBaseline
-                          metrics:nil
-                          views:viewsDictionary]];
-    [self addConstraints:[NSLayoutConstraint
-                          constraintsWithVisualFormat:@"V:|-[tapMenuMainButton]-|"
-                          options:NSLayoutFormatAlignAllBaseline
-                          metrics:nil
-                          views:viewsDictionary]];
+        [self.activityIndicator setFrame:CGRectMake(0.0f,
+                                                    CGRectGetMaxY(self.bounds) - 40.0f,
+                                                    40.0f,
+                                                    40.0f)];
+
+        [self addSubview:self.activityIndicator];
+
+        NSDictionary *viewsDictionary = @{@"tapMenuMainButton":self.mainButton,
+                                          /*@"tapMenuExitButton":self.exitButton*/};
+
+        [self addConstraints:[NSLayoutConstraint
+                              constraintsWithVisualFormat:@"H:|-[tapMenuMainButton]-|"
+                              options:NSLayoutFormatAlignAllBaseline
+                              metrics:nil
+                              views:viewsDictionary]];
+        [self addConstraints:[NSLayoutConstraint
+                              constraintsWithVisualFormat:@"V:|-[tapMenuMainButton]-0-|"
+                              options:NSLayoutFormatAlignAllBaseline
+                              metrics:nil
+                              views:viewsDictionary]];
+
 /*
-    [self addConstraints:[NSLayoutConstraint
-                          constraintsWithVisualFormat:@"H:|-[tapMenuExitButton]-|"
-                          options:NSLayoutFormatAlignAllBaseline
-                          metrics:nil
-                          views:viewsDictionary]];
-    [self addConstraints:[NSLayoutConstraint
-                          constraintsWithVisualFormat:@"V:|-[tapMenuExitButton]-|"
-                          options:NSLayoutFormatAlignAllBaseline
-                          metrics:nil
-                          views:viewsDictionary]];
+        [self addConstraints:[NSLayoutConstraint
+                              constraintsWithVisualFormat:@"H:|-[tapMenuExitButton]-|"
+                              options:NSLayoutFormatAlignAllBaseline
+                              metrics:nil
+                              views:viewsDictionary]];
+        [self addConstraints:[NSLayoutConstraint
+                              constraintsWithVisualFormat:@"V:|-[tapMenuExitButton]-|"
+                              options:NSLayoutFormatAlignAllBaseline
+                              metrics:nil
+                              views:viewsDictionary]];
 */
+    }
+
     [self.mainButton addTarget:self
                         action:@selector(mainButtonPressed:)
               forControlEvents:UIControlEventTouchUpInside];
@@ -118,11 +131,14 @@
 {
     ControlPanel *controlPanel = [ControlPanel sharedControlPanel];
     [controlPanel open];
-    NSLog(@"TapMenu %f %f", self.frame.origin.y, self.frame.size.height);
+
 /*
-    if ([self menuOpened] == YES) {
+    if ([self menuOpened] == YES) 
+    {
         [self closeMenu];
-    } else {
+    } 
+    else 
+    {
         [self openMenu];
     }
 
@@ -142,8 +158,11 @@
 - (void)tapMenuItemPressed:(id)sender
 {
     [self closeMenu];
+
     TapMenuItemView *itemView = (TapMenuItemView *)sender;
+
     TapMenuItem *item = (TapMenuItem *)itemView.owner;
+
     [self.delegate tapMenuItemPressed:item.command];
 }
 
@@ -170,9 +189,12 @@
         self.rows = [NSMutableArray array];
 
     NSMutableArray *row;
-    if ([self.rows count] > rowNumber) {
+    if ([self.rows count] > rowNumber)
+    {
         row = [self.rows objectAtIndex:rowNumber];
-    } else {
+    }
+    else
+    {
         row = [NSMutableArray array];
         [self.rows addObject:row];
     }
@@ -180,6 +202,7 @@
     TapMenuItem *item = [[TapMenuItem alloc] initWithIconName:iconName
                                                       command:command
                                                     rowNumber:rowNumber];
+
     [row addObject:item];
 }
 
@@ -281,7 +304,9 @@
 {
 /*
     if ([self menuOpened] == NO)
+    {
         return;
+    }
 
     [self setMenuOpened:NO];
 

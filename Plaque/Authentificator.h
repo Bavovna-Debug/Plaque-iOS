@@ -12,10 +12,10 @@
 
 @property (strong, nonatomic, readwrite) id<ProfileDelegate> profileDelegate;
 
-@property (nonatomic, strong, readwrite) NSUUID *deviceToken;
-@property (nonatomic, strong, readwrite) NSUUID *sessionToken;
-@property (nonatomic, strong, readwrite) NSUUID *profileToken;
-@property (nonatomic, strong, readwrite) NSData *notificationsToken;
+@property (strong, nonatomic, readwrite) NSUUID *deviceToken;
+@property (strong, nonatomic, readwrite) NSUUID *sessionToken;
+@property (strong, nonatomic, readwrite) NSUUID *profileToken;
+@property (strong, nonatomic, readwrite) NSData *notificationsToken;
 
 + (Authentificator *)sharedAuthentificator;
 

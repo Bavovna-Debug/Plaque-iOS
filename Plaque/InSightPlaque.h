@@ -12,16 +12,16 @@
 
 @interface InSightPlaque : NSObject
 
-@property (weak,   nonatomic) Plaque               *plaque;
-@property (weak,   nonatomic) CALayer              *plaqueLayer;
-@property (weak,   nonatomic) CALayer              *inscriptionLayer;
-@property (weak,   nonatomic) CALayer              *capturedLayer;
-@property (assign, nonatomic) Boolean              inSight;
-@property (assign, nonatomic) Boolean              needRedraw;
-@property (assign, nonatomic) CLLocationDirection  directionFromUser;
-@property (assign, nonatomic) CLLocationDistance   distanceToUser;
-@property (assign, nonatomic) CLLocationDistance   altitudeOverUser;
-@property (assign, nonatomic) CLLocationDirection  rotationOnScreen;
+@property (weak,   nonatomic, readwrite) Plaque                 *plaque;
+@property (weak,   nonatomic, readwrite) CALayer                *plaqueLayer;
+@property (weak,   nonatomic, readwrite) CALayer                *inscriptionLayer;
+@property (weak,   nonatomic, readwrite) CALayer                *capturedLayer;
+@property (assign, nonatomic, readwrite) Boolean                inSight;
+@property (assign, nonatomic, readwrite) Boolean                needRedraw;
+@property (assign, nonatomic, readwrite) CLLocationDirection    directionFromUser;
+@property (assign, nonatomic, readwrite) CLLocationDistance     distanceToUser;
+@property (assign, nonatomic, readwrite) CLLocationDistance     altitudeOverUser;
+@property (assign, nonatomic, readwrite) CLLocationDirection    rotationOnScreen;
 
 - (id)initWithParentView:(UIView *)parentView;
 

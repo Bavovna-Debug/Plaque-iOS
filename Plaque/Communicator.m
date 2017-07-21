@@ -17,7 +17,7 @@
 
 @interface Communicator () <GCDAsyncSocketDelegate>
 
-@property (strong, nonatomic) NSLock            *connectionLock;
+//@property (strong, nonatomic) NSLock            *connectionLock;
 @property (strong, nonatomic) NSTimer           *reconnectTimer;
 @property (strong, nonatomic) NSTimer           *flushQueueTimer;
 @property (strong, nonatomic) NSMutableArray    *inputPieces;
@@ -65,7 +65,7 @@
         return nil;
     }
 
-    self.connectionLock = [[NSLock alloc] init];
+    //self.connectionLock = [[NSLock alloc] init];
     self.inputPieces = [NSMutableArray array];
     self.inputPiecesLock = [[NSLock alloc] init];
     self.inputPiecesReaderLock = [[NSLock alloc] init];
@@ -139,6 +139,15 @@
 
 - (void)enqueue:(Paquet *)paquet
 {
+    // Make sure device is connected to vpCloud.
+    //
+    {
+        if (connected == NO)
+        {
+            [self scheduleReconnectWithInterval:ReconnectIntervalIfConnectionMissing];
+        }
+    }
+
     NSMutableData *piece = [NSMutableData data];
 
     {
@@ -249,6 +258,7 @@
         NSLog(@"[Communicator] Not connected");
 #endif
         [self connect];
+
         return;
     }
 
@@ -264,7 +274,9 @@
                 if ([paquet cancelWhenPossible] == YES)
                 {
                     [self.paquets removeObject:paquet];
+
                     needToLoop = TRUE;
+
                     break;
                 }
 
@@ -311,6 +323,7 @@
     // Already connected or trying to establish connection right now?
     // If yes, then quit.
     //
+    /*
     if ([self.connectionLock tryLock] == NO)
     {
 #ifdef VerboseCommunicationSocketConnection
@@ -318,11 +331,13 @@
 #endif
         return;
     }
+     */
 
 #ifdef VerboseCommunicationSocketConnection
     NSLog(@"[Communicator] Establish connection");
-    [statusBar postMessage:NSLocalizedString(@"STATUS_BAR_VPCLOUD_ESTABLISH_CONNECTION", nil)];
 #endif
+
+    [statusBar postMessage:NSLocalizedString(@"STATUS_BAR_VPCLOUD_ESTABLISH_CONNECTION", nil)];
 
     dialogueEstablished = NO;
 
@@ -344,7 +359,7 @@
 
     [self.socket setIPv4Enabled:YES];
     [self.socket setIPv6Enabled:YES];
-    [self.socket setIPv4PreferredOverIPv6:YES];
+    [self.socket setIPv4PreferredOverIPv6:NO];
 
     if (background == YES)
     {
@@ -354,25 +369,31 @@
         }];
     }
 
+    NSLog(@"[Communicator] Connecting to %@(%u)",
+          [servers serverAddress],
+          (unsigned int) [servers serverPort]);
+
+
     NSError *error = nil;
     BOOL status = [self.socket connectToHost:[servers serverAddress]
                                       onPort:[servers serverPort]
                                        error:&error];
-    NSLog(@"[Communicator] Connecting %@ %u",
-          [servers serverAddress],
-          (unsigned int) [servers serverPort]);
 
     [servers nextServer];
 
     if (status == NO)
     {
-        [self.connectionLock unlock];
-
-        [statusBar postMessage:NSLocalizedString(@"STATUS_BAR_VPCLOUD_CANNOT_CONNECT", nil)];
+        //[self.connectionLock unlock];
 
 #ifdef VerboseCommunicationSocketConnection
         NSLog(@"[Communicator] Cannot connect: %@", error);
 #endif
+
+        [statusBar postMessage:NSLocalizedString(@"STATUS_BAR_VPCLOUD_CANNOT_CONNECT", nil)];
+
+        // Require to retry connection attempt.
+        //
+        [self scheduleReconnectWithInterval:ReconnectIntervalIfConnectionFailed];
     }
 }
 
@@ -380,7 +401,7 @@
 {
     if (forced == YES)
     {
-        [self.socket disconnect];
+        //[self.socket disconnect];
     }
     else
     {
@@ -410,11 +431,15 @@
 
 - (void)scheduleReconnectWithInterval:(NSTimeInterval)reconnectInterval
 {
+#if 0
     // Don't reconnect if application is in background mode.
     //
     if (background == YES)
+    {
         return;
-
+    }
+#endif
+    
     // If reconnect is already scheduled then stop the timer.
     //
     NSTimer *reconnectTimer = self.reconnectTimer;
@@ -428,7 +453,7 @@
                                      target:self
                                    selector:@selector(fireReconnect:)
                                    userInfo:nil
-                                    repeats:NO];
+                                    repeats:YES];
 
     [statusBar postMessage:[NSString stringWithFormat:
                             NSLocalizedString(@"STATUS_BAR_VPCLOUD_SCHEDULE_RECONNECT", nil),
@@ -450,9 +475,19 @@ didConnectToHost:(NSString *)host
     NSLog(@"[Communicator] Connected");
 #endif
 
+    // Stop reconnect timer as the first step.
+    //
+    NSTimer *reconnectTimer = self.reconnectTimer;
+    if (reconnectTimer != nil)
+    {
+        [reconnectTimer invalidate];
+
+        self.reconnectTimer = nil;
+    }
+
     connected = YES;
 
-    [self.connectionLock unlock];
+    //[self.connectionLock unlock];
 
     [statusBar postMessage:NSLocalizedString(@"STATUS_BAR_VPCLOUD_CONNECTION_ESTABLISHED", nil)];
 
@@ -486,6 +521,7 @@ didConnectToHost:(NSString *)host
 
     // If connection lock is occupied then disconnect happened right after connect request.
     //
+    /*
     if ([self.connectionLock tryLock] == NO)
     {
 #ifdef VerboseCommunicationSocketConnection
@@ -493,6 +529,7 @@ didConnectToHost:(NSString *)host
 #endif
     }
     else
+     */
     {
         [statusBar postMessage:NSLocalizedString(@"STATUS_BAR_VPCLOUD_LOST_CONNECTION", nil)];
     }
@@ -501,8 +538,11 @@ didConnectToHost:(NSString *)host
 
     [self clearAllQueues];
 
-    [self.connectionLock unlock];
+    //[self.connectionLock unlock];
 
+    // Require to retry connection attempt.
+    //
+    [self scheduleReconnectWithInterval:ReconnectIntervalAfterConnectionLost];
 }
 
 #ifdef VerboseCommunicationSocket
@@ -1111,6 +1151,7 @@ didWriteDataWithTag:(long)tag
             if ([self parseDialogueVerdict:payload] == FALSE)
             {
                 [self disconnect:YES];
+
                 [self scheduleReconnectWithInterval:ReconnectIntervalIfHandshakeFailed];
             }
             else

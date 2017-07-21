@@ -89,7 +89,7 @@
                                    userInfo:nil
                                     repeats:YES];
 
-    [self translate:1];
+    [self translate:+1.0f];
 }
 
 - (void)didClosePanel

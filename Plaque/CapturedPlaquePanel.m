@@ -11,9 +11,7 @@
 #import "Navigator.h"
 #import "Plaques.h"
 
-@interface CapturedPlaquePanel ()
-
-@end
+#define CapturedPlaqueEditButtonSize 48.0f
 
 @implementation CapturedPlaquePanel
 
@@ -21,17 +19,22 @@
 {
     [super didOpenPanel];
 
+    Plaque *plaque = self.plaque;
+    Profile *profile = [[Profiles sharedProfiles] profileByToken:plaque.profileToken];
+
     CGRect bounds = self.superview.bounds;
 
-    CGSize panelSize = CGSizeMake(280.0f, 200.0f);
+    CGSize panelSize = CGSizeMake(300.0f, 200.0f);
 
     CGRect panelFrame =
     CGRectMake(CGRectGetMidX(bounds) - panelSize.width / 2,
-               CGRectGetMaxY(bounds) - panelSize.height - 64.0f,
+               CGRectGetMaxY(bounds) - panelSize.height - CapturedPlaqueEditButtonSize,
                panelSize.width,
                panelSize.height);
 
     [self setFrame:panelFrame];
+
+    [self setBackground:@"PanelCapturedBackground"];
 
     /*
      [self setBackgroundColor:[UIColor colorWithRed:0.400f green:0.400f blue:1.000f alpha:0.750f]];
@@ -39,42 +42,93 @@
      [self.layer setBorderColor:[[UIColor colorWithRed:0.400f green:0.400f blue:1.000f alpha:1.0f] CGColor]];
      [self.layer setCornerRadius:8.0f];
      */
-    Plaque *plaque = self.plaque;
-    Profile *profile = [[Profiles sharedProfiles] profileByToken:plaque.profileToken];
 
-    CGRect inscriptionFrame = self.bounds;
-    CGRect profileNameFrame = CGRectOffset(inscriptionFrame, 0.0f, 30.0f);
-    CGRect userNameFrame = CGRectOffset(inscriptionFrame, 0.0f, 60.0f);
+    CGRect contentsBounds = CGRectInset(self.bounds, 12.0f, 10.0f);
 
-    UILabel *inscriptionLabel = [[UILabel alloc] initWithFrame:inscriptionFrame];
-    [inscriptionLabel setText:plaque.inscription];
-    [self addSubview:inscriptionLabel];
+    CGRect plaqueLayerFrame =
+    CGRectMake(CGRectGetMinX(contentsBounds),
+               CGRectGetMinY(contentsBounds),
+               CGRectGetWidth(contentsBounds) - CapturedPlaqueEditButtonSize - 8.0f,
+               CGRectGetHeight(contentsBounds) / 2.0f);
+
+    CGRect editButtonFrame =
+    CGRectMake(CGRectGetMaxX(contentsBounds) - CapturedPlaqueEditButtonSize,
+               CGRectGetMinY(contentsBounds),
+               CapturedPlaqueEditButtonSize,
+               CapturedPlaqueEditButtonSize);
+
+    CGRect inscriptionFrame =
+    CGRectMake(CGRectGetMinX(contentsBounds),
+               CGRectGetHeight(contentsBounds) / 2.0f,
+               CGRectGetWidth(contentsBounds),
+               (CGRectGetHeight(contentsBounds) / 2.0f) - 14.0f);
+
+    CGRect profileNameFrame =
+    CGRectMake(CGRectGetMinX(contentsBounds),
+               CGRectGetMaxY(contentsBounds) - 14.0f,
+               CGRectGetWidth(contentsBounds),
+               14.0f);
+
+    {
+        CALayer *plaqueLayer = [plaque layerWithFrameToFit:plaqueLayerFrame];
+        [self.plaque inscriptionLayerForLayer:plaqueLayer];
+        [self.layer addSublayer:plaqueLayer];
+    }
+
+    {
+        UILabel *inscriptionLabel = [[UILabel alloc] initWithFrame:inscriptionFrame];
+        [inscriptionLabel setText:plaque.inscription];
+        [inscriptionLabel setTextColor:[UIColor colorWithWhite:0.2f alpha:1.0f]];
+        [inscriptionLabel setFont:[UIFont systemFontOfSize:12.0f]];
+        [inscriptionLabel setLineBreakMode:NSLineBreakByWordWrapping];
+        [inscriptionLabel setNumberOfLines:0];
+        [self addSubview:inscriptionLabel];
+    }
 
     if (profile != nil)
     {
-        UILabel *profileNameLabel = [[UILabel alloc] initWithFrame:profileNameFrame];
-        [profileNameLabel setText:profile.profileName];
-        [self addSubview:profileNameLabel];
+        NSString *profileNameText = NSLocalizedString(@"CAPTURED_PLAQUE_AUTHOR", nil);
+        profileNameText = [NSString stringWithFormat:profileNameText, profile.profileName];
 
-        UILabel *userNameLabel = [[UILabel alloc] initWithFrame:userNameFrame];
-        [userNameLabel setText:profile.userName];
-        [self addSubview:userNameLabel];
+        UILabel *profileNameLabel = [[UILabel alloc] initWithFrame:profileNameFrame];
+        [profileNameLabel setText:profileNameText];
+        [profileNameLabel setFont:[UIFont systemFontOfSize:12.0f]];
+        [profileNameLabel setTextColor:[UIColor lightTextColor]];
+        [self addSubview:profileNameLabel];
     }
 
-    UIButton *editButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [editButton setFrame:CGRectMake(200.0f, 50.0f, 80.0f, 40.0f)];
-    [editButton setTitle:@"Edit"
-                forState:UIControlStateNormal];
-    [self addSubview:editButton];
+    if ([plaque fortified] == NO)
+    {
+        UIButton *editButton = [UIButton buttonWithType:UIButtonTypeCustom];
 
-    [editButton addTarget:self
-                   action:@selector(editButtonPressed:)
-         forControlEvents:UIControlEventTouchUpInside];
+        [editButton.layer setBorderWidth:1.0f];
+        [editButton.layer setBorderColor:[[UIColor colorWithRed:0.416f green:0.416f blue:0.416f alpha:1.0f] CGColor]];
+        [editButton.layer setCornerRadius:4.0f];
 
-    [self translate:-1];
+        [editButton setBackgroundImage:[UIImage imageNamed:@"EditModeEnterButton"] forState:UIControlStateNormal];
+        [editButton setFrame:editButtonFrame];
 
-    // FIXME: As long the close button has "layer problems".
-    //[self addCloseButton];
+        CGRect labelFrame = CGRectMake(CGRectGetMinX(editButton.bounds),
+                                       CGRectGetMaxY(editButton.bounds),
+                                       CGRectGetWidth(editButton.bounds),
+                                       10.0f);
+
+        UILabel *label = [[UILabel alloc] initWithFrame:labelFrame];
+        [label setBackgroundColor:[UIColor clearColor]];
+        [label setTextColor:[UIColor darkTextColor]];
+        [label setTextAlignment:NSTextAlignmentCenter];
+        [label setFont:[UIFont systemFontOfSize:9.0f]];
+        [label setText:NSLocalizedString(@"EDIT_MODE_EDIT_BUTTON", nil)];
+        [editButton addSubview:label];
+
+        [self addSubview:editButton];
+
+        [editButton addTarget:self
+                       action:@selector(editButtonPressed:)
+             forControlEvents:UIControlEventTouchUpInside];
+    }
+
+    [self translate:-1.0f];
 }
 
 - (void)didClosePanel

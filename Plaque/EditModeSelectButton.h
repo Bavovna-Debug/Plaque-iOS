@@ -18,7 +18,8 @@ typedef enum
     EditModeBackgroundColor,
     EditModeForegroundColor,
     EditModeFont,
-    EditModeInscription
+    EditModeInscription,
+    EditModeFortify
 }
 EditMode;
 

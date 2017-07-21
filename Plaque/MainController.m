@@ -76,13 +76,11 @@
     //self.informationalView = [[InformationalView alloc] init];
     self.surroundingView = [[SurroundingView alloc] init];
 
-    CGRect statusBarFrame;
-
-    statusBarFrame = CGRectMake(0.0f, 0.0f, CGRectGetWidth(self.view.bounds), 20.0f);
-
-    NSString *deviceVersion = [[UIDevice currentDevice] systemVersion];
-    if ([deviceVersion floatValue] >= 7.0f)
-        statusBarFrame.size.height += 20.0f;
+    CGRect statusBarFrame =
+    CGRectMake(0.0f,
+               0.0f,
+               CGRectGetWidth(self.view.bounds),
+               40.0f);
 
     [self.statusBarView setFrame:statusBarFrame];
 

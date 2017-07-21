@@ -12,4 +12,6 @@
 
 + (SQLiteDatabase *)mainDatabase;
 
++ (void)upgradeDatabase;
+
 @end

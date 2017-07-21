@@ -19,7 +19,7 @@
     NSUserDefaults *defaults;
 }
 
-+ (Settings *)defaultSettings
++ (Settings *)sharedSettings
 {
     static dispatch_once_t onceToken;
     static Settings *settings;
@@ -45,6 +45,32 @@
     return self;
 }
 
+- (NSUInteger)lastApplicationVersion
+{
+    NSUInteger lastApplicationVersion = [defaults integerForKey:LastApplicationVersionKey];
+
+    return lastApplicationVersion;
+}
+
+- (void)setLastApplicationVersion:(NSUInteger)lastApplicationVersion
+{
+    [defaults setInteger:lastApplicationVersion
+                  forKey:LastApplicationVersionKey];
+}
+
+- (NSUInteger)lastDatabaseVersion
+{
+    NSUInteger lastDatabaseVersion = [defaults integerForKey:LastDatabaseVersionKey];
+
+    return lastDatabaseVersion;
+}
+
+- (void)setLastDatabaseVersion:(NSUInteger)lastDatabaseVersion
+{
+    [defaults setInteger:lastDatabaseVersion
+                  forKey:LastDatabaseVersionKey];
+}
+
 - (Boolean)tapMenuOnlyIcons
 {
     Boolean tapMenuOnlyIcons = [defaults boolForKey:TapMenuOnlyIconsKey];
@@ -60,7 +86,7 @@
 
 - (NSUInteger)lastOwnObjectId
 {
-    Boolean lastOwnObjectId = [defaults integerForKey:LastOwnObjectIdKey];
+    NSUInteger lastOwnObjectId = [defaults integerForKey:LastOwnObjectIdKey];
 
     lastOwnObjectId++;
 
@@ -77,7 +103,7 @@
 /*
 - (UInt32)radarOnRadarRevision
 {
-    UInt32 radarOnRadarRevision = (UInt32)[defaults integerForKey:OnRadarRevisionKey];
+    UInt32 radarOnRadarRevision = (UInt32) [defaults integerForKey:OnRadarRevisionKey];
 
     return radarOnRadarRevision;
 }
@@ -90,7 +116,7 @@
 
 - (UInt32)radarInSightRevision
 {
-    UInt32 radarInSightRevision = (UInt32)[defaults integerForKey:InSightRevisionKey];
+    UInt32 radarInSightRevision = (UInt32) [defaults integerForKey:InSightRevisionKey];
 
     return radarInSightRevision;
 }
@@ -103,7 +129,7 @@
 
 - (UInt32)radarOnMapRevision
 {
-    UInt32 radarOnMapRevision = (UInt32)[defaults integerForKey:OnMapRevisionKey];
+    UInt32 radarOnMapRevision = (UInt32) [defaults integerForKey:OnMapRevisionKey];
  
     return radarOnMapRevision;
 }

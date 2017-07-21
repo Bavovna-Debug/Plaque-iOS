@@ -8,6 +8,10 @@
 
 @interface Panel : UIView
 
+- (void)setBackground:(NSString *)backgroundImageName;
+
+- (void)removeSubviews;
+
 - (void)didOpenPanel;
 
 - (void)didClosePanel;

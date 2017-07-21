@@ -20,10 +20,11 @@
 
 + (ControlPanel *)sharedControlPanel
 {
-    static dispatch_once_t onceToken;
-    static ControlPanel *controlPanel;
+    static dispatch_once_t  onceToken;
+    static ControlPanel     *controlPanel;
 
-    dispatch_once(&onceToken, ^{
+    dispatch_once(&onceToken, ^
+    {
         controlPanel = [[ControlPanel alloc] init];
     });
 
@@ -36,15 +37,17 @@
     FullScreenShield *shield = [application fullScreenSchield:nil
                                                  closeOnTouch:YES];
 
-    CGRect mainViewFrame;
-    mainViewFrame = CGRectMake(CGRectGetMidX(shield.bounds) - 160.0f,
-                               CGRectGetMaxY(shield.bounds),
-                               320.0f,
-                               0.0f);
+    CGRect mainViewFrame = CGRectMake(CGRectGetMidX(shield.bounds) - 160.0f,
+                                      CGRectGetMaxY(shield.bounds),
+                                      320.0f,
+                                      0.0f);
 
     UIView *mainView = [[UIView alloc] initWithFrame:mainViewFrame];
+
     [mainView setBackgroundColor:[UIColor grayColor]];
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+    {
         [mainView.layer setBorderWidth:1.0f];
         [mainView.layer setBorderColor:[[UIColor colorWithWhite:0.5f alpha:0.5f] CGColor]];
         [mainView.layer setCornerRadius:4.0f];
@@ -60,11 +63,15 @@
 
     [UIView beginAnimations:nil
                     context:nil];
+
     [UIView setAnimationDuration:ControlPanelOpenDuration];
 
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+    {
         [mainView setFrame:CGRectOffset(mainViewFrame, 0.0f, -CGRectGetHeight(mainViewFrame) - 10.0f)];
-    } else {
+    }
+    else
+    {
         [mainView setFrame:CGRectOffset(mainViewFrame, 0.0f, -CGRectGetHeight(mainViewFrame))];
     }
 
@@ -76,8 +83,11 @@
 - (void)close
 {
     FullScreenShield *shield = self.shield;
+
     if (shield != nil)
+    {
         [shield remove];
+    }
 }
 
 - (UIView *)surroundingSelector:(UIView *)mainView
@@ -86,6 +96,7 @@
                               CGRectGetMaxY(mainView.bounds),
                               CGRectGetWidth(mainView.bounds),
                               80.0f);
+
     UIView *surroundingSelectorView = [[UIView alloc] initWithFrame:frame];
 
     UIImage *inSightImage = [UIImage imageNamed:@"ViewModeInSight"];
@@ -102,8 +113,10 @@
 
     [inSightButton setCenter:CGPointMake(round(CGRectGetWidth(frame) / 4),
                                          CGRectGetMidY(frame))];
+
     [onMapButton setCenter:CGPointMake(round(CGRectGetWidth(frame) / 4 * 2),
                                        CGRectGetMidY(frame))];
+
     /*[manualNavigationButtonButton setCenter:CGPointMake(round(CGRectGetWidth(frame) / 4 * 3),
                                                         CGRectGetMidY(frame))];*/
 
@@ -125,14 +138,17 @@
 - (UIButton *)buttonWithIcon:(UIImage *)buttonIcon
 {
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+
     [button setImage:buttonIcon
             forState:UIControlStateNormal];
+
     [button setBounds:(CGRect){ CGPointZero, buttonIcon.size }];
 
     [button.layer setBackgroundColor:[[UIColor lightGrayColor] CGColor]];
     [button.layer setBorderColor:[[UIColor darkGrayColor] CGColor]];
     [button.layer setBorderWidth:2.0f];
     [button.layer setCornerRadius:buttonIcon.size.width / 2];
+
     /*
      [button.layer setShadowColor:[[UIColor lightGrayColor] CGColor]];
      [button.layer setShadowOffset:CGSizeMake(0.0f, 0.0f)];
@@ -145,18 +161,21 @@
 - (void)inSightButtonPressed:(id)sender
 {
     [self.controller switchToInSight];
+
     [self close];
 }
 
 - (void)onMapButtonPressed:(id)sender
 {
     [self.controller switchToOnMap];
+
     [self close];
 }
 
 - (void)manualNavigationButtonButtonPressed:(id)sender
 {
     [self.controller switchToManualNavigation];
+
     [self close];
 }
 

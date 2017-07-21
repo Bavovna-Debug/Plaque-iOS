@@ -8,13 +8,22 @@
 
 #include "Definitions.h"
 
+@interface PlaqueAnnotation ()
+
+@property (assign, nonatomic, readwrite) CLLocationCoordinate2D coordinate;
+@property (copy,   nonatomic, readwrite) NSString               *inscription;
+
+@end
+
 @implementation PlaqueAnnotation
 
 - (id)initWithPlaque:(Plaque *)plaque
 {
     self = [super init];
     if (self == nil)
+    {
         return nil;
+    }
 
     self.plaque = plaque;
 
@@ -26,9 +35,17 @@
     return self.plaque.location.coordinate;
 }
 
-- (NSString *)title
+- (void)setCoordinate:(CLLocationCoordinate2D)coordinate
+{
+}
+
+- (NSString *)inscription
 {
     return self.plaque.inscription;
+}
+
+- (void)setInscription:(NSString *)inscription
+{
 }
 
 - (void)createLayer
@@ -39,7 +56,9 @@
     //
     plaqueLayer = self.annotationLayer;
     if (plaqueLayer != nil)
+    {
         [plaqueLayer removeFromSuperlayer];
+    }
 
     // Create new layer.
     //
@@ -50,13 +69,15 @@
     [plaqueLayer setBorderWidth:1.0f];
     [plaqueLayer setCornerRadius:5.0f];
 
-    CGSize plaqueViewSize = CGSizeMake(self.plaque.size.width * PlaqueSizeFixedScaleFactor,
-                                       self.plaque.size.height * PlaqueSizeFixedScaleFactor);
+    CGSize plaqueViewSize =
+    CGSizeMake(self.plaque.size.width * PlaqueSizeFixedScaleFactor,
+               self.plaque.size.height * PlaqueSizeFixedScaleFactor);
 
-    CGRect frame = CGRectMake(-plaqueViewSize.width / 2,
-                              -plaqueViewSize.height / 2,
-                              plaqueViewSize.width,
-                              plaqueViewSize.height);
+    CGRect frame =
+    CGRectMake(-plaqueViewSize.width / 2,
+               -plaqueViewSize.height / 2,
+               plaqueViewSize.width,
+               plaqueViewSize.height);
 
     [plaqueLayer setFrame:frame];
 
@@ -78,7 +99,9 @@
 {
     CALayer *annotationLayer = self.annotationLayer;
     if (annotationLayer != nil)
+    {
         [annotationLayer removeFromSuperlayer];
+    }
 }
 
 #pragma mark -

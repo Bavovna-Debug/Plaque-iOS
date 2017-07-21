@@ -1,0 +1,82 @@
+"YOUR_PLAQUE_WAS_DESTROYED" = "Your plaque '%2$@' was destroyed by %1$@!";
+
+"GPSERROR_TITLE"                             = "GPS";
+"GPSERROR_MESSAGE"                           = "Sans accès au GPS, cette application ne pouvait pas représenter le contenu de vpCloud en 3D. Vous pouvez activer l'accès au GPS pour cette application dans les paramètres système de votre appareil.";
+
+"AVERROR_TITLE"                             = "Caméra";
+"AVERROR_MESSAGE"                           = "Sans accès à la caméra, cette application ne pouvait pas représenter le contenu de vpCloud en 3D. Vous pouvez activer l'accès de la caméra pour cette application dans les paramètres système de votre appareil.";
+
+"ALERT_BUTTON_OK"                           = "D'accord";
+"ALERT_BUTTON_NO"                           = "Non";
+"ALERT_BUTTON_YES"                          = "Oui";
+
+"SETUP_QUESTION_ABOUT_GPS_TITLE"            = "Réglages de base";
+"SETUP_QUESTION_ABOUT_GPS_MESSAGE"          = "";
+"SETUP_QUESTION_ABOUT_CAMERA_TITLE"         = "Réglages de base";
+"SETUP_QUESTION_ABOUT_CAMERA_MESSAGE"       = "";
+"SETUP_QUESTION_ABOUT_NOTIFICATIONS_TITLE"  = "Réglages de base";
+"SETUP_QUESTION_ABOUT_NOTIFICATIONS_MESSAGE" = "";
+
+"DO_YOU_WANT_TO_CREATE_PROFILE_TITLE"       = "Profil";
+"DO_YOU_WANT_TO_CREATE_PROFILE_MESSAGE"     = "Vous n'avez pas encore de profil vpCloud. Voulez-vous inscrire dans vpCloud?";
+"DO_YOU_WANT_TO_CREATE_PROFILE_NOT_YET"     = "Pas encore";
+"DO_YOU_WANT_TO_CREATE_PROFILE_YES_BUTTON"  = "Oui";
+
+"PROFILE_FORM_CANCEL_BUTTON"                = "Annuler";
+"PROFILE_FORM_SUBMIT_BUTTON"                = "Soumettre";
+
+"PROFILE_FORM_PROFILE_NAME_LABEL"           = "Nom de profil:";
+"PROFILE_FORM_PROFILE_NAME_HELP"            = "Le nom du profil doit comporter au moins 4 et pas plus de 20 caractères et peut contenir des lettres, des chiffres et des symboles spéciaux.";
+"PROFILE_FORM_PROFILE_NAME_VALIDATING_MESSAGE"          = "Validation de '%@' dans vpCloud";
+"PROFILE_FORM_PROFILE_NAME_IS_AVAILABLE_MESSAGE"        = "Le nom '%@' est disponible";
+"PROFILE_FORM_PROFILE_NAME_ALREADY_IN_USE_MESSAGE"      = "Le nom '%@' est déjà utilisé";
+"PROFILE_FORM_PROFILE_NAME_CONSTRAINT_MESSAGE"          = "Le nom '%@' ne confirme pas le nom des règles";
+"PROFILE_FORM_PROFILE_NAME_VALIDATION_ERROR_MESSAGE"    = "Vous n'êtes pas connecté à vpCloud";
+
+"PROFILE_FORM_USER_NAME_LABEL"              = "Identifiant:";
+"PROFILE_FORM_USER_NAME_HELP"               = "";
+
+"PROFILE_FORM_PASSWORD_LABEL"               = "Mot de passe:";
+"PROFILE_FORM_PASSWORD_HELP"                = "";
+
+"CREATE_PLAQUE_LABEL"                       = "Créer une plaque ici";
+
+"CREATE_PLAQUE_HELP_TEXT"                   = "Gardez votre iPhone/iPad vertical. Pointez-le sur un objet près de chez vous et appuyez sur 'Feu'. Une nouvelle plaque apparaît à environ 20 mètres devant vous.";
+"CREATE_PLAQUE_FIRE_BUTTON"                 = "Feu";
+"CREATE_PLAQUE_CANCEL_BUTTON"               = "Soumettre";
+
+"DEFAULT_INSCRIPTION"                       = "Voici votre publicité";
+
+"EDIT_MODE_EDIT_BUTTON"                     = "modifier";
+"EDIT_MODE_COORDINATE_BUTTON"               = "emplacement";
+"EDIT_MODE_ALTITUDE_BUTTON"                 = "altitude";
+"EDIT_MODE_DIRECTION_BUTTON"                = "direction";
+"EDIT_MODE_TILT_BUTTON"                     = "inclinaison";
+"EDIT_MODE_SIZE_BUTTON"                     = "taille";
+"EDIT_MODE_BACKGROUND_BUTTON"               = "couleur fond";
+"EDIT_MODE_FOREGROUND_BUTTON"               = "couleur texte";
+"EDIT_MODE_FONT_BUTTON"                     = "caractère";
+"EDIT_MODE_INSCRIPTION_BUTTON"              = "content";
+"EDIT_MODE_FORTIFY_BUTTON"                  = "protection";
+
+"CAPTURED_PLAQUE_AUTHOR"                    = "le créateur: %@";
+
+"MESSAGE_FORTIFICATION_IN_PROCESS"          = "La protection d'une de vos plaques est encore en cours. Attendez qu'il soit terminé.";
+
+"APP_STORE_ERROR_MESSAGE"                   = "Ne pouvez pas procéder à votre achat dès maintenant! Essayez plus tard.";
+
+"APP_STORE_NOT_YET"                         = "Non, merci";
+"APP_STORE_BUY_NOW"                         = "Acheter - %@";
+
+"STATUS_BAR_VPCLOUD_ESTABLISH_CONNECTION"   = "Connexion à vpCloud";
+"STATUS_BAR_VPCLOUD_CANNOT_CONNECT"         = "Peut pas se connecter à vpCloud";
+"STATUS_BAR_VPCLOUD_SCHEDULE_RECONNECT"     = "Reviendrai à connecter à vpCloud en %.0f secondes";
+"STATUS_BAR_VPCLOUD_CONNECTION_ESTABLISHED" = "Connexion à vpCloud établie";
+"STATUS_BAR_VPCLOUD_LOST_CONNECTION"        = "Connexion à vpCloud perdu";
+
+"STATUS_BAR_PROCESS_RADAR"                  = "Détecté %u plaque(s) sur le radar";
+"STATUS_BAR_PROCESS_PLAQUES"                = "Synchronisation avec vpCloud";
+"STATUS_BAR_DOWNLOAD_PLAQUES"               = "Synchronisation de %lu plaque(s) avec vpCloud";
+
+"STATUS_BAR_NEW_PLAQUE_SYNCRONIZED"         = "La nouvelle plaque a été synchronisée avec vpCloud";
+"STATUS_BAR_PLAQUE_CHANGES_SYNCRONIZED"     = "Les changements de plaque ont été synchronisés avec vpCloud";

@@ -12,11 +12,7 @@
 
 + (AppStore *)sharedAppStore;
 
-/*
-- (void)purchaseUnlock;
-
-- (void)restorePurchasedUnlock;
-*/
+- (void)purchaseFortification;
 
 @end
 
@@ -24,6 +20,6 @@
 
 @required
 
-- (void)gameWasUnlocked;
+- (void)dmaqPurchased;
 
 @end

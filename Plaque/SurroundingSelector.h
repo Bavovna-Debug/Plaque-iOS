@@ -10,11 +10,13 @@
 
 @interface SurroundingSelector : UIView
 
-typedef enum {
+typedef enum
+{
     SurroundingInSight,
     SurroundingOnMap,
     SurroundingRadar
-} SurroundingViewMode;
+}
+SurroundingViewMode;
 
 @property (strong, nonatomic, readwrite) id<SurroundingSelectorDelegate> delegate;
 

@@ -11,11 +11,11 @@
 
 @interface PlaqueAnnotation : NSObject <CALayerDelegate, MKAnnotation>
 
-@property (copy,   nonatomic) NSString                  *title;
-@property (assign, nonatomic) CLLocationCoordinate2D    coordinate;
-@property (weak,   nonatomic) Plaque                    *plaque;
-@property (strong, nonatomic) CALayer                   *annotationLayer;
-@property (strong, nonatomic) CATextLayer               *annotationTextLayer;
+@property (assign, nonatomic, readonly)  CLLocationCoordinate2D coordinate;
+@property (copy,   nonatomic, readonly)  NSString               *inscription;
+@property (weak,   nonatomic, readwrite) Plaque                 *plaque;
+@property (strong, nonatomic, readwrite) CALayer                *annotationLayer;
+@property (strong, nonatomic, readwrite) CATextLayer            *annotationTextLayer;
 
 - (id)initWithPlaque:(Plaque *)plaque;
 
