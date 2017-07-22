@@ -19,6 +19,8 @@
 #import "EditModeInscriptionView.h"
 #import "Plaques.h"
 
+#include "Definitions.h"
+
 #undef FORTIFICATION
 
 @interface EditModeView ()
@@ -160,6 +162,11 @@
 
 - (void)editModeButtonPressed:(id)sender
 {
+    [UIView beginAnimations:nil
+                    context:nil];
+    [UIView setAnimationDuration:
+     (self.bothFitOnScreen == NO) ? EditModeAnimationDurationOniPhone : EditModeAnimationDurationOniPad];
+
     EditModeSelectButton *button = sender;
 
     [self.controlsPanel removeSubviews];
@@ -285,7 +292,7 @@
 
         case EditModeFortify:
         {
-#if 0
+#ifdef FORTIFICATION
             Plaques *plaques = [Plaques sharedPlaques];
             if ([plaques plaqueUnderFortification] != nil)
             {
@@ -313,6 +320,8 @@
             break;
         }
     }
+
+    [UIView commitAnimations];
 }
 
 @end

@@ -36,7 +36,7 @@
     [self setTranslatesAutoresizingMaskIntoConstraints:NO];
     [self setBackgroundColor:[UIColor clearColor]];
 
-    self.mainButton = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"FlyMenu"]];
+    self.mainButton = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"TapMenu"]];
     [self.mainButton setFrame:CGRectZero];
     [self.mainButton setTranslatesAutoresizingMaskIntoConstraints:NO];
     [self addSubview:self.mainButton];

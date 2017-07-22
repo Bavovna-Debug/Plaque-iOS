@@ -18,17 +18,14 @@
 
 @property (assign, nonatomic, readwrite) Boolean menuOpened;
 
-@property (weak,   nonatomic) FullScreenShield *shield;
-@property (strong, nonatomic) NSMutableArray *rows;
 @property (strong, nonatomic) UIButton *mainButton;
-//@property (strong, nonatomic) UIButton *exitButton;
+@property (weak,   nonatomic) FullScreenShield *shield;
+@property (strong, nonatomic) NSMutableArray *items;
 @property (strong, nonatomic) UIActivityIndicatorView *activityIndicator;
 
 @end
 
 @implementation TapMenu
-
-@synthesize menuOpened = _menuOpened;
 
 + (TapMenu *)mainTapMenu
 {
@@ -51,6 +48,8 @@
         return nil;
     }
 
+    self.items = [NSMutableArray array];
+
     [self setTranslatesAutoresizingMaskIntoConstraints:NO];
     [self setBackgroundColor:[UIColor clearColor]];
 
@@ -61,14 +60,6 @@
     [self.mainButton setTranslatesAutoresizingMaskIntoConstraints:NO];
     [self addSubview:self.mainButton];
 
-/*
-    self.exitButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [self.exitButton setImage:[UIImage imageNamed:@"TapMenuQuit"]
-                     forState:UIControlStateNormal];
-    [self.exitButton setTranslatesAutoresizingMaskIntoConstraints:NO];
-    [self.exitButton setHidden:YES];
-    [self addSubview:self.exitButton];
-*/
     {
         self.activityIndicator =
         [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
@@ -79,43 +70,28 @@
                                                     40.0f)];
 
         [self addSubview:self.activityIndicator];
+    }
 
-        NSDictionary *viewsDictionary = @{@"tapMenuMainButton":self.mainButton,
-                                          /*@"tapMenuExitButton":self.exitButton*/};
+    {
+        NSDictionary *viewsDictionary = @{@"tapMenuMainButton":self.mainButton};
 
         [self addConstraints:[NSLayoutConstraint
-                              constraintsWithVisualFormat:@"H:|-[tapMenuMainButton]-|"
-                              options:NSLayoutFormatAlignAllBaseline
-                              metrics:nil
-                              views:viewsDictionary]];
-        [self addConstraints:[NSLayoutConstraint
-                              constraintsWithVisualFormat:@"V:|-[tapMenuMainButton]-0-|"
+                              constraintsWithVisualFormat:@"H:|-0-[tapMenuMainButton(48)]-|"
                               options:NSLayoutFormatAlignAllBaseline
                               metrics:nil
                               views:viewsDictionary]];
 
-/*
         [self addConstraints:[NSLayoutConstraint
-                              constraintsWithVisualFormat:@"H:|-[tapMenuExitButton]-|"
+                              constraintsWithVisualFormat:@"V:|-[tapMenuMainButton(48)]-0-|"
                               options:NSLayoutFormatAlignAllBaseline
                               metrics:nil
                               views:viewsDictionary]];
-        [self addConstraints:[NSLayoutConstraint
-                              constraintsWithVisualFormat:@"V:|-[tapMenuExitButton]-|"
-                              options:NSLayoutFormatAlignAllBaseline
-                              metrics:nil
-                              views:viewsDictionary]];
-*/
     }
 
     [self.mainButton addTarget:self
                         action:@selector(mainButtonPressed:)
               forControlEvents:UIControlEventTouchUpInside];
-/*
-    [self.exitButton addTarget:self
-                        action:@selector(exitButtonPressed:)
-              forControlEvents:UIControlEventTouchUpInside];
-*/
+
     return self;
 }
 
@@ -129,10 +105,11 @@
 
 - (void)mainButtonPressed:(id)sender
 {
+    /*
     ControlPanel *controlPanel = [ControlPanel sharedControlPanel];
     [controlPanel open];
+*/
 
-/*
     if ([self menuOpened] == YES) 
     {
         [self closeMenu];
@@ -142,18 +119,8 @@
         [self openMenu];
     }
 
-    [self.delegate mainButtonPressed];
-*/
+    //[self.delegate mainButtonPressed];
 }
-
-/*
-- (void)exitButtonPressed:(id)sender
-{
-    [self closeMenu];
-
-    [self.delegate exitButtonPressed];
-}
-*/
 
 - (void)tapMenuItemPressed:(id)sender
 {
@@ -170,45 +137,90 @@
 {
     [self closeMenu];
 
-    [self.rows removeAllObjects];
+    [self.items removeAllObjects];
 }
 
 - (void)addItemWithIconName:(NSString *)iconName
-                    command:(TapMenuCommand)command
+                      title:(NSString *)title
+                    command:(TapMenuCommand)command;
 {
-    [self addItemWithIconName:iconName
-                      command:command
-                    rowNumber:0];
-}
-
-- (void)addItemWithIconName:(NSString *)iconName
-                    command:(TapMenuCommand)command
-                  rowNumber:(NSUInteger)rowNumber
-{
-    if (self.rows == nil)
-        self.rows = [NSMutableArray array];
-
-    NSMutableArray *row;
-    if ([self.rows count] > rowNumber)
-    {
-        row = [self.rows objectAtIndex:rowNumber];
-    }
-    else
-    {
-        row = [NSMutableArray array];
-        [self.rows addObject:row];
-    }
-
     TapMenuItem *item = [[TapMenuItem alloc] initWithIconName:iconName
-                                                      command:command
-                                                    rowNumber:rowNumber];
+                                                        title:title
+                                                      command:command];
 
-    [row addObject:item];
+    [self.items addObject:item];
 }
 
 - (void)openMenu
 {
+    if ([self menuOpened] == YES)
+    {
+        return;
+    }
+
+    [self setMenuOpened:YES];
+
+    ApplicationDelegate *application =
+    (ApplicationDelegate *) [[UIApplication sharedApplication] delegate];
+
+    FullScreenShield *shield = [application fullScreenSchield:self
+                                                 closeOnTouch:YES];
+
+    CGSize mainButtonSize = self.mainButton.bounds.size;
+
+    CGRect nullFrame = CGRectMake(0.0f, CGRectGetHeight(self.superview.bounds), 0.0f, 0.0f);
+
+    CGRect itemFrame = CGRectMake(mainButtonSize.width * 0.4f,
+                                  CGRectGetMaxY(self.frame) - mainButtonSize.height * 0.8f,
+                                  [TapMenuItem fullSize].width,
+                                  [TapMenuItem fullSize].height);
+
+    for (TapMenuItem *item in self.items)
+    {
+        [shield addSubview:[item prepareViewFor:shield]];
+
+        [item.view setAlpha:5.0f];
+        [item.view setFrame:nullFrame];
+    }
+
+    CGFloat angle = -4.0f;
+
+    [UIView beginAnimations:nil
+                    context:nil];
+    [UIView setAnimationDuration:TapMenuAnimationDurationOpen];
+
+    [self.mainButton setAlpha:AlphaMainButtonOpenned];
+
+    for (TapMenuItem *item in self.items)
+    {
+        [item.view setAlpha:1.0f];
+        [item.view setFrame:itemFrame];
+        [item.view addTarget:self
+                      action:@selector(tapMenuItemPressed:)
+            forControlEvents:UIControlEventTouchUpInside];
+
+        CATransform3D transform = CATransform3DIdentity;
+        transform.m34 = -1.0f / 500.0f;
+        //transform = CATransform3DTranslate(transform, transX, -transY, -transZ);
+        transform = CATransform3DRotate(transform, DegreesToRadians(angle), 0, 0, -1);
+        transform = CATransform3DRotate(transform, DegreesToRadians(25.0f), 0, -1, 0);
+        //transform = CATransform3DScale(transform, scaleFactor, scaleFactor, scaleFactor);
+
+        [item.view.layer setTransform:transform];
+
+        CGFloat offset = sinf(1.0f - (CGRectGetMaxY(itemFrame) / CGRectGetMaxY(self.frame))) * 45.0f;
+        itemFrame = CGRectOffset(itemFrame, -offset, -CGRectGetHeight(itemFrame) * 1.2f);
+        angle += 4.0f;
+    }
+
+    [UIView commitAnimations];
+
+    self.shield = shield;
+}
+
 /*
+- (void)openMenu
+{
     if ([self menuOpened] == YES)
         return;
 
@@ -229,7 +241,7 @@
     [UIView setAnimationDuration:TapMenuAnimationDurationOpen];
 
     [self.mainButton setAlpha:AlphaMainButtonOpenned];
-    [self.exitButton setHidden:NO];
+    //[self.exitButton setHidden:NO];
 
     CGFloat lastRowRadius;
 
@@ -257,8 +269,8 @@
         CGFloat deltaX = sqrtf(powf(radius, 2) - powf(overboarderY, 2));
         CGFloat deltaY = sqrtf(powf(radius, 2) - powf(overboarderX, 2));
 
-        CGFloat angleOverDown = radiandsToDegrees(atan2f(overboarderY, deltaX));
-        CGFloat angleOverUp = radiandsToDegrees(atan2f(overboarderX, deltaY));
+        CGFloat angleOverDown = RadiandsToDegrees(atan2f(overboarderY, deltaX));
+        CGFloat angleOverUp = RadiandsToDegrees(atan2f(overboarderX, deltaY));
 
         CGFloat fromAngle = -angleOverDown;
         CGFloat toAngle = 90.0f + angleOverUp;
@@ -277,8 +289,8 @@
                                           itemSize.width,
                                           itemSize.height);
             itemFrame = CGRectOffset(itemFrame,
-                                     sin(degreesToRadians(currentAngle)) * radius,
-                                     -cos(degreesToRadians(currentAngle)) * radius);
+                                     sin(DegreesToRadians(currentAngle)) * radius,
+                                     -cos(DegreesToRadians(currentAngle)) * radius);
 
             [itemView setAlpha:1.0f];
             [itemView setFrame:itemFrame];
@@ -297,12 +309,40 @@
     [UIView commitAnimations];
 
     self.shield = shield;
-*/
 }
+*/
 
 - (void)closeMenu
 {
+    if ([self menuOpened] == NO)
+    {
+        return;
+    }
+
+    [self setMenuOpened:NO];
+
+    CGRect nullFrame = CGRectMake(0.0f, CGRectGetHeight(self.superview.bounds), 0.0f, 0.0f);
+
+    [UIView beginAnimations:nil
+                    context:nil];
+    [UIView setAnimationDuration:FlyMenuAnimationDurationClose];
+
+    [self.mainButton setAlpha:AlphaMainButtonNormal];
+
+    for (TapMenuItem *item in self.items)
+    {
+        [item.view setAlpha:0.0f];
+        [item.view setFrame:nullFrame];
+    }
+
+    [UIView commitAnimations];
+
+    [self.shield remove];
+}
+
 /*
+- (void)closeMenu
+{
     if ([self menuOpened] == NO)
     {
         return;
@@ -314,7 +354,7 @@
                     context:nil];
     [UIView setAnimationDuration:TapMenuAnimationDurationClose];
 
-    [self.exitButton setHidden:YES];
+    //[self.exitButton setHidden:YES];
     [self.mainButton setAlpha:AlphaMainButtonNormal];
 
     [[SurroundingSelector panel] setHidden:YES];
@@ -322,7 +362,8 @@
     [UIView commitAnimations];
 
     [self.shield remove];
-*/}
+}
+*/
 
 #pragma mark - FullScreenSchield delegate
 

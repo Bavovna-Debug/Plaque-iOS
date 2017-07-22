@@ -2,16 +2,17 @@
   "images" : [
     {
       "idiom" : "universal",
-      "filename" : "ViewModeInSight.png",
+      "filename" : "TapMenuViewModeInSight.png",
       "scale" : "1x"
     },
     {
       "idiom" : "universal",
-      "filename" : "ViewModeInSight@2x.png",
+      "filename" : "TapMenuViewModeInSight@2x.png",
       "scale" : "2x"
     },
     {
       "idiom" : "universal",
+      "filename" : "TapMenuViewModeInSight@3x.png",
       "scale" : "3x"
     }
   ],

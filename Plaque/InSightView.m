@@ -8,7 +8,6 @@
 #import <CoreLocation/CoreLocation.h>
 #import <CoreMotion/CoreMotion.h>
 
-#import "PlaqueEditView.h"
 #import "Authentificator.h"
 #import "Navigator.h"
 #import "Plaques.h"
@@ -18,6 +17,8 @@
 #import "InSightPlaque.h"
 
 #include "Definitions.h"
+
+#undef CreatePlaqueLabel
 
 @interface InSightView () <
     CLLocationManagerDelegate,
@@ -34,16 +35,16 @@
 @property (strong, nonatomic) NSMutableArray            *inSightPlaques;
 @property (strong, nonatomic) NSLock                    *recalculateLock;
 @property (strong, nonatomic) NSLock                    *refreshLock;
-@property (strong, nonatomic) NSLock                    *tiltLock;
-@property (strong, nonatomic) NSLock                    *turnLock;
+//@property (strong, nonatomic) NSLock                    *tiltLock;
+//@property (strong, nonatomic) NSLock                    *turnLock;
 
 @property (strong, nonatomic) CLLocationManager         *locationManager;
 @property (strong, nonatomic) CLLocation                *location;
 @property (strong, nonatomic) CLHeading                 *heading;
 
 @property (strong, nonatomic) CMMotionManager           *motionManager;
-@property (assign, nonatomic) CGFloat                   tilt;
-@property (assign, nonatomic) CGFloat                   turn;
+@property (assign, atomic)    CGFloat                   tilt;
+@property (assign, atomic)    CGFloat                   turn;
 
 @property (strong, nonatomic) NSTimer                   *captureTimer;
 @property (strong, nonatomic) NSTimer                   *cameraWorkaroundTimer;
@@ -72,11 +73,13 @@
 
     self.recalculateLock = [[NSLock alloc] init];
     self.refreshLock = [[NSLock alloc] init];
-    self.tiltLock = [[NSLock alloc] init];
-    self.turnLock = [[NSLock alloc] init];
+    //self.tiltLock = [[NSLock alloc] init];
+    //self.turnLock = [[NSLock alloc] init];
 
     [self setTranslatesAutoresizingMaskIntoConstraints:NO];
     [self setBackgroundColor:[UIColor colorWithWhite:0.2f alpha:1.0f]];
+
+#if CreatePlaqueLabel
 
     NSString *createPlaqueText = NSLocalizedString(@"CREATE_PLAQUE_LABEL", nil);
 
@@ -90,6 +93,8 @@
                  forControlEvents:UIControlEventTouchUpInside];
     [self addSubview:createPlaqueButton];
     self.createPlaqueButton = createPlaqueButton;
+
+#endif
 
     [self checkCameraAuthorization];
 
@@ -222,28 +227,34 @@
 
          CGFloat turn = CorrectDegrees(RadiandsToDegrees(-atan2f(accelerometerData.acceleration.x, accelerometerData.acceleration.y)) - 180.0f);
 
-#ifdef INSIGHTVIEW_TILT_BY_ACCURACY
+#ifdef InSightTiltByAccuracy
+
          if (round(tilt / TiltAccuracy) != round(self.tilt / TiltAccuracy))
          {
              self.tilt = tilt;
 
              [self tiltUp];
          }
+
 #else
 
         self.tilt = tilt;
 
         [self tiltUp];
+
 #endif
 
-#ifdef INSIGHTVIEW_TURN_BY_ACCURACY
-         if (round(turn / TurnAccuracy) != round(self.turn / TurnAccuracy))
-         {
-             self.turn = turn;
-         }
+#ifdef InSightTurnByAccuracy
+
+        if (round(turn / TurnAccuracy) != round(self.turn / TurnAccuracy))
+        {
+            self.turn = turn;
+        }
+
 #else
 
         self.turn = turn;
+
 #endif
 
         if (error)
@@ -297,7 +308,9 @@
             // ... then skip this plaque if it is not the one on workdesk.
             //
             if ([plaques.plaquesOnWorkdesk containsObject:plaques] == NO)
+            {
                 continue;
+            }
         }
 
         CGFloat distanceToAim = [inSightPlaque distanceToAimWithTiltOffset:tiltOffset];
@@ -321,14 +334,16 @@
 
 - (void)tiltUp
 {
+#if 0
     if ([self.tiltLock tryLock] == FALSE)
     {
         return;
     }
+#endif
 
     if ((self.tilt < -(M_PI_2 / 90.0f * 50.0f)) || (self.tilt > (M_PI_2 / 90.0f * 40.0f)))
     {
-        [self.tiltLock unlock];
+        //[self.tiltLock unlock];
 
         return;
     }
@@ -336,10 +351,11 @@
     CGRect bounds = self.bounds;
     tiltFactor = sinf(self.tilt);
     tiltOffset = roundf(CGRectGetHeight(bounds) * tiltFactor);
+
     [self.container setPosition:CGPointMake(CGRectGetMidX(bounds),
                                             CGRectGetMidY(bounds) + tiltOffset)];
 
-    [self.tiltLock unlock];
+    //[self.tiltLock unlock];
 }
 
 - (void)refreshPlaquesInSight
@@ -823,6 +839,10 @@
 
 - (void)switchCameraOn
 {
+#ifdef EmulationMode
+    return;
+#endif
+
     if (self.cameraController != nil)
     {
         return;

@@ -207,12 +207,6 @@
 		94DBA15C1AA9934900190805 /* ControlPanel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ControlPanel.h; sourceTree = "<group>"; };
 		94DBA15D1AA9934900190805 /* ControlPanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ControlPanel.m; sourceTree = "<group>"; };
 		94E747141ED9B72C00AD68F2 /* Plaque.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Plaque.entitlements; sourceTree = "<group>"; };
-		94F169861A7A1B38006DAB9D /* ActionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActionView.h; sourceTree = "<group>"; };
-		94F169871A7A1B38006DAB9D /* ActionView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ActionView.m; sourceTree = "<group>"; };
-		94F169891A7A2344006DAB9D /* ActionButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActionButton.h; sourceTree = "<group>"; };
-		94F1698A1A7A2344006DAB9D /* ActionButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ActionButton.m; sourceTree = "<group>"; };
-		94F1698C1A7A3503006DAB9D /* PlaqueEditView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlaqueEditView.h; sourceTree = "<group>"; };
-		94F1698D1A7A3503006DAB9D /* PlaqueEditView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PlaqueEditView.m; sourceTree = "<group>"; };
 		94F169901A7A67FA006DAB9D /* EditModeSelectButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EditModeSelectButton.h; sourceTree = "<group>"; };
 		94F169911A7A67FA006DAB9D /* EditModeSelectButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EditModeSelectButton.m; sourceTree = "<group>"; };
 		94F169931A7A699A006DAB9D /* EditModeCoordinateSubview.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EditModeCoordinateSubview.h; sourceTree = "<group>"; };
@@ -353,12 +347,6 @@
 		945F20DB1A7FD4B300FA69C6 /* Trash */ = {
 			isa = PBXGroup;
 			children = (
-				94F1698C1A7A3503006DAB9D /* PlaqueEditView.h */,
-				94F1698D1A7A3503006DAB9D /* PlaqueEditView.m */,
-				94F169861A7A1B38006DAB9D /* ActionView.h */,
-				94F169871A7A1B38006DAB9D /* ActionView.m */,
-				94F169891A7A2344006DAB9D /* ActionButton.h */,
-				94F1698A1A7A2344006DAB9D /* ActionButton.m */,
 			);
 			name = Trash;
 			sourceTree = "<group>";

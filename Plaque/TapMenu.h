@@ -22,11 +22,8 @@
 - (void)clearMenu;
 
 - (void)addItemWithIconName:(NSString *)iconName
+                      title:(NSString *)title
                     command:(TapMenuCommand)command;
-
-- (void)addItemWithIconName:(NSString *)iconName
-                    command:(TapMenuCommand)command
-                  rowNumber:(NSUInteger)rowNumber;
 
 - (void)openMenu;
 

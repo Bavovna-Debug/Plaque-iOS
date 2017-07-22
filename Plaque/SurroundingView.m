@@ -111,7 +111,7 @@
 {
     [super switchToBackground];
 
-    SurroundingSubview *currentView = (SurroundingSubview *)[self.subviews lastObject];
+    SurroundingSubview *currentView = (SurroundingSubview *) [self.subviews lastObject];
     [currentView pause];
 }
 
@@ -119,7 +119,7 @@
 {
     [super switchToForeground];
 
-    SurroundingSubview *currentView = (SurroundingSubview *)[self.subviews lastObject];
+    SurroundingSubview *currentView = (SurroundingSubview *) [self.subviews lastObject];
     [currentView resume];
 }
 

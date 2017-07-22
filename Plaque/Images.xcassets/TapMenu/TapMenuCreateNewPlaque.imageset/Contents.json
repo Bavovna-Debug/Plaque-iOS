@@ -2,16 +2,17 @@
   "images" : [
     {
       "idiom" : "universal",
-      "scale" : "1x",
-      "filename" : "ViewModeOnMap.png"
+      "filename" : "TapMenuCreateNewPlaque.png",
+      "scale" : "1x"
     },
     {
       "idiom" : "universal",
-      "scale" : "2x",
-      "filename" : "ViewModeOnMap@2x.png"
+      "filename" : "TapMenuCreateNewPlaque@2x.png",
+      "scale" : "2x"
     },
     {
       "idiom" : "universal",
+      "filename" : "TapMenuCreateNewPlaque@3x.png",
       "scale" : "3x"
     }
   ],

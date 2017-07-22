@@ -12,7 +12,6 @@
 #import "Navigator.h"
 #import "Plaques.h"
 #import "MainController.h"
-#import "PlaqueEditView.h"
 #import "Authentificator.h"
 #import "EditModeCoordinateSubview.h"
 #import "EditModeAltitudeSubview.h"

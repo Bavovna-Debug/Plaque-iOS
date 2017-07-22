@@ -39,7 +39,10 @@
 "PROFILE_FORM_PASSWORD_LABEL"               = "Mot de passe:";
 "PROFILE_FORM_PASSWORD_HELP"                = "";
 
-"CREATE_PLAQUE_LABEL"                       = "Créer une plaque ici";
+//"CREATE_PLAQUE_LABEL"                       = "Créer une plaque ici";
+"TAP_MENU_CREATE_PLAQUE"                    = "Créer une plaque ici";
+"TAP_MENU_IN_SIGHT_MODE"                    = "Passez en mode d'affichage";
+"TAP_MENU_ON_MAP_MODE"                      = "Passer à la carte";
 
 "CREATE_PLAQUE_HELP_TEXT"                   = "Gardez votre iPhone/iPad vertical. Pointez-le sur un objet près de chez vous et appuyez sur 'Feu'. Une nouvelle plaque apparaît à environ 20 mètres devant vous.";
 "CREATE_PLAQUE_FIRE_BUTTON"                 = "Feu";

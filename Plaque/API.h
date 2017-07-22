@@ -4,11 +4,10 @@
 //  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
-#ifndef __API__
-#define __API__
+#pragma once
 
-#define TCP_PORT_NUMBER_IPV4                        12004
-#define TCP_PORT_NUMBER_IPV6                        12006
+#define TCP_PortNumberIPv4                          12004
+#define TCP_PortNumberIPv6                          12006
 
 #define API_DialogueSignature						0xC2D6D5D1D6E4D900
 
@@ -36,9 +35,11 @@
 #define API_PaquetDisplacementOnRadar               0x00010101
 #define API_PaquetDisplacementInSight               0x00010102
 #define API_PaquetDisplacementOnMap                 0x00010104
+//
 #define API_PaquetDownloadPlaquesOnRadar            0x00010201
 #define API_PaquetDownloadPlaquesInSight            0x00010202
 #define API_PaquetDownloadPlaquesOnMap              0x00010204
+//
 #define API_PaquetPostNewPlaque                     0x00020001
 #define API_PaquetPlaqueModifiedLocation            0x00020002
 #define API_PaquetPlaqueModifiedOrientation         0x00020003
@@ -46,10 +47,17 @@
 #define API_PaquetPlaqueModifiedColors              0x00020005
 #define API_PaquetPlaqueModifiedFont	            0x00020006
 #define API_PaquetPlaqueModifiedInscription         0x00020007
+//
 #define API_PaquetDownloadProfiles                  0x00030001
+//
 #define API_PaquetNotificationsToken                0x00040000
 #define API_PaquetValidateProfileName               0x00040001
 #define API_PaquetCreateProfile                     0x00040002
+//
+#define API_FortificationCheckMyAccount             0x00050001
+#define API_FortificationDepositCoins               0x00050002
+#define API_FortificationAskForPrice                0x00050004
+#define API_FortificationPayForPlaque               0x00050008
 
 #define API_PaquetReportMessage                     0xA1A1A1A1
 
@@ -90,5 +98,3 @@
 #define API_BonjourCreateProfileNameConstraint		0xA1A0FE04
 #define API_BonjourCreateProfileEmailAlreadyInUse	0xA1A0FE05
 #define API_BonjourCreateProfileEmailConstraint		0xA1A0FE06
-
-#endif

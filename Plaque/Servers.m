@@ -55,11 +55,11 @@
 {
     if ((currentServerNumber % 2) == 0)
     {
-        return TCP_PORT_NUMBER_IPV4;
+        return TCP_PortNumberIPv4;
     }
     else
     {
-        return TCP_PORT_NUMBER_IPV6;
+        return TCP_PortNumberIPv6;
     }
 }
 

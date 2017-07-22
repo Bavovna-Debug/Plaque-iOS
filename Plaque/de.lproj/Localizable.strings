@@ -39,7 +39,10 @@
 "PROFILE_FORM_PASSWORD_LABEL"               = "Passwort:";
 "PROFILE_FORM_PASSWORD_HELP"                = "";
 
-"CREATE_PLAQUE_LABEL"                       = "Plaque vor mir erstellen";
+//"CREATE_PLAQUE_LABEL"                       = "Plaque vor mir erstellen";
+"TAP_MENU_CREATE_PLAQUE"                    = "Plaque vor mir erstellen";
+"TAP_MENU_IN_SIGHT_MODE"                    = "Schalte zu Sichtmodus";
+"TAP_MENU_ON_MAP_MODE"                      = "Schalte zu Karte";
 
 "CREATE_PLAQUE_HELP_TEXT"                   = "Halte dein iPhone/iPad senkrecht. Richte es auf ein Objekt in deiner Nähe und drücke auf 'Platzieren'. Neuer Plaque erscheint in ca. 20 Meter vor dir.";
 "CREATE_PLAQUE_FIRE_BUTTON"                 = "Platzieren";

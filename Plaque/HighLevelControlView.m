@@ -6,11 +6,18 @@
 
 #import "ApplicationDelegate.h"
 #import "HighLevelControlView.h"
+#import "SurroundingSelector.h"
 #import "TapMenu.h"
 
 #include "Definitions.h"
 
+#undef WithSurroundingSelector
+
 @interface HighLevelControlView () <TapMenuDelegate>
+
+#ifdef WithSurroundingSelector
+@property (strong, nonatomic) SurroundingSelector *surroundingSelector;
+#endif
 
 @property (strong, nonatomic) TapMenu *tapMenu;
 
@@ -26,17 +33,29 @@
     [self.tapMenu setDelegate:self];
 
     [self addSubview:self.tapMenu];
-/*
+
+#ifdef WithSurroundingSelector
+
     self.surroundingSelector = [SurroundingSelector panel];
     [self.surroundingSelector setTranslatesAutoresizingMaskIntoConstraints:NO];
     [self.surroundingSelector setHidden:YES];
     [self addSubview:self.surroundingSelector];
-*/
-    NSDictionary *viewsDictionary = @{@"tapMenu":self.tapMenu/*,
-                                      @"surroundingSelector":self.surroundingSelector*/};
+
+#endif
+
+#ifdef WithSurroundingSelector
+
+    NSDictionary *viewsDictionary = @{@"tapMenu":self.tapMenu,
+                                      @"surroundingSelector":self.surroundingSelector};
+
+#else
+
+    NSDictionary *viewsDictionary = @{@"tapMenu":self.tapMenu};
+
+#endif
 
     [self addConstraints:[NSLayoutConstraint
-                          constraintsWithVisualFormat:@"H:|-[tapMenu]-|"
+                          constraintsWithVisualFormat:@"H:|-0-[tapMenu]"
                           options:0
                           metrics:nil
                           views:viewsDictionary]];
@@ -47,7 +66,8 @@
                           metrics:nil
                           views:viewsDictionary]];
 
-/*
+#ifdef WithSurroundingSelector
+
     [self addConstraints:[NSLayoutConstraint
                           constraintsWithVisualFormat:@"H:[surroundingSelector(140)]-0-|"
                           options:NSLayoutFormatAlignAllBaseline
@@ -59,7 +79,8 @@
                           options:NSLayoutFormatAlignAllBaseline
                           metrics:nil
                           views:viewsDictionary]];
-*/
+
+#endif
 
     [self openViewModePanel];
 
@@ -72,22 +93,36 @@
 {
     [self.tapMenu clearMenu];
 
-    [self.tapMenu addItemWithIconName:@"TapMenuMainCreateNewPlaque"
-                              command:TapMenuMainCreateNewPlaque
-                            rowNumber:0];
+    [self.tapMenu addItemWithIconName:@"TapMenuViewModeOnMap"
+                                title:NSLocalizedString(@"TAP_MENU_ON_MAP_MODE", nil)
+                              command:TapMenuViewOnMap];
 
-    [self.tapMenu addItemWithIconName:@"ViewModeOnMap"
-                              command:TapMenuMainProfile
-                            rowNumber:0];
+    [self.tapMenu addItemWithIconName:@"TapMenuViewModeInSight"
+                                title:NSLocalizedString(@"TAP_MENU_IN_SIGHT_MODE", nil)
+                              command:TapMenuViewInSight];
 
-    /*[self.tapMenu addItemWithIconName:@"ViewModeOnMap"
-                              command:TapMenuViewOnRadar
-                            rowNumber:0];*/
+    [self.tapMenu addItemWithIconName:@"TapMenuCreateNewPlaque"
+                                title:NSLocalizedString(@"TAP_MENU_CREATE_PLAQUE", nil)
+                              command:TapMenuMainCreateNewPlaque];
+}
+
+- (void)switchTapMenuToMapMode
+{
+    [self.tapMenu clearMenu];
+
+    [self.tapMenu addItemWithIconName:@"TapMenuViewModeOnMap"
+                                title:NSLocalizedString(@"TAP_MENU_ON_MAP_MODE", nil)
+                              command:TapMenuViewOnMap];
+
+    [self.tapMenu addItemWithIconName:@"TapMenuViewModeInSight"
+                                title:NSLocalizedString(@"TAP_MENU_IN_SIGHT_MODE", nil)
+                              command:TapMenuViewInSight];
 }
 
 - (void)openViewModePanel
 {
-/*
+#ifdef WithSurroundingSelector
+
     [UIView beginAnimations:nil
                     context:nil];
     [UIView setAnimationDuration:HighLevelAnimationDurationOpen];
@@ -100,12 +135,14 @@
     [self.surroundingSelector setAlpha:1.0f];
 
     [UIView commitAnimations];
-*/
+
+#endif
 }
 
 - (void)closeViewModePanel
 {
-/*
+#ifdef WithSurroundingSelector
+
     [UIView beginAnimations:nil
                     context:nil];
     [UIView setAnimationDuration:HighLevelAnimationDurationClose];
@@ -118,7 +155,8 @@
     [self.surroundingSelector setAlpha:0.0f];
 
     [UIView commitAnimations];
-*/
+
+#endif
 }
 
 #pragma mark - TapMenu delegate
@@ -129,7 +167,9 @@
     {
         case TapMenuMainProfile:
         {
-            ApplicationDelegate *application = (ApplicationDelegate *)[[UIApplication sharedApplication] delegate];
+            ApplicationDelegate *application =
+            (ApplicationDelegate *) [[UIApplication sharedApplication] delegate];
+            
             [application openProfileForm];
 
             break;
@@ -142,6 +182,24 @@
             break;
         }
 
+        case TapMenuViewInSight:
+        {
+            [self switchTapMenuToMain];
+
+            [self.controller switchToInSight];
+
+            break;
+        }
+
+        case TapMenuViewOnMap:
+        {
+            [self switchTapMenuToMapMode];
+
+            [self.controller switchToOnMap];
+
+            break;
+        }
+            
         default:
             break;
     }

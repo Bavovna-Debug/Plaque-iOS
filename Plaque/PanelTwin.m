@@ -10,17 +10,15 @@
 
 @interface PanelTwin ()
 
-@property (strong, nonatomic, readwrite) Panel  *leftPanel;
-@property (strong, nonatomic, readwrite) Panel  *rightPanel;
+@property (strong, nonatomic, readwrite) Panel      *leftPanel;
+@property (strong, nonatomic, readwrite) Panel      *rightPanel;
+@property (assign, nonatomic, readwrite) Boolean    bothFitOnScreen;
 
-@property (strong, nonatomic)            UIView *panelsView;
+@property (strong, nonatomic)            UIView     *panelsView;
 
 @end
 
 @implementation PanelTwin
-{
-    Boolean bothFitOnScreen;
-}
 
 - (id)init
 {
@@ -30,7 +28,7 @@
         return nil;
     }
 
-    bothFitOnScreen = (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad);
+    [self setBothFitOnScreen:(UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)];
 
     return self;
 }
@@ -55,7 +53,7 @@
 - (void)createPanels
 {
     CGRect panelsViewFrame = self.bounds;
-    if (bothFitOnScreen == NO)
+    if (self.bothFitOnScreen == NO)
     {
         panelsViewFrame.size.width *= 2;
     }
@@ -74,7 +72,7 @@
 
     CGRect controlsPanelRect = selectorPanelRect;
 
-    if (bothFitOnScreen == YES)
+    if (self.bothFitOnScreen == YES)
     {
         CGFloat distancer = panelSize.width / 2 + 4.0f;
         selectorPanelRect = CGRectOffset(selectorPanelRect, -distancer, 0.0f);
@@ -108,7 +106,7 @@
           forControlEvents:UIControlEventTouchUpInside];
     [panelsView addSubview:closeButton];
 
-    if (bothFitOnScreen == YES)
+    if (self.bothFitOnScreen == YES)
     {
         [closeButton setFrame:CGRectMake(CGRectGetMidX(self.bounds) - closeButtonSize.width / 2,
                                          CGRectGetMinY(selectorPanelRect),
@@ -125,7 +123,7 @@
 
     // Back button should be available only on small screen.
     //
-    if (bothFitOnScreen == NO)
+    if (self.bothFitOnScreen == NO)
     {
         UIImage *backButtonImage = [UIImage imageNamed:@"EditModeBackButton"];
 
@@ -156,7 +154,7 @@
     self.leftPanel = leftPanel;
     self.rightPanel = rightPanel;
 
-    if (bothFitOnScreen == NO)
+    if (self.bothFitOnScreen == NO)
     {
         CGPoint panelsCenter = [panelsView center];
         panelsCenter.x += CGRectGetWidth(self.bounds) / 2;
@@ -166,7 +164,7 @@
 
 - (void)movePanelsLeft
 {
-    if (bothFitOnScreen == FALSE)
+    if (self.bothFitOnScreen == FALSE)
     {
         [UIView beginAnimations:nil
                         context:nil];
@@ -182,7 +180,7 @@
 
 - (void)movePanelsRight
 {
-    if (bothFitOnScreen == FALSE)
+    if (self.bothFitOnScreen == FALSE)
     {
         [UIView beginAnimations:nil
                         context:nil];

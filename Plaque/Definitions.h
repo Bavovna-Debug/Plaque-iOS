@@ -4,16 +4,17 @@
 //  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
-#ifndef Definitions_h
-#define Definitions_h
+#pragma once
 
-#define ApplicationVersion  170721u
+#define ApplicationVersion  170722u
 #define DatabaseVersion     170719u
+
+#undef EmulationMode
 
 #define CameraAlphaLevel    0.6f
 
-#define INSIGHTVIEW_TILT_BY_ACCURACY
-#define INSIGHTVIEW_TURN_BY_ACCURACY
+#undef InSightTiltByAccuracy
+#undef InSightTurnByAccuracy
 
 #ifdef DEBUG
 
@@ -110,12 +111,15 @@
 // Database
 //
 #ifdef DEBUG
-#define DatabaseName                        @"plaque3"
+#define DatabaseName                        @"plaque"
 #define TemplateName                        @"plaque"
 #else
 #define DatabaseName                        @"plaque"
 #define TemplateName                        @"plaque"
 #endif
+
+#define EditModeAnimationDurationOniPhone   0.4f
+#define EditModeAnimationDurationOniPad     0.2f
 
 // EditModeFontSubview
 //
@@ -135,12 +139,16 @@
 
 // Gyro
 //
-#ifdef INSIGHTVIEW_TILT_BY_ACCURACY
+#ifdef InSightTiltByAccuracy
 #define TiltAccuracy                        0.05f
+#else
+#define TiltAccuracy                        1.0f
 #endif
 
-#ifdef INSIGHTVIEW_TURN_BY_ACCURACY
+#ifdef InSightTurnByAccuracy
 #define TurnAccuracy                        0.05f
+#else
+#define TurnAccuracy                        1.0f
 #endif
 
 // FlyMenu
@@ -242,10 +250,8 @@
 // TapMenu
 //
 #define AlphaMainButtonNormal               1.0f
-#define AlphaMainButtonOpenned              0.4f
-#define TapMenuAnimationDurationOpen        0.4f
-#define TapMenuAnimationDurationClose       0.4f
+#define AlphaMainButtonOpenned              0.0f
+#define TapMenuAnimationDurationOpen        0.2f
+#define TapMenuAnimationDurationClose       0.2f
 
 #define DistanceBetweenRows                 8.0f
-
-#endif /* Definitions_h */

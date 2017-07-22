@@ -40,8 +40,6 @@ TapMenuCommand;
 
 - (id)initWithOwner:(id)owner;
 
-- (CGSize)fullSize;
-
 @end
 
 @interface TapMenuItem : NSObject
@@ -51,9 +49,11 @@ TapMenuCommand;
 @property (weak,   nonatomic) TapMenuItemView *view;
 
 - (id)initWithIconName:(NSString *)iconName
-               command:(TapMenuCommand)command
-             rowNumber:(NSUInteger)rowNumber;
+                 title:(NSString *)title
+               command:(TapMenuCommand)command;
 
 - (TapMenuItemView *)prepareViewFor:(UIView *)superview;
+
++ (CGSize)fullSize;
 
 @end

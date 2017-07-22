@@ -10,8 +10,9 @@
 
 @interface PanelTwin : UIView
 
-@property (strong, nonatomic, readonly) Panel *leftPanel;
-@property (strong, nonatomic, readonly) Panel *rightPanel;
+@property (strong, nonatomic, readonly) Panel   *leftPanel;
+@property (strong, nonatomic, readonly) Panel   *rightPanel;
+@property (assign, nonatomic, readonly) Boolean bothFitOnScreen;
 
 - (void)movePanelsLeft;
 
