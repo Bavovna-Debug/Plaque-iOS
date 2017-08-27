@@ -39,12 +39,11 @@
 "PROFILE_FORM_PASSWORD_LABEL"               = "Login password:";
 "PROFILE_FORM_PASSWORD_HELP"                = "";
 
-//"CREATE_PLAQUE_LABEL"                       = "Create a plaque over here";
 "TAP_MENU_CREATE_PLAQUE"                    = "Create a new plaque";
 "TAP_MENU_IN_SIGHT_MODE"                    = "Switch to «in sight» mode";
 "TAP_MENU_ON_MAP_MODE"                      = "Switch to «on map» mode";
 
-"CREATE_PLAQUE_HELP_TEXT"                   = "Keep your iPhone/iPad vertical. Point it at an object near you and press 'Fire'. New plaque appears in about 20 meters in front of you.";
+"CREATE_PLAQUE_HELP_TEXT"                   = "Keep your iPhone/iPad vertical. Point it at an object near you and press «Fire». New plaque appears in about 20 meters in front of you.";
 "CREATE_PLAQUE_FIRE_BUTTON"                 = "Fire";
 "CREATE_PLAQUE_CANCEL_BUTTON"               = "Cancel";
 
@@ -81,5 +80,5 @@
 "STATUS_BAR_PROCESS_PLAQUES"                = "Synchronizing with vpCloud";
 "STATUS_BAR_DOWNLOAD_PLAQUES"               = "Synchronizing %lu plaque(s) with vpCloud";
 
-"STATUS_BAR_NEW_PLAQUE_SYNCRONIZED"         = "You new plaque synchronized with vpCloud";
+"STATUS_BAR_NEW_PLAQUE_SYNCRONIZED"         = "Your new plaque synchronized with vpCloud";
 "STATUS_BAR_PLAQUE_CHANGES_SYNCRONIZED"     = "Plaque changes synchronized with vpCloud";

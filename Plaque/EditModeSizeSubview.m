@@ -4,6 +4,7 @@
 //  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
+#import "Definitions.h"
 #import "EditModeSizeSubview.h"
 #import "Plaques.h"
 
@@ -12,6 +13,8 @@
 @interface EditModeSizeSubview ()
 
 @property (weak,   nonatomic) Plaque    *plaque;
+@property (strong, nonatomic) UIView    *backgroundView;
+@property (strong, nonatomic) UIView    *controlsView;
 @property (strong, nonatomic) CALayer   *plaqueLayer;
 @property (strong, nonatomic) UILabel   *widthValue;
 @property (strong, nonatomic) UILabel   *heightValue;
@@ -19,11 +22,13 @@
 @property (strong, nonatomic) UIView    *touchPadHeight;
 @property (assign, nonatomic) Boolean   resizing;
 @property (strong, nonatomic) NSTimer   *touchPadTimer;
+@property (strong, nonatomic) NSTimer   *controlsTimer;
 
 @end
 
 @implementation EditModeSizeSubview
 {
+    Boolean controlsAnimationDirection;
     CGFloat changeWidthPerTimerTick;
     CGFloat changeHeightPerTimerTick;
 }
@@ -61,8 +66,31 @@
 {
     [self setBackgroundColor:[UIColor clearColor]];
 
-    UIView *backgroundView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"EditModeSizeSubview"]];
-    [self addSubview:backgroundView];
+    // Setup backround.
+    //
+    {
+        self.backgroundView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"EditModeSizeBackground"]];
+        [self addSubview:self.backgroundView];
+
+        self.controlsView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"EditModeSizeControls"]];
+        [self addSubview:self.controlsView];
+
+        controlsAnimationDirection = FALSE;
+
+        [self.controlsView setAlpha:EditModeControlsAnimationAlphaLow];
+
+        [self.controlsView.layer setShadowColor:[[UIColor blueColor] CGColor]];
+        [self.controlsView.layer setShadowOffset:CGSizeMake(0.0f, 0.0f)];
+        [self.controlsView.layer setShadowOpacity:EditModeControlsShadowOpacity];
+
+        self.controlsTimer =
+        [NSTimer scheduledTimerWithTimeInterval:EditModeControlsAnimationDuration
+                                         target:self
+                                       selector:@selector(fireControlsTimer:)
+                                       userInfo:nil
+                                        repeats:YES];
+        [self.controlsTimer fire];
+    }
 
     CGRect bounds = self.bounds;
     CGRect valueFrame = CGRectMake(0.0f, 0.0f, 96.0f, 20.0f);
@@ -131,6 +159,31 @@
     if (touchPadTimer != nil)
     {
         [touchPadTimer invalidate];
+    }
+}
+
+- (void)fireControlsTimer:(NSTimer *)timer
+{
+    if (self.resizing == NO)
+    {
+        [UIView beginAnimations:nil
+                        context:nil];
+        [UIView setAnimationDuration:EditModeControlsAnimationDuration];
+
+        if (controlsAnimationDirection == FALSE)
+        {
+            [self.controlsView setAlpha:EditModeControlsAnimationAlphaHigh];
+
+            controlsAnimationDirection = TRUE;
+        }
+        else
+        {
+            [self.controlsView setAlpha:EditModeControlsAnimationAlphaLow];
+
+            controlsAnimationDirection = FALSE;
+        }
+
+        [UIView commitAnimations];
     }
 }
 
@@ -227,6 +280,8 @@
 
         [self.touchPadTimer fire];
     }
+
+    [self.controlsView setAlpha:EditModeControlsAnimationAlphaAction];
 }
 
 - (void)touchesEnded:(NSSet *)touches

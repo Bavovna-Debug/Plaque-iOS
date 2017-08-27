@@ -18,8 +18,6 @@
 
 #include "Definitions.h"
 
-#undef CreatePlaqueLabel
-
 @interface InSightView () <
     CLLocationManagerDelegate,
     PlaquesDelegate,
@@ -28,7 +26,6 @@
 
 @property (weak,   nonatomic) MainController            *controller;
 @property (strong, nonatomic) UIImagePickerController   *cameraController;
-@property (strong, nonatomic) UIButton                  *createPlaqueButton;
 @property (assign, nonatomic) Boolean                   cameraAuthorized;
 @property (assign, nonatomic) CGFloat                   cameraScaleFactor;
 
@@ -78,23 +75,6 @@
 
     [self setTranslatesAutoresizingMaskIntoConstraints:NO];
     [self setBackgroundColor:[UIColor colorWithWhite:0.2f alpha:1.0f]];
-
-#if CreatePlaqueLabel
-
-    NSString *createPlaqueText = NSLocalizedString(@"CREATE_PLAQUE_LABEL", nil);
-
-    CGRect createPlaqueButtonRect = CGRectMake(0.0f, 0.0f, 320.0f, 48.0f);
-    UIButton *createPlaqueButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [createPlaqueButton setFrame:createPlaqueButtonRect];
-    [createPlaqueButton setTitle:createPlaqueText
-                        forState:UIControlStateNormal];
-    [createPlaqueButton addTarget:controller
-                           action:@selector(createNewPlaquePressed)
-                 forControlEvents:UIControlEventTouchUpInside];
-    [self addSubview:createPlaqueButton];
-    self.createPlaqueButton = createPlaqueButton;
-
-#endif
 
     [self checkCameraAuthorization];
 

@@ -4,6 +4,7 @@
 //  Copyright © 2014-2017 Meine Werke. All rights reserved.
 //
 
+#import "Definitions.h"
 #import "EditModeAltitudeSubview.h"
 #import "Plaques.h"
 
@@ -11,6 +12,8 @@
 
 @property (weak,   nonatomic) CLLocationManager *locationManager;
 @property (weak,   nonatomic) Plaque            *plaque;
+@property (strong, nonatomic) UIView            *backgroundView;
+@property (strong, nonatomic) UIView            *controlsView;
 @property (strong, nonatomic) UILabel           *altitudeLabel1;
 @property (strong, nonatomic) UILabel           *altitudeLabel2;
 @property (strong, nonatomic) UILabel           *altitudeLabel3;
@@ -19,12 +22,14 @@
 @property (strong, nonatomic) UIView            *touchPad;
 @property (assign, nonatomic) Boolean           moving;
 @property (strong, nonatomic) NSTimer           *touchPadTimer;
+@property (strong, nonatomic) NSTimer           *controlsTimer;
 
 @end
 
 @implementation EditModeAltitudeSubview
 {
-    CLLocationDistance shiftAltitudePerTimerTick;
+    Boolean             controlsAnimationDirection;
+    CLLocationDistance  shiftAltitudePerTimerTick;
 }
 
 - (id)initWithLocationManager:(CLLocationManager *)locationManager
@@ -66,8 +71,31 @@
 {
     [self setBackgroundColor:[UIColor clearColor]];
 
-    UIView *backgroundView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"EditModeAltitudeSubview"]];
-    [self addSubview:backgroundView];
+    // Setup backround.
+    //
+    {
+        self.backgroundView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"EditModeAltitudeBackground"]];
+        [self addSubview:self.backgroundView];
+
+        self.controlsView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"EditModeAltitudeControls"]];
+        [self addSubview:self.controlsView];
+
+        controlsAnimationDirection = FALSE;
+
+        [self.controlsView setAlpha:EditModeControlsAnimationAlphaLow];
+
+        [self.controlsView.layer setShadowColor:[[UIColor blueColor] CGColor]];
+        [self.controlsView.layer setShadowOffset:CGSizeMake(0.0f, 0.0f)];
+        [self.controlsView.layer setShadowOpacity:EditModeControlsShadowOpacity];
+
+        self.controlsTimer =
+        [NSTimer scheduledTimerWithTimeInterval:EditModeControlsAnimationDuration
+                                         target:self
+                                       selector:@selector(fireControlsTimer:)
+                                       userInfo:nil
+                                        repeats:YES];
+        [self.controlsTimer fire];
+    }
 
     CGRect bounds = self.bounds;
     CGRect valueFrame = CGRectMake(0.0f, 0.0f, 96.0f, 20.0f);
@@ -131,7 +159,7 @@
                                    userInfo:nil
                                     repeats:YES];
     [self.touchPadTimer fire];
-    
+
     [self refreshValues];
 }
 
@@ -141,6 +169,31 @@
     if (touchPadTimer != nil)
     {
         [touchPadTimer invalidate];
+    }
+}
+
+- (void)fireControlsTimer:(NSTimer *)timer
+{
+    if (self.moving == NO)
+    {
+        [UIView beginAnimations:nil
+                        context:nil];
+        [UIView setAnimationDuration:EditModeControlsAnimationDuration];
+
+        if (controlsAnimationDirection == FALSE)
+        {
+            [self.controlsView setAlpha:EditModeControlsAnimationAlphaHigh];
+
+            controlsAnimationDirection = TRUE;
+        }
+        else
+        {
+            [self.controlsView setAlpha:EditModeControlsAnimationAlphaLow];
+
+            controlsAnimationDirection = FALSE;
+        }
+
+        [UIView commitAnimations];
     }
 }
 
@@ -190,6 +243,8 @@
 
         [self.touchPadTimer fire];
     }
+
+    [self.controlsView setAlpha:EditModeControlsAnimationAlphaAction];
 }
 
 - (void)touchesEnded:(NSSet *)touches

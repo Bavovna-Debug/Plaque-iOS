@@ -1,0 +1,84 @@
+"YOUR_PLAQUE_WAS_DESTROYED" = "Your plaque '%2$@' was destroyed by %1$@!";
+
+"GPSERROR_TITLE"                             = "GPS";
+"GPSERROR_MESSAGE"                           = "Без доступа к GPS это приложение не сможет представлять содержимое vpCloud в 3D. Вы можете включить GPS-доступ для этого приложения в системных настройках Вашего iPhone/iPad.";
+
+"AVERROR_TITLE"                             = "Камера";
+"AVERROR_MESSAGE"                           = "Без доступа к камере это приложение не сможет представлять содержимое vpCloud в 3D. Вы можете включить доступ к камере для этого приложения в системных настройках Вашего iPhone/iPad.";
+
+"ALERT_BUTTON_OK"                           = "ОК";
+"ALERT_BUTTON_NO"                           = "Нет";
+"ALERT_BUTTON_YES"                          = "Да";
+
+"SETUP_QUESTION_ABOUT_GPS_TITLE"            = "Настроийка";
+"SETUP_QUESTION_ABOUT_GPS_MESSAGE"          = "";
+"SETUP_QUESTION_ABOUT_CAMERA_TITLE"         = "Настроийка";
+"SETUP_QUESTION_ABOUT_CAMERA_MESSAGE"       = "";
+"SETUP_QUESTION_ABOUT_NOTIFICATIONS_TITLE"  = "Настроийка";
+"SETUP_QUESTION_ABOUT_NOTIFICATIONS_MESSAGE" = "";
+
+"DO_YOU_WANT_TO_CREATE_PROFILE_TITLE"       = "Профиль";
+"DO_YOU_WANT_TO_CREATE_PROFILE_MESSAGE"     = "У вас пока нет профиля vpCloud. Вы хотите зарегистрироваться в vpCloud?";
+"DO_YOU_WANT_TO_CREATE_PROFILE_NOT_YET"     = "Пока нет";
+"DO_YOU_WANT_TO_CREATE_PROFILE_YES_BUTTON"  = "Да";
+
+"PROFILE_FORM_CANCEL_BUTTON"                = "Отмена";
+"PROFILE_FORM_SUBMIT_BUTTON"                = "ОК";
+
+"PROFILE_FORM_PROFILE_NAME_LABEL"           = "Имя профиля:";
+"PROFILE_FORM_PROFILE_NAME_HELP"            = "Имя профиля должно состоять как минимум из 4 но не более 20 символов и содержать буквы, цифры и некоторые специальные символы.";
+"PROFILE_FORM_PROFILE_NAME_VALIDATING_MESSAGE"          = "Проверка '%@' в vpCloud";
+"PROFILE_FORM_PROFILE_NAME_IS_AVAILABLE_MESSAGE"        = "Имя '%@' ещё свободно";
+"PROFILE_FORM_PROFILE_NAME_ALREADY_IN_USE_MESSAGE"      = "Имя '%@' уже занято";
+"PROFILE_FORM_PROFILE_NAME_CONSTRAINT_MESSAGE"          = "Имя '%@' не соответствует правилам";
+"PROFILE_FORM_PROFILE_NAME_VALIDATION_ERROR_MESSAGE"    = "Вы не подключены к vpCloud";
+
+"PROFILE_FORM_USER_NAME_LABEL"              = "Логин:";
+"PROFILE_FORM_USER_NAME_HELP"               = "";
+
+"PROFILE_FORM_PASSWORD_LABEL"               = "Пароль:";
+"PROFILE_FORM_PASSWORD_HELP"                = "";
+
+"TAP_MENU_CREATE_PLAQUE"                    = "Создать новую табличку";
+"TAP_MENU_IN_SIGHT_MODE"                    = "Режим «поле зрения»";
+"TAP_MENU_ON_MAP_MODE"                      = "Режим «карта»";
+
+"CREATE_PLAQUE_HELP_TEXT"                   = "Держите iPhone/iPad вертикально. Направьте его на объект рядом с вами и нажмите «Создать». Новая табличка появится примерно в 20 метрах перед вами.";
+"CREATE_PLAQUE_FIRE_BUTTON"                 = "Создать";
+"CREATE_PLAQUE_CANCEL_BUTTON"               = "Отмена";
+
+"DEFAULT_INSCRIPTION"                       = "Здесь могла быть Ваша реклама";
+
+"EDIT_MODE_EDIT_BUTTON"                     = "Изменить";
+"EDIT_MODE_COORDINATE_BUTTON"               = "Дислокация";
+"EDIT_MODE_ALTITUDE_BUTTON"                 = "Высота";
+"EDIT_MODE_DIRECTION_BUTTON"                = "Направление";
+"EDIT_MODE_TILT_BUTTON"                     = "Наклон";
+"EDIT_MODE_SIZE_BUTTON"                     = "Размер";
+"EDIT_MODE_BACKGROUND_BUTTON"               = "Цвет фона";
+"EDIT_MODE_FOREGROUND_BUTTON"               = "Цвет текста";
+"EDIT_MODE_FONT_BUTTON"                     = "Шрифт";
+"EDIT_MODE_INSCRIPTION_BUTTON"              = "Надпись";
+"EDIT_MODE_FORTIFY_BUTTON"                  = "Защита";
+
+"CAPTURED_PLAQUE_AUTHOR"                    = "Владелец: %@";
+
+"MESSAGE_FORTIFICATION_IN_PROCESS"          = "Включение защиты для одной из Ваших табличек все еще продолжается. Подождите, пока процесс закончится.";
+
+"APP_STORE_ERROR_MESSAGE"                   = "Невозможно завершить покупку сейчас! Попробуйте позже.";
+
+"APP_STORE_NOT_YET"                         = "Нет, спасибо";
+"APP_STORE_BUY_NOW"                         = "Купить - %@";
+
+"STATUS_BAR_VPCLOUD_ESTABLISH_CONNECTION"   = "Подключение к vpCloud";
+"STATUS_BAR_VPCLOUD_CANNOT_CONNECT"         = "Не удается подключиться к vpCloud";
+"STATUS_BAR_VPCLOUD_SCHEDULE_RECONNECT"     = "Повторная попытка подключения к vpCloud через %.0f секунд";
+"STATUS_BAR_VPCLOUD_CONNECTION_ESTABLISHED" = "Установлено соединение с vpCloud";
+"STATUS_BAR_VPCLOUD_LOST_CONNECTION"        = "Потеряно соединение с vpCloud";
+
+"STATUS_BAR_PROCESS_RADAR"                  = "Обнаружено %u табличек на радаре";
+"STATUS_BAR_PROCESS_PLAQUES"                = "Синхронизация с vpCloud";
+"STATUS_BAR_DOWNLOAD_PLAQUES"               = "Синхронизация %lu табличек с vpCloud";
+
+"STATUS_BAR_NEW_PLAQUE_SYNCRONIZED"         = "Ваша новая табличка синхронизована с vpCloud";
+"STATUS_BAR_PLAQUE_CHANGES_SYNCRONIZED"     = "Изменения синхронизованы с vpCloud";

@@ -166,6 +166,14 @@
 #define CaptureInterval                     1.0f
 #define CaptureOffAfterSelectionByUserInterval  5.0f
 
+// EditMode
+//
+#define EditModeControlsShadowOpacity       0.8f
+#define EditModeControlsAnimationDuration   1.0f
+#define EditModeControlsAnimationAlphaLow   0.2f
+#define EditModeControlsAnimationAlphaHigh  0.5f
+#define EditModeControlsAnimationAlphaAction 1.0f
+
 // NavigationPanel
 //
 #define CameraUpdateInterval                0.5f
