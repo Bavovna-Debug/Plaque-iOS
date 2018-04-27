@@ -1,7 +1,7 @@
 //
 //  Plaque'n'Play
 //
-//  Copyright © 2014-2017 Meine Werke. All rights reserved.
+//  Copyright © 2014-2018 Meine Werke. All rights reserved.
 //
 
 #import "PanelTwin.h"
