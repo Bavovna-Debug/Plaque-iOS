@@ -8,8 +8,6 @@
 
 @interface ApplicationSetup : NSObject
 
-@property (assign, nonatomic, readwrite) Boolean everythingOK;
-
 + (ApplicationSetup *)sharedApplicationSetup;
 
 - (void)goThroughQuestionsAndAnswers;

@@ -6,8 +6,8 @@
 
 #pragma once
 
-#define TCP_PortNumberIPv4                          12004
-#define TCP_PortNumberIPv6                          12006
+#define TCP_PortNumberIPv4                          17004
+#define TCP_PortNumberIPv6                          17006
 
 #define API_DialogueSignature						0xC2D6D5D1D6E4D900
 

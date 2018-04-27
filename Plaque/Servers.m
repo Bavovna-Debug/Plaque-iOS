@@ -43,11 +43,11 @@
 {
     if ((currentServerNumber % 2) == 0)
     {
-        return @"144.76.27.237";
+        return @"vp4.zeppelinium.de";
     }
     else
     {
-        return @"2a01:4f8:191:13ec::2";
+        return @"vp6.zeppelinium.de";
     }
 }
 

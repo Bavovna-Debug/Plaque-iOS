@@ -15,7 +15,9 @@
 @end
 
 @implementation ApplicationSetup
-
+{
+    Boolean 
+}
 + (ApplicationSetup *)sharedApplicationSetup
 {
     static dispatch_once_t onceToken;
@@ -44,12 +46,10 @@
 
 - (void)goThroughQuestionsAndAnswers
 {
-#if 0
     [self askToEnableGPS];
     [self askToEnableCamera];
     [self askToEnableNotifications];
     [[UIApplication sharedApplication] registerForRemoteNotifications];
-#endif
 }
 
 #pragma mark - UIAlertView creator
