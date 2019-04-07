@@ -12,6 +12,8 @@
 @property (assign, atomic,    readwrite) NSUInteger lastDatabaseVersion;
 @property (assign, nonatomic, readwrite) Boolean    tapMenuOnlyIcons;
 @property (assign, atomic,    readonly)  NSUInteger lastOwnObjectId;
+@property (assign, nonatomic, readwrite) Boolean    confirmedUsageOfGPS;
+@property (assign, nonatomic, readwrite) Boolean    confirmedUsageOfCamera;
 
 /*
 @property (assign, nonatomic) UInt32        radarOnRadarRevision;

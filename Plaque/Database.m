@@ -30,10 +30,12 @@
 
 + (void)upgradeDatabase
 {
+#if 0
     SQLiteDatabase *database = [Database mainDatabase];
 
     [database executeSQL:@"ALTER TABLE plaques ADD COLUMN fortified INTEGER NOT NULL DEFAULT 0"
        ignoreConstraints:YES];
+#endif
 }
 
 @end

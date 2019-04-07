@@ -11,5 +11,5 @@
 "CFBundleDisplayName~iphone"            = "VP";
 "CFBundleDisplayName~ipad"              = "Virtual Post";
 
-"NSLocationWhenInUseUsageDescription"   = "";
-"NSLocationAlwaysUsageDescription"      = "";
+"NSLocationWhenInUseUsageDescription"   = "Without access to GPS this app could not represent contents of vpCloud in 3D. You can enable GPS access for this app in system settings of your device.";
+"NSLocationAlwaysUsageDescription"      = "Without access to GPS this app could not represent contents of vpCloud in 3D. You can enable GPS access for this app in system settings of your device.";

@@ -235,6 +235,8 @@
 #define LastDatabaseVersionKey              @"LastDatabaseVersion"
 #define TapMenuOnlyIconsKey                 @"TapMenuOnlyIcons"
 #define LastOwnObjectIdKey                  @"LastOwnObjectId"
+#define ConfirmedUsageOfGPSKey              @"ConfirmedUsageOfGPS"
+#define ConfirmedUsageOfCameraKey           @"ConfirmedUsageOfCamera"
 #ifdef DEBUG
 /*
  #define OnRadarRevisionKey                  @"OnRadarRevision2"

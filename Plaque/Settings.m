@@ -100,6 +100,32 @@
 {
 }
 
+- (Boolean)confirmedUsageOfGPS
+{
+    Boolean confirmedUsageOfGPS = [defaults boolForKey:ConfirmedUsageOfGPSKey];
+
+    return confirmedUsageOfGPS;
+}
+
+- (void)setConfirmedUsageOfGPS:(Boolean)confirmedUsageOfGPS
+{
+    [defaults setBool:confirmedUsageOfGPS
+               forKey:ConfirmedUsageOfGPSKey];
+}
+
+- (Boolean)confirmedUsageOfCamera
+{
+    Boolean confirmedUsageOfCamera = [defaults boolForKey:ConfirmedUsageOfCameraKey];
+
+    return confirmedUsageOfCamera;
+}
+
+- (void)setConfirmedUsageOfCamera:(Boolean)confirmedUsageOfCamera
+{
+    [defaults setBool:confirmedUsageOfCamera
+               forKey:ConfirmedUsageOfCameraKey];
+}
+
 /*
 - (UInt32)radarOnRadarRevision
 {

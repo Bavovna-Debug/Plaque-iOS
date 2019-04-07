@@ -7,6 +7,7 @@
 #import <UIKit/UIKit.h>
 
 #import "ApplicationSetup.h"
+#import "Settings.h"
 
 #include "Definitions.h"
 
@@ -15,9 +16,7 @@
 @end
 
 @implementation ApplicationSetup
-{
-    Boolean 
-}
+
 + (ApplicationSetup *)sharedApplicationSetup
 {
     static dispatch_once_t onceToken;
@@ -39,17 +38,38 @@
         return nil;
     }
 
-    [self setEverythingOK:YES];
-
     return self;
 }
 
 - (void)goThroughQuestionsAndAnswers
 {
-    [self askToEnableGPS];
-    [self askToEnableCamera];
-    [self askToEnableNotifications];
-    [[UIApplication sharedApplication] registerForRemoteNotifications];
+    Settings *settings = [Settings sharedSettings];
+
+    if ([settings confirmedUsageOfGPS] == false)
+    {
+        [self askToEnableGPS];
+
+        do
+        {
+            usleep(200000);
+        }
+        while ([settings confirmedUsageOfGPS] == false);
+    }
+
+    if ([settings confirmedUsageOfCamera] == false)
+    {
+        [self askToEnableCamera];
+
+        do
+        {
+            usleep(200000);
+        }
+        while ([settings confirmedUsageOfCamera] == false);
+    }
+
+    //[self askToEnableNotifications];
+
+    //[[UIApplication sharedApplication] registerForRemoteNotifications];
 }
 
 #pragma mark - UIAlertView creator
@@ -116,13 +136,19 @@
 - (void)alertView:(UIAlertView *)alertView
 clickedButtonAtIndex:(NSInteger)buttonIndex
 {
+    Settings *settings = [Settings sharedSettings];
+
     switch ([alertView tag])
     {
         case AlertDoYouWantToEnableGPS:
         {
             if (buttonIndex == 0)
             {
-                [self setEverythingOK:NO];
+                [settings setConfirmedUsageOfGPS:NO];
+            }
+            else if (buttonIndex == 0)
+            {
+                [settings setConfirmedUsageOfGPS:YES];
             }
             break;
         }
@@ -131,7 +157,11 @@ clickedButtonAtIndex:(NSInteger)buttonIndex
         {
             if (buttonIndex == 0)
             {
-                [self setEverythingOK:NO];
+                [settings setConfirmedUsageOfCamera:NO];
+            }
+            else if (buttonIndex == 0)
+            {
+                [settings setConfirmedUsageOfCamera:YES];
             }
             break;
         }
@@ -140,7 +170,6 @@ clickedButtonAtIndex:(NSInteger)buttonIndex
         {
             if (buttonIndex == 0)
             {
-                [self setEverythingOK:NO];
             }
             break;
         }

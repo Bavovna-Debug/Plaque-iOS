@@ -10,10 +10,10 @@
 "ALERT_BUTTON_NO"                           = "No";
 "ALERT_BUTTON_YES"                          = "Yes";
 
-"SETUP_QUESTION_ABOUT_GPS_TITLE"            = "Setup";
-"SETUP_QUESTION_ABOUT_GPS_MESSAGE"          = "";
-"SETUP_QUESTION_ABOUT_CAMERA_TITLE"         = "Setup";
-"SETUP_QUESTION_ABOUT_CAMERA_MESSAGE"       = "";
+"SETUP_QUESTION_ABOUT_GPS_TITLE"            = "GPS";
+"SETUP_QUESTION_ABOUT_GPS_MESSAGE"          = "Without access to GPS this app could not represent contents of vpCloud in 3D. You can enable GPS access for this app in system settings of your device.";
+"SETUP_QUESTION_ABOUT_CAMERA_TITLE"         = "Camera";
+"SETUP_QUESTION_ABOUT_CAMERA_MESSAGE"       = "Without access to camera this app could not represent contents of vpCloud in 3D. You can enable camera access for this app in system settings of your device.";
 "SETUP_QUESTION_ABOUT_NOTIFICATIONS_TITLE"  = "Setup";
 "SETUP_QUESTION_ABOUT_NOTIFICATIONS_MESSAGE" = "";
 

@@ -45,6 +45,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 
     [application setMinimumBackgroundFetchInterval:MinimumBackgroundFetchInterval];
 
+#if 0
     UIUserNotificationType types =
     UIUserNotificationTypeSound | UIUserNotificationTypeBadge | UIUserNotificationTypeAlert;
 
@@ -52,10 +53,9 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
     [UIUserNotificationSettings settingsForTypes:types
                                       categories:nil];
     [application registerUserNotificationSettings:notificationSettings];
-
+#endif
+    
     [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
-
-    [[ApplicationSetup sharedApplicationSetup] goThroughQuestionsAndAnswers];
 
     NSDictionary *remoteNotif =
     [launchOptions objectForKey:UIApplicationLaunchOptionsRemoteNotificationKey];
@@ -90,6 +90,8 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
     [self.window makeKeyAndVisible];
 
     [[UITableViewCell appearance] setBackgroundColor:[UIColor clearColor]];
+
+    //[[ApplicationSetup sharedApplicationSetup] goThroughQuestionsAndAnswers];
 
     return YES;
 }

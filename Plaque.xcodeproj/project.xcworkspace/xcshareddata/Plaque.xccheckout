@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>4D7E89C0-5BCC-4C7E-BBB2-BAFB4AA68827</string>
+	<key>IDESourceControlProjectName</key>
+	<string>Plaque</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>F273318B2CEC2FECD0FBD5434AA182B178CC6C25</key>
+		<string>git-xcode:plaque/ios</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>Plaque.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>F273318B2CEC2FECD0FBD5434AA182B178CC6C25</key>
+		<string>../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>git-xcode:plaque/ios</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>F273318B2CEC2FECD0FBD5434AA182B178CC6C25</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>F273318B2CEC2FECD0FBD5434AA182B178CC6C25</string>
+			<key>IDESourceControlWCCName</key>
+			<string>iOS</string>
+		</dict>
+	</array>
+</dict>
+</plist>

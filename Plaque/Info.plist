@@ -19,15 +19,13 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>180429</string>
+	<string>180430</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Augmented reality app requires access to camera.</string>
-	<key>NSLocationUsageDescription</key>
-	<string>Augmented reality app requires access to GPS.</string>
+	<string>Without access to camera this app could not represent contents of vpCloud in 3D. You can enable camera access for this app in system settings of your device.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Augmented reality app requires access to camera.</string>
+	<string>Without access to camera this app could not represent contents of vpCloud in 3D. You can enable camera access for this app in system settings of your device.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
